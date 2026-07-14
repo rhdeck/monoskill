@@ -1,0 +1,32 @@
+{
+  "name": "monoskill",
+  "version": "0.1.0",
+  "description": "Compile a repository of agent skills into one provenance-aware router skill.",
+  "type": "module",
+  "bin": {
+    "monoskill": "bin/monoskill.js"
+  },
+  "files": [
+    "bin",
+    "src"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check bin/monoskill.js && node --check src/*.js",
+    "prepublishOnly": "npm test"
+  },
+  "keywords": [
+    "agent-skills",
+    "codex",
+    "claude",
+    "skills",
+    "cli"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "yaml": "^2.8.1"
+  }
+}

@@ -19,11 +19,15 @@ export async function build(sourceInput, options) {
   }
 }
 
+/**
+ * Compile through a temporary tree and leave only a reproducible .skill file.
+ * Temporary output is always cleaned; archive overwrite still requires force.
+ */
 export async function buildArchive(sourceInput, options) {
   assertSkillName(options.name);
   const temp = await mkdtemp(join(tmpdir(), "monoskill-build-archive-"));
   try {
-    const built = await build(sourceInput, { ...options, output: join(temp, options.name) });
+    const built = await build(sourceInput, { ...options, reproducible: true, output: join(temp, options.name) });
     const packaged = await packageSkill(built.output, { output: options.output, force: options.force });
     return { ...built, output: packaged.output, entryCount: packaged.entryCount };
   } finally {
@@ -114,7 +118,7 @@ async function compileMaterialized(source, options) {
 
   const manifest = {
     schemaVersion: 1,
-    compiledAt: new Date().toISOString(),
+    compiledAt: options.reproducible ? null : new Date().toISOString(),
     compiler: { name: "monoskill", version: TOOL_VERSION },
     skill: { name: options.name, description, descriptionOverride },
     source: {

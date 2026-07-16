@@ -68,7 +68,9 @@ test("package produces a deterministic, lossless .skill archive and protects exi
     await assert.rejects(packageSkill(compiled, { output: join(compiled, "nested.skill") }), /outside the skill directory/);
     const outputAlias = join(temp, "compiled-alias");
     await symlink(compiled, outputAlias, "dir");
-    await assert.rejects(packageSkill(compiled, { output: join(outputAlias, "nested.skill") }), /outside the skill directory/);
+    const rejectedParent = join(outputAlias, "new-parent");
+    await assert.rejects(packageSkill(compiled, { output: join(rejectedParent, "nested.skill") }), /outside the skill directory/);
+    assert.equal(await pathExists(rejectedParent), false);
     if (sep !== "\\") {
       const unsafeName = join(compiled, "unsafe\\name");
       await writeFile(unsafeName, "unsafe");
@@ -102,12 +104,18 @@ test("build --archive path packages directly and invalid generated skills fail c
   const temp = await mkdtemp(join(tmpdir(), "monoskill-direct-archive-test-"));
   const source = join(temp, "vendor");
   const archive = join(temp, "vendor-marketing.skill");
+  const secondArchive = join(temp, "vendor-marketing-second.skill");
   const invalid = join(temp, "invalid");
   try {
     await createSkill(source, "seo", "Audit search performance.");
     await commitFixture(source);
     const { stdout } = await exec(process.execPath, [join(process.cwd(), "bin", "monoskill.js"), "build", source, "--name", "vendor-marketing", "--archive", "--output", archive]);
     assert.match(stdout, /Built 1 skills into .*vendor-marketing\.skill/);
+    await exec(process.execPath, [join(process.cwd(), "bin", "monoskill.js"), "build", source, "--name", "vendor-marketing", "--archive", "--output", secondArchive]);
+    assert.deepEqual(await readFile(archive), await readFile(secondArchive));
+    const extracted = join(temp, "direct-extracted");
+    await extractArchive(archive, extracted);
+    assert.equal(JSON.parse(await readFile(join(extracted, "provenance.json"), "utf8")).compiledAt, null);
     assert.equal(await pathExists(join(temp, "vendor-marketing")), false);
 
     await mkdir(invalid);

@@ -58,7 +58,7 @@ npx github:rhdeck/monoskill build coreyhaines31/marketingskills \
 
 Use `--output ./artifacts/corey-marketing.skill` to choose the archive path. Archive output must end in `.skill` and must live outside the input skill directory. Existing artifacts are never replaced unless `--force` is explicit.
 
-Before packaging, Monoskill validates the generated root files, the provenance manifest, and every referenced skill entrypoint. Entries are stored in lexical order with normalized timestamps while preserving file contents, relative paths, filesystem modes, symlinks, and empty directories. Packaging the same compiled tree twice therefore produces byte-identical archives.
+Before packaging, Monoskill validates the generated root files, the provenance manifest, and every referenced skill entrypoint. Entries are stored in lexical order with normalized timestamps while preserving file contents, relative paths, filesystem modes, symlinks, and empty directories. Packaging the same compiled tree twice therefore produces byte-identical archives. Direct archive builds also omit the volatile build clock (`compiledAt` is `null`), so compiling the same source and options produces the same bytes.
 
 ## Source conventions
 

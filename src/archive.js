@@ -1,5 +1,5 @@
-import { createWriteStream, existsSync } from "node:fs";
-import { link, lstat, mkdir, mkdtemp, readFile, readdir, readlink, realpath, rename, rm, stat } from "node:fs/promises";
+import { constants, createWriteStream, existsSync } from "node:fs";
+import { copyFile, link, lstat, mkdir, mkdtemp, readFile, readdir, readlink, realpath, rename, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { pipeline } from "node:stream/promises";
@@ -22,6 +22,7 @@ export async function packageSkill(skillDir, options = {}) {
   assertSkillArchivePath(output);
   if (!options.force && existsSync(output)) throw new Error(`archive already exists: ${output} (pass --force to replace it)`);
 
+  assertOutputOutsideSkill(root, await plannedPhysicalOutput(output));
   await mkdir(dirname(output), { recursive: true });
   const physicalParent = await realpath(dirname(output));
   const physicalOutput = join(physicalParent, basename(output));
@@ -128,7 +129,8 @@ async function publishArchive(staged, output, force) {
     await link(staged, output);
   } catch (error) {
     if (error.code === "EEXIST") throw new Error(`archive already exists: ${output} (pass --force to replace it)`);
-    throw error;
+    if (!["EXDEV", "EPERM", "EOPNOTSUPP", "ENOTSUP"].includes(error.code)) throw error;
+    await copyArchiveExclusively(staged, output);
   }
 }
 
@@ -158,6 +160,18 @@ async function resolveExistingDirectory(path) {
   } catch {
     throw new Error(`skill directory does not exist: ${resolve(path)}`);
   }
+}
+
+async function plannedPhysicalOutput(output) {
+  let ancestor = dirname(output);
+  const suffix = [basename(output)];
+  while (!existsSync(ancestor)) {
+    suffix.unshift(basename(ancestor));
+    const parent = dirname(ancestor);
+    if (parent === ancestor) break;
+    ancestor = parent;
+  }
+  return join(await realpath(ancestor), ...suffix);
 }
 
 async function assertEntryType(root, relativePath, type) {
@@ -197,4 +211,14 @@ async function replaceArchiveOnRenameLimitedPlatform(staged, output) {
     throw error;
   }
   await rm(backup, { force: true });
+}
+
+async function copyArchiveExclusively(staged, output) {
+  try {
+    await copyFile(staged, output, constants.COPYFILE_EXCL);
+  } catch (error) {
+    if (error.code === "EEXIST") throw new Error(`archive already exists: ${output} (pass --force to replace it)`);
+    await rm(output, { force: true });
+    throw error;
+  }
 }

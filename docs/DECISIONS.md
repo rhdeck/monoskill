@@ -4,7 +4,7 @@ This log records settled, load-bearing product and implementation choices. Newes
 
 ## 2026-07-16 — Make `.skill` a deterministic, archive-only build target
 
-A `.skill` artifact is a standard ZIP whose root exactly matches the generated directory contract, without an enclosing folder. `package` converts an existing compiled directory; `build --archive` compiles through a temporary directory and leaves only the archive. Entries are ordered lexically with normalized timestamps, while file modes, symlinks, empty directories, provenance, and complete reference trees are preserved. Archive publication refuses existing paths unless `--force` is explicit.
+A `.skill` artifact is a standard ZIP whose root exactly matches the generated directory contract, without an enclosing folder. `package` converts an existing compiled directory; `build --archive` compiles through a temporary directory and leaves only the archive. Entries are ordered lexically with normalized timestamps, while file modes, symlinks, empty directories, provenance, and complete reference trees are preserved. Direct archive builds record `compiledAt: null` so the build clock cannot change artifact bytes. Archive publication refuses existing paths unless `--force` is explicit.
 
 ## 2026-07-15 — Publish the CLI as `monoskill`
 

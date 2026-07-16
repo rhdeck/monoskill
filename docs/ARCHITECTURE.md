@@ -41,7 +41,7 @@ The package is an ECMAScript-module Node.js CLI requiring Node.js 20 or newer.
 
 `package` validates an existing generated directory, enumerates its complete tree in lexical order, and writes a ZIP archive with normalized timestamps. Regular file contents and modes, symlinks, and empty directories are preserved. The archive has no enclosing directory: its root has the same generated skill contract shown above.
 
-Archive publication is staged beside the destination. A new artifact is linked into place without an overwrite race; `--force` opts into atomic replacement. `build --archive` compiles in a temporary directory, packages it, and removes the intermediate tree.
+Archive publication is staged beside the destination. A new artifact is linked into place without an overwrite race, with an exclusive-copy fallback for filesystems that do not support hard links; `--force` opts into replacement. `build --archive` compiles in a temporary directory, packages it, and removes the intermediate tree. It records `compiledAt: null` instead of a volatile wall clock so identical source and options produce identical artifacts.
 
 ## Drift and update
 

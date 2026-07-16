@@ -9,7 +9,9 @@
   <rect x="710" y="235" width="28" height="160" fill="#17151d" stroke="#8b7b9a" stroke-width="4"/>
   <rect x="800" y="100" width="310" height="430" fill="#f5ead9" transform="rotate(2 955 315)"/>
   <text x="845" y="190" fill="#17151d" font-family="Arial Narrow, sans-serif" font-size="28" font-weight="700" letter-spacing="5">MONOSKILL</text>
-  <text x="845" y="295" fill="#17151d" font-family="Arial Narrow, sans-serif" font-size="66" font-weight="900">MANY SKILLS.</text>
-  <text x="845" y="365" fill="#c93428" font-family="Arial Narrow, sans-serif" font-size="66" font-weight="900">ONE WAY IN.</text>
-  <text x="845" y="450" fill="#17151d" font-family="Arial, sans-serif" font-size="22">Provenance intact.</text>
+  <text x="845" y="270" fill="#17151d" font-family="Arial Narrow, sans-serif" font-size="52" font-weight="900">MANY</text>
+  <text x="845" y="325" fill="#17151d" font-family="Arial Narrow, sans-serif" font-size="52" font-weight="900">SKILLS.</text>
+  <text x="845" y="390" fill="#c93428" font-family="Arial Narrow, sans-serif" font-size="52" font-weight="900">ONE WAY</text>
+  <text x="845" y="445" fill="#c93428" font-family="Arial Narrow, sans-serif" font-size="52" font-weight="900">IN.</text>
+  <text x="845" y="490" fill="#17151d" font-family="Arial, sans-serif" font-size="20">Provenance intact.</text>
 </svg>

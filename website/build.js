@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL(".", import.meta.url));
 const output = join(root, "dist");
 const publicFiles = [
+  "analytics.js",
   "app.js",
   "favicon.svg",
   "generator.js",

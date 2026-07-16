@@ -2,9 +2,17 @@ const CONTROL_CHARACTERS = /[\u0000-\u001f\u007f]/;
 const GITHUB_SHORTHAND = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 const SCP_GIT_URL = /^[A-Za-z0-9._-]+@[A-Za-z0-9.-]+:[^\s]+$/;
 const LOCAL_PATH = /^(?:\.{0,2}\/|~\/|\/)/;
+const BARE_LOCAL_PATH = /^[A-Za-z0-9_][A-Za-z0-9._' ()@+-]*(?:\/[A-Za-z0-9._' ()@+-]+)*$/;
 const SKILL_NAME = /^[a-z0-9-]{1,63}$/;
 const SUPPORTED_PROTOCOLS = new Set(["https:", "http:", "ssh:", "git:", "file:"]);
 
+/**
+ * Classify source text the live CLI can materialize: GitHub owner/repo
+ * shorthand, HTTP/HTTPS/SSH/Git/file URLs, SCP-style Git URLs, and absolute,
+ * home-relative, dot-relative, or bare POSIX paths. This is shape validation,
+ * not a network/existence check; the CLI remains authoritative when it fetches
+ * or resolves the safely quoted value.
+ */
 export function validateSource(raw) {
   const source = String(raw ?? "").trim();
   if (!source) return { valid: false, message: "Paste a GitHub repository, Git URL, or local path." };
@@ -13,6 +21,7 @@ export function validateSource(raw) {
   if (GITHUB_SHORTHAND.test(source)) return { valid: true, value: source, type: "github-shorthand" };
   if (LOCAL_PATH.test(source)) return { valid: true, value: source, type: "local-path" };
   if (SCP_GIT_URL.test(source)) return { valid: true, value: source, type: "git-url" };
+  if (BARE_LOCAL_PATH.test(source)) return { valid: true, value: source, type: "local-path" };
 
   try {
     const url = new URL(source);
@@ -25,7 +34,7 @@ export function validateSource(raw) {
 
   return {
     valid: false,
-    message: "Use owner/repo, a supported Git URL, or a local path beginning with ./, ../, ~/, or /."
+    message: "Use owner/repo, a supported Git URL, or a POSIX local path."
   };
 }
 

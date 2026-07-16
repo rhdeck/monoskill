@@ -8,7 +8,7 @@ test("generates safe commands without leaking pasted values to analytics", async
     window.addEventListener("monoskill:analytics", (event) => window.__events.push(event.detail));
   });
 
-  await page.locator("#source").fill("owner/repo\n--output /tmp/private");
+  await page.locator("#source").fill("javascript:alert(private-source)");
   await expect(page.locator("#source")).toHaveAttribute("aria-invalid", "true");
   await expect(page.getByRole("button", { name: "Copy command" })).toBeDisabled();
 

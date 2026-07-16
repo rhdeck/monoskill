@@ -9,6 +9,8 @@ test("accepts every source form supported by the website", () => {
     "git@github.com:coreyhaines31/marketingskills.git",
     "ssh://git@github.com/coreyhaines31/marketingskills.git",
     "file:///tmp/local-skills",
+    "local-skills",
+    "local skills/with apostrophe's",
     "./local-skills",
     "../local-skills",
     "~/skills/local",
@@ -17,7 +19,7 @@ test("accepts every source form supported by the website", () => {
 });
 
 test("rejects ambiguous and unsafe source text", () => {
-  for (const source of ["", "local-skills", "javascript:alert(1)", "owner/repo\n--output /tmp/oops", "https://"]) {
+  for (const source of ["", "javascript:alert(1)", "-starts-like-an-option", "owner/repo\n--output /tmp/oops", "https://"]) {
     assert.equal(validateSource(source).valid, false, JSON.stringify(source));
   }
 });

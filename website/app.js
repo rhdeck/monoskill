@@ -6,6 +6,7 @@ import {
   validateSkillName,
   validateSource
 } from "./generator.js";
+import { collectAnalytics } from "./analytics.js";
 
 const form = document.querySelector("#generator-form");
 const sourceInput = document.querySelector("#source");
@@ -22,7 +23,7 @@ let completionWasTracked = false;
 function track(event, detail = {}) {
   const safeDetail = { event, ...detail };
   window.dispatchEvent(new CustomEvent("monoskill:analytics", { detail: safeDetail }));
-  if (typeof window.plausible === "function") window.plausible(event, { props: detail });
+  collectAnalytics(event, detail);
 }
 
 function trackSourceCompletion() {
@@ -81,6 +82,7 @@ document.querySelector("#example-button").addEventListener("click", () => {
   nameInput.value = "corey-marketing";
   nameWasEdited = true;
   render();
+  nameWasEdited = false;
   sourceInput.focus();
 });
 

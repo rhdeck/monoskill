@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { chmod, lstat, mkdtemp, mkdir, readFile, readlink, readdir, rm, symlink, writeFile } from "node:fs/promises";
+import { chmod, lstat, mkdtemp, mkdir, readFile, readlink, readdir, realpath, rename, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, normalize, relative, resolve, sep } from "node:path";
 import { promisify } from "node:util";
@@ -8,6 +8,7 @@ import test from "node:test";
 import yauzl from "yauzl";
 import { packageSkill } from "../src/archive.js";
 import { build, check, update } from "../src/compiler.js";
+import { parseRemoteSource, selectTreeRef } from "../src/source.js";
 
 const exec = promisify(execFile);
 
@@ -127,6 +128,189 @@ test("build --archive path packages directly and invalid generated skills fail c
   }
 });
 
+test("add compiles one canonical project skill and links explicit harness targets", async () => {
+  const temp = await mkdtemp(join(tmpdir(), "monoskill-add-test-"));
+  const source = join(temp, "vendor");
+  const project = join(temp, "project");
+  const cli = join(process.cwd(), "bin", "monoskill.js");
+  try {
+    await createSkill(source, "seo", "Audit search performance.");
+    await commitFixture(source);
+    await exec("git", ["-C", source, "remote", "add", "origin", "https://example.invalid/wrong.git"]);
+    await mkdir(project);
+    const { stdout } = await exec(process.execPath, [cli, "add", source, "--name", "vendor-marketing", "--agent", "codex", "--json"], { cwd: project });
+    const result = JSON.parse(stdout);
+    const projectRoot = await realpath(project);
+    const canonical = join(projectRoot, ".agents", "skills", "vendor-marketing");
+    const codex = join(projectRoot, ".codex", "skills", "vendor-marketing");
+    assert.equal(result.output, canonical);
+    assert.equal((await lstat(codex)).isSymbolicLink(), true);
+    assert.equal(resolve(dirname(codex), await readlink(codex)), canonical);
+    assert.equal(await pathExists(join(projectRoot, ".claude", "skills", "vendor-marketing")), false);
+    const manifest = JSON.parse(await readFile(join(canonical, "provenance.json"), "utf8"));
+    assert.match(manifest.source.url, /^file:/);
+    assert.equal(manifest.deployment.scope, "project");
+    assert.deepEqual(manifest.deployment.targets.map((target) => target.agent), ["codex"]);
+    assert.equal((await check(canonical)).current, true);
+    const previousVersion = await realpath(canonical);
+
+    await writeFile(join(source, "skills", "seo", "SKILL.md"), skillText("seo", "Audit organic search performance."));
+    await exec("git", ["-C", source, "add", "."]);
+    await exec("git", ["-C", source, "-c", "user.name=Test", "-c", "user.email=test@example.com", "commit", "-qm", "update"]);
+    await update(codex);
+    assert.equal((await check(canonical)).current, true);
+    assert.equal((await lstat(canonical)).isSymbolicLink(), true);
+    assert.notEqual(await realpath(canonical), previousVersion);
+    assert.equal(await pathExists(previousVersion), false);
+    assert.equal((await lstat(codex)).isSymbolicLink(), true);
+    assert.equal(JSON.parse(await readFile(join(canonical, "provenance.json"), "utf8")).deployment.targets[0].agent, "codex");
+
+    await assert.rejects(exec(process.execPath, [cli, "add", source, "--name", "vendor-marketing", "--agent", "codex"], { cwd: project }), /refusing to overwrite existing installation/);
+  } finally {
+    await rm(temp, { recursive: true, force: true });
+  }
+});
+
+test("add previews safely and requires explicit confirmation for global harness writes", async () => {
+  const temp = await mkdtemp(join(tmpdir(), "monoskill-global-add-test-"));
+  const source = join(temp, "vendor");
+  const project = join(temp, "project");
+  const home = join(temp, "home");
+  const cli = join(process.cwd(), "bin", "monoskill.js");
+  const env = {
+    ...process.env,
+    HOME: home,
+    CODEX_HOME: join(home, "custom-codex"),
+    CLAUDE_CONFIG_DIR: join(home, "custom-claude")
+  };
+  try {
+    await createSkill(source, "seo", "Audit search performance.");
+    await commitFixture(source);
+    await mkdir(project);
+    const preview = await exec(process.execPath, [cli, "add", source, "--name", "preview", "--global", "--dry-run", "--json"], { cwd: project, env });
+    assert.equal(JSON.parse(preview.stdout).dryRun, true);
+    assert.equal(await pathExists(join(home, ".agents")), false);
+
+    await assert.rejects(exec(process.execPath, [cli, "add", source, "--name", "global-skill", "--global"], { cwd: project, env }), /global installation requires --yes/);
+    await exec(process.execPath, [cli, "add", source, "--name", "global-skill", "--global", "--yes"], { cwd: project, env });
+    const homeRoot = await realpath(home);
+    const canonical = join(homeRoot, ".agents", "skills", "global-skill");
+    assert.equal(await pathExists(join(canonical, "SKILL.md")), true);
+    assert.equal((await lstat(join(homeRoot, "custom-codex", "skills", "global-skill"))).isSymbolicLink(), true);
+    assert.equal((await lstat(join(homeRoot, "custom-claude", "skills", "global-skill"))).isSymbolicLink(), true);
+  } finally {
+    await rm(temp, { recursive: true, force: true });
+  }
+});
+
+test("add-managed projects remain atomically updateable after relocation", async () => {
+  const temp = await mkdtemp(join(tmpdir(), "monoskill-relocation-test-"));
+  const source = join(temp, "vendor");
+  const project = join(temp, "project");
+  const moved = join(temp, "moved-project");
+  const cli = join(process.cwd(), "bin", "monoskill.js");
+  try {
+    await createSkill(source, "seo", "Audit search performance.");
+    await commitFixture(source);
+    await mkdir(project);
+    await exec(process.execPath, [cli, "add", source, "--name", "portable", "--agent", "codex"], { cwd: project });
+    await rename(project, moved);
+    await writeFile(join(source, "skills", "seo", "SKILL.md"), skillText("seo", "Audit organic search performance."));
+    await exec("git", ["-C", source, "add", "."]);
+    await exec("git", ["-C", source, "-c", "user.name=Test", "-c", "user.email=test@example.com", "commit", "-qm", "update"]);
+    await exec(process.execPath, [cli, "update", join(moved, ".codex", "skills", "portable")]);
+    assert.equal((await check(join(moved, ".agents", "skills", "portable"))).current, true);
+    assert.equal((await lstat(join(moved, ".agents", "skills", "portable"))).isSymbolicLink(), true);
+  } finally {
+    await rm(temp, { recursive: true, force: true });
+  }
+});
+
+test("non-Git local directories support add, check, drift, and atomic update", async () => {
+  const temp = await mkdtemp(join(tmpdir(), "monoskill-nongit-local-test-"));
+  const source = join(temp, "vendor");
+  const project = join(temp, "project");
+  const cli = join(process.cwd(), "bin", "monoskill.js");
+  try {
+    await createSkill(source, "seo", "Audit search performance.");
+    await mkdir(project);
+    await exec(process.execPath, [cli, "add", source, "--name", "local-skills", "--agent", "codex"], { cwd: project });
+    const canonical = join(project, ".agents", "skills", "local-skills");
+    assert.equal((await check(canonical)).current, true);
+    assert.equal(JSON.parse(await readFile(join(canonical, "provenance.json"), "utf8")).source.commit, "local");
+    await writeFile(join(source, "skills", "seo", "SKILL.md"), skillText("seo", "Audit organic search performance."));
+    assert.equal((await check(canonical)).current, false);
+    await exec(process.execPath, [cli, "update", join(project, ".codex", "skills", "local-skills")]);
+    assert.equal((await check(canonical)).current, true);
+  } finally {
+    await rm(temp, { recursive: true, force: true });
+  }
+});
+
+test("source parser supports shorthand, clone URLs, and GitHub tree paths", () => {
+  assert.equal(parseRemoteSource("owner/repo").url, "https://github.com/owner/repo.git");
+  assert.equal(parseRemoteSource("git@github.com:owner/repo.git").url, "git@github.com:owner/repo.git");
+  assert.deepEqual(parseRemoteSource("https://github.com/owner/repo/tree/main/packages/skills"), {
+    url: "https://github.com/owner/repo.git",
+    ref: null,
+    skillsDir: null,
+    treeParts: ["main", "packages", "skills"]
+  });
+  assert.equal(selectTreeRef(["feature", "nested", "skills"], ["main", "feature", "feature/nested"]), "feature/nested");
+});
+
+test("CLI integrates GitHub shorthand and full clone URL sources", { skip: process.env.MONOSKILL_NETWORK_TESTS !== "1" }, async () => {
+  const temp = await mkdtemp(join(tmpdir(), "monoskill-network-sources-test-"));
+  const cli = join(process.cwd(), "bin", "monoskill.js");
+  try {
+    const shorthand = await exec(process.execPath, [cli, "add", "coreyhaines31/marketingskills", "--name", "shorthand", "--dry-run", "--json"], { cwd: temp });
+    const fullUrl = await exec(process.execPath, [cli, "add", "https://github.com/coreyhaines31/marketingskills.git", "--name", "full-url", "--dry-run", "--json"], { cwd: temp });
+    assert.equal(JSON.parse(shorthand.stdout).skillCount, 47);
+    assert.equal(JSON.parse(fullUrl.stdout).skillCount, 47);
+    assert.equal(await pathExists(join(temp, ".agents")), false);
+  } finally {
+    await rm(temp, { recursive: true, force: true });
+  }
+});
+
+test("project add refuses harness parents symlinked outside the project", async () => {
+  const temp = await mkdtemp(join(tmpdir(), "monoskill-path-safety-test-"));
+  const source = join(temp, "vendor");
+  const project = join(temp, "project");
+  const outside = join(temp, "outside");
+  const cli = join(process.cwd(), "bin", "monoskill.js");
+  try {
+    await createSkill(source, "seo", "Audit search performance.");
+    await commitFixture(source);
+    await mkdir(project);
+    await mkdir(outside);
+    await symlink(outside, join(project, ".agents"), "dir");
+    await assert.rejects(exec(process.execPath, [cli, "add", source, "--name", "escape"], { cwd: project }), /project harness parent must not be a symlink/);
+    assert.equal(await pathExists(join(outside, "skills", "escape")), false);
+  } finally {
+    await rm(temp, { recursive: true, force: true });
+  }
+});
+
+test("add JSON errors identify source, compilation, and target-discovery boundaries", async () => {
+  const temp = await mkdtemp(join(tmpdir(), "monoskill-errors-test-"));
+  const emptySource = join(temp, "empty");
+  const cli = join(process.cwd(), "bin", "monoskill.js");
+  try {
+    await mkdir(emptySource);
+    await writeFile(join(emptySource, "README.md"), "No skills here.\n");
+    await commitFixture(emptySource);
+    const sourceError = await commandFailure(process.execPath, [cli, "add", "file:///definitely/missing/monoskill-source", "--name", "broken", "--json"], { cwd: temp });
+    assert.equal(JSON.parse(sourceError.stderr).stage, "source");
+    const compileError = await commandFailure(process.execPath, [cli, "add", emptySource, "--name", "empty", "--json"], { cwd: temp });
+    assert.equal(JSON.parse(compileError.stderr).stage, "compilation");
+    const targetError = await commandFailure(process.execPath, [cli, "add", emptySource, "--name", "empty", "--agent", "unknown", "--json"], { cwd: temp });
+    assert.equal(JSON.parse(targetError.stderr).stage, "target discovery");
+  } finally {
+    await rm(temp, { recursive: true, force: true });
+  }
+});
+
 async function createSkill(root, name, description) {
   const dir = join(root, "skills", name);
   await mkdir(dir, { recursive: true });
@@ -202,6 +386,15 @@ async function pathExists(path) {
   } catch {
     return false;
   }
+}
+
+async function commandFailure(command, args, options) {
+  try {
+    await exec(command, args, options);
+  } catch (error) {
+    return error;
+  }
+  assert.fail("expected command to fail");
 }
 
 function skillText(name, description) {

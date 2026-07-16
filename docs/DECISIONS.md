@@ -2,6 +2,10 @@
 
 This log records settled, load-bearing product and implementation choices. Newest entries go first.
 
+## 2026-07-16 — Name the one-command workflow `add` and deploy one canonical copy
+
+The source-to-harness command is `add`, matching the familiar `skills add` verb while preserving Monoskill's distinct unit: it compiles all discovered upstream skills and deploys one router skill. Project scope is the default; global scope requires `--yes`. Each scope stores the compiled directory under `.agents/skills/<name>` and links explicit Codex and Claude Code harness targets to it. Collisions are refused rather than inferred safe, deployment provenance is recorded, and `check`/`update` continue to operate after installation. This canonical-copy-plus-links layout prevents separately copied harness targets from drifting.
+
 ## 2026-07-16 — Make `.skill` a deterministic, archive-only build target
 
 A `.skill` artifact is a standard ZIP whose root exactly matches the generated directory contract, without an enclosing folder. `package` converts an existing compiled directory; `build --archive` compiles through a temporary directory and leaves only the archive. Entries are ordered lexically with normalized timestamps, while file modes, symlinks, empty directories, provenance, and complete reference trees are preserved. Direct archive builds record `compiledAt: null` so the build clock cannot change artifact bytes. Archive publication refuses existing paths unless `--force` is explicit.

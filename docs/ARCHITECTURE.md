@@ -9,9 +9,10 @@ Monoskill compiles a collection of independently authored agent skills into one 
 The package is an ECMAScript-module Node.js CLI requiring Node.js 20 or newer.
 
 - `bin/monoskill.js` is the npm executable entry point. It delegates to the CLI module and owns top-level error reporting.
-- `src/cli.js` parses `build`, `package`, `check`, and `update` commands and renders human or JSON output.
+- `src/cli.js` parses `add`, `build`, `package`, `check`, and `update` commands and renders human or JSON output.
 - `src/source.js` resolves a local directory, Git URL, or GitHub `owner/repo` shorthand into a materialized Git working tree with a resolved commit.
 - `src/compiler.js` discovers skills, parses YAML frontmatter, hashes and copies upstream trees, renders the compact router, and implements drift checks and atomic updates.
+- `src/deploy.js` plans project or global harness targets, compiles into isolated staging, records deployment provenance, refuses collisions, and atomically publishes one canonical skill plus per-agent symlinks.
 - `src/archive.js` validates generated skills and writes deterministic, atomically published ZIP-format `.skill` artifacts.
 - `test/monoskill.test.js` exercises the full compile/check/update lifecycle against a temporary local Git repository.
 
@@ -47,8 +48,18 @@ Archive publication is staged beside the destination. A new artifact is linked i
 
 `check` rebuilds from the recorded source into a temporary directory and compares resolved commits and per-skill hashes. It reports added, removed, and changed skills without mutating the installation. `update` uses the same provenance to rebuild and atomically replace the installed directory.
 
+When an installation was created by `add`, deployment metadata is retained across updates. `update` resolves a supplied harness symlink before swapping so every agent link continues to point at the one canonical installation.
+
+## Harness deployment
+
+`add` is the source-to-installed-skill operation. It uses `.agents/skills/<name>` as the canonical path in either the current project or the user's home directory. That path is an atomically replaceable pointer to a private version under `.agents/skills/.monoskill/<name>/`; Codex and Claude Code receive relative directory symlinks from their adapter-discovered roots. Global adapters honor `CODEX_HOME` and `CLAUDE_CONFIG_DIR` before their `.codex/skills` and `.claude/skills` defaults. Deployment paths are recorded relative to the installation root, so moving a project does not disable atomic updates. Relative links keep a project tree relocatable while a single active compiled copy prevents agent targets from drifting independently.
+
+Target discovery and collision checks happen before compilation. Project target discovery conservatively refuses existing harness parent symlinks, preventing target escape from the project root. Compilation happens in a temporary directory; harness mutation begins only after it succeeds. Deployment publishes the private version and canonical pointer first, creates requested links second, and removes published skill/link artifacts plus still-empty parent scaffolding if a later deployment step fails. Existing canonical paths, files, directories, or even dangling links are collisions and are never replaced.
+
+Project scope needs no confirmation. Global scope requires `--yes`, while `--dry-run` performs source resolution and compilation but no harness writes. JSON errors carry the failed boundary so automation can distinguish source, compilation, target-discovery, and deployment failures.
+
 ## Current boundaries
 
-- Monoskill compiles and packages repositories of skills; it does not install archives into agent harnesses.
+- Monoskill deploys generated skill directories into Codex and Claude Code harness roots. Portable `.skill` archive extraction and third-party harness adapters remain outside the deployment surface.
 - The repository currently contains only the CLI package. The website and AI-facing Monoskill skill are tracked as GitHub initiatives, not current architecture.
 - Network access is required only for remote Git sources; local-source builds remain local.

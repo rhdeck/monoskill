@@ -1,13 +1,13 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
-import { cp, mkdir, mkdtemp, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
+import { cp, lstat, mkdir, mkdtemp, readFile, readdir, realpath, rename, rm, stat, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { basename, dirname, join, relative, resolve } from "node:path";
+import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
 import YAML from "yaml";
 import { packageSkill } from "./archive.js";
 import { materializeSource } from "./source.js";
 
-const TOOL_VERSION = "0.2.0";
+const TOOL_VERSION = "0.3.0";
 
 export async function build(sourceInput, options) {
   assertSkillName(options.name);
@@ -55,9 +55,14 @@ export async function check(skillDir) {
 }
 
 export async function update(skillDir) {
+  skillDir = await realpath(skillDir);
   const manifest = await readManifest(skillDir);
   const drift = await check(skillDir);
   if (drift.current) return { current: true, commit: manifest.source.commit, skillCount: manifest.skills.length };
+
+  if (await isAtomicDeployment(manifest, skillDir)) {
+    return updateAtomicDeployment(skillDir, manifest);
+  }
 
   const parent = dirname(skillDir);
   const temp = await mkdtemp(join(parent, ".monoskill-update-"));
@@ -69,6 +74,11 @@ export async function update(skillDir) {
       skillsDir: manifest.source.skillsDir,
       output: join(temp, basename(skillDir))
     });
+    if (manifest.deployment) {
+      const nextManifest = await readManifest(result.output);
+      nextManifest.deployment = { ...manifest.deployment, updatedAt: new Date().toISOString() };
+      await writeFile(join(result.output, "provenance.json"), `${JSON.stringify(nextManifest, null, 2)}\n`);
+    }
     const backup = `${skillDir}.backup-${Date.now()}`;
     await rename(skillDir, backup);
     try {
@@ -84,8 +94,66 @@ export async function update(skillDir) {
   }
 }
 
+/**
+ * Refresh an add-managed installation without ever removing its public path.
+ * A complete new version is built privately, then a temporary canonical link
+ * is renamed over the old link in one filesystem operation. Harness links keep
+ * resolving throughout the swap; the retired version is cleaned afterward.
+ */
+async function updateAtomicDeployment(currentVersion, manifest) {
+  const { canonical, versionStore } = deploymentPaths(manifest, currentVersion);
+  await mkdir(versionStore, { recursive: true });
+  const nextVersion = join(versionStore, `${Date.now()}-${process.pid}-${randomUUID()}`);
+  const nextLink = `${canonical}.next-${process.pid}-${randomUUID()}`;
+  let result;
+  try {
+    result = await build(manifest.source.url, {
+      name: manifest.skill.name,
+      description: manifest.skill.descriptionOverride,
+      ref: manifest.source.requestedRef,
+      skillsDir: manifest.source.skillsDir,
+      output: nextVersion
+    });
+    const nextManifest = await readManifest(nextVersion);
+    nextManifest.deployment = { ...manifest.deployment, updatedAt: new Date().toISOString() };
+    await writeFile(join(nextVersion, "provenance.json"), `${JSON.stringify(nextManifest, null, 2)}\n`);
+    await symlink(relative(dirname(canonical), nextVersion), nextLink, "dir");
+    await rename(nextLink, canonical);
+  } catch (error) {
+    await rm(nextLink, { force: true });
+    await rm(nextVersion, { recursive: true, force: true });
+    throw error;
+  }
+  await rm(currentVersion, { recursive: true, force: true }).catch(() => {});
+  return { current: false, previousCommit: manifest.source.commit, commit: result.commit, skillCount: result.skillCount };
+}
+
+async function isAtomicDeployment(manifest, currentVersion) {
+  if (!manifest.deployment?.canonicalPath) return false;
+  try {
+    const { canonical } = deploymentPaths(manifest, currentVersion);
+    return (await lstat(canonical)).isSymbolicLink() && await realpath(canonical) === currentVersion;
+  } catch {
+    return false;
+  }
+}
+
+function deploymentPaths(manifest, currentVersion) {
+  const recordedStore = manifest.deployment.versionStore ?? dirname(currentVersion);
+  if (isAbsolute(manifest.deployment.canonicalPath)) {
+    return { canonical: resolve(manifest.deployment.canonicalPath), versionStore: resolve(recordedStore) };
+  }
+  const storeParts = String(recordedStore).split(/[\\/]/).filter(Boolean);
+  let installationRoot = currentVersion;
+  for (let index = 0; index <= storeParts.length; index += 1) installationRoot = dirname(installationRoot);
+  return {
+    canonical: resolve(installationRoot, manifest.deployment.canonicalPath),
+    versionStore: resolve(installationRoot, recordedStore)
+  };
+}
+
 async function compileMaterialized(source, options) {
-  const skillsRoot = resolveSkillsRoot(source.root, options.skillsDir);
+  const skillsRoot = resolveSkillsRoot(source.root, options.skillsDir ?? source.suggestedSkillsDir);
   const skillDirs = await findSkillDirs(skillsRoot);
   if (!skillDirs.length) throw new Error(`no SKILL.md files found under ${skillsRoot}`);
 
@@ -160,7 +228,7 @@ async function findSkillDirs(root) {
       return;
     }
     for (const entry of entries) {
-      if (!entry.isDirectory() || [".git", "node_modules", ".agents", ".claude"].includes(entry.name)) continue;
+      if (!entry.isDirectory() || [".git", "node_modules", ".agents", ".claude", ".codex"].includes(entry.name)) continue;
       await walk(join(dir, entry.name));
     }
   }

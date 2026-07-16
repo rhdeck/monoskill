@@ -101,6 +101,16 @@ Use `--output ./artifacts/corey-marketing.skill` to choose the archive path. Arc
 
 Before packaging, Monoskill validates the generated root files, the provenance manifest, and every referenced skill entrypoint. Entries are stored in lexical order with normalized timestamps while preserving file contents, relative paths, filesystem modes, symlinks, and empty directories. Packaging the same compiled tree twice therefore produces byte-identical archives. Direct archive builds also omit the volatile build clock (`compiledAt` is `null`), so compiling the same source and options produces the same bytes.
 
+## Agent skill
+
+Install the lightweight Monoskill skill with standard agent-skill tooling:
+
+```bash
+npx skills add rhdeck/monoskill --skill monoskill
+```
+
+The skill triggers on explicit Monoskill and compile-as-one requests, teaches agents to use the real CLI, and keeps detailed commands behind progressive disclosure. It also requires destination inspection before any operation that could replace an existing output.
+
 ## Source conventions
 
 Sources can be GitHub shorthand (`owner/repo`), a full GitHub repository URL, a GitHub `/tree/<ref>/<path>` URL, any Git clone URL, or a local directory. `monoskill` uses `skills/` when present; otherwise it searches the repository. A tree URL supplies its ref and source path; explicit `--ref` and `--skills-dir` values override source inference. Pin a branch, tag, or commit with `--ref`.
@@ -113,6 +123,7 @@ Each discovered skill must be a directory containing `SKILL.md` with YAML frontm
 npm install
 npm test
 npm run check
+npm run validate:skill
 ```
 
 MIT

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Monoskill"
+  short_description: "Compile many agent skills into one router"
+  default_prompt: "Use $monoskill to compile this repository into one provenance-aware router skill."

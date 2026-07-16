@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { parse } from "yaml";
 
 const origin = "https://monoskill.statechange.ai";
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
@@ -38,21 +39,24 @@ test("Netlify contract builds the verified static site with restrictive headers"
 
 test("GitHub main is the fail-closed Netlify production path", async () => {
   const workflow = await read("../.github/workflows/deploy-site.yml");
-  assert.match(workflow, /push:\s*\n\s*branches:\s*\n\s*- main/);
-  assert.match(workflow, /permissions:\s*\n\s*contents: read/);
-  assert.match(workflow, /if: github\.ref == 'refs\/heads\/main'/);
-  assert.match(workflow, /node-version: "20"/);
-  assert.match(workflow, /actions\/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10/);
-  assert.match(workflow, /actions\/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38/);
+  const config = parse(workflow);
+  const steps = config.jobs.deploy.steps;
+
+  assert.deepEqual(config.on.push.branches, ["main"]);
+  assert.equal(config.permissions.contents, "read");
+  assert.equal(config.jobs.deploy.if, "github.ref == 'refs/heads/main'");
+  assert.equal(steps[1].with["node-version"], "20.20.2");
+  assert.equal(steps[0].uses, "actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10");
+  assert.equal(steps[1].uses, "actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38");
   assert.doesNotMatch(workflow, /uses:\s+[^\s]+@v\d/);
-  assert.doesNotMatch(workflow, /pull_request:/);
-  assert.deepEqual(
-    workflow.match(/^\s*NETLIFY_AUTH_TOKEN:.*$/gm),
-    ["          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}"],
-  );
-  assert.match(workflow, /npx --no-install netlify deploy/);
-  assert.match(workflow, /playwright install --with-deps chromium/);
-  assert.match(workflow, /npm run website:test/);
-  assert.match(workflow, /--dir website\/dist/);
-  assert.match(workflow, /--site f4a7a382-4d6a-4d80-9109-62fb16a7293c/);
+  assert.equal(config.on.pull_request, undefined);
+  assert.deepEqual(steps.at(-1).env, {
+    NETLIFY_AUTH_TOKEN: "${{ secrets.NETLIFY_AUTH_TOKEN }}",
+    NETLIFY_SITE_ID: "${{ vars.NETLIFY_SITE_ID }}",
+  });
+  assert.match(steps.at(-1).run, /npx --no-install netlify deploy/);
+  assert.equal(steps.some(({ run }) => run === "npx playwright install --with-deps chromium"), true);
+  assert.equal(steps.some(({ run }) => run === "npm run website:test"), true);
+  assert.match(steps.at(-1).run, /--dir website\/dist/);
+  assert.match(steps.at(-1).run, /--site "\$\{NETLIFY_SITE_ID\}"/);
 });

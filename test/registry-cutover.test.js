@@ -20,6 +20,8 @@ const consumerSurfaces = [
 const canonicalOwnerSurfaces = [
   "README.md",
   "SECURITY.md",
+  "docs/ARCHITECTURE.md",
+  "docs/PUBLIC_DISCLOSURE_AUDIT.md",
   "package.json",
   "scripts/release-preflight.js",
   "scripts/smoke-registry-release.js",
@@ -49,7 +51,7 @@ test("canonical ownership surfaces reject the personal-repository location", asy
   }
 });
 
-test("the actual npm tarball README self-references only the corrective registry version", async () => {
+test("the actual npm tarball README self-references only the ownership-cutover version", async () => {
   const temporary = await mkdtemp(path.join(os.tmpdir(), "monoskill-packed-readme-"));
   try {
     const [pack] = JSON.parse(execFileSync("npm", ["pack", "--json", "--ignore-scripts", "--pack-destination", temporary], {

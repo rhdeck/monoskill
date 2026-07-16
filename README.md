@@ -128,7 +128,7 @@ npm run validate:skill
 
 ## Releasing (maintainers)
 
-Releases use npm Trusted Publishing from `.github/workflows/publish.yml`; there is no npm write token or manual workflow fallback. The npm package binding is exact:
+Releases use npm Trusted Publishing from `.github/workflows/publish.yml`; there is no npm write token or manual workflow fallback. The target npm package binding for the ownership cutover is:
 
 - Provider: GitHub Actions
 - Organization or user: `statechange`
@@ -136,6 +136,8 @@ Releases use npm Trusted Publishing from `.github/workflows/publish.yml`; there 
 - Workflow filename: `publish.yml`
 - Environment: none
 - Allowed action: `npm publish`
+
+Treat that target as active only after npm accepts it and an OIDC release from `statechange/monoskill` publishes with matching provenance.
 
 The only trigger is a pushed `v*` tag. Before publishing, the GitHub-hosted workflow requires Node 24 and npm 11.5.1, runs the complete release simulation, then fails unless the tag is exactly `v<package.json version>`, the tag, event, and checkout resolve to the same commit, that repository and commit are anonymously readable from GitHub, packaged worktree bytes are clean, the version is still absent from the exact public registry, and the dry-run tarball contains exactly the intended package files. Releases are serialized package-wide and never cancel one another. Do not create a tag until its package version is ready: npm versions are immutable, so a failed or incorrect published version is repaired only with a new version, never by moving or replaying the tag.
 

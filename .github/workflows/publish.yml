@@ -1,0 +1,38 @@
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-release-monoskill
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - name: Install npm with trusted-publishing support
+        run: npm install --global npm@11.5.1
+      - run: npm ci
+      - name: Exercise the complete release path without publishing
+        run: npm run release:simulate
+      - name: Verify the real tag and immutable release boundary
+        run: npm run release:preflight
+      - name: Publish with npm trusted publishing
+        run: npm publish
+      - name: Verify the clean-cache registry release and provenance
+        run: npm run smoke:registry

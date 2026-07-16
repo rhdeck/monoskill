@@ -54,9 +54,16 @@ test("GitHub main is the fail-closed Netlify production path", async () => {
     NETLIFY_AUTH_TOKEN: "${{ secrets.NETLIFY_AUTH_TOKEN }}",
     NETLIFY_SITE_ID: "${{ vars.NETLIFY_SITE_ID }}",
   });
+  assert.deepEqual(steps.slice(2, -1).map(({ run }) => run), [
+    "npm ci",
+    "npm test",
+    "npm run check",
+    "npm run website:build",
+    "npx playwright install --with-deps chromium",
+    "npm run website:test",
+  ]);
   assert.match(steps.at(-1).run, /npx --no-install netlify deploy/);
-  assert.equal(steps.some(({ run }) => run === "npx playwright install --with-deps chromium"), true);
-  assert.equal(steps.some(({ run }) => run === "npm run website:test"), true);
+  assert.match(steps.at(-1).run, /--prod/);
   assert.match(steps.at(-1).run, /--dir website\/dist/);
   assert.match(steps.at(-1).run, /--site "\$\{NETLIFY_SITE_ID\}"/);
 });

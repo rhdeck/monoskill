@@ -1,5 +1,5 @@
 const ANALYTICS_ENDPOINT = "https://plausible.io/api/event";
-const ANALYTICS_DOMAIN = "monoskill.dev";
+const ANALYTICS_DOMAIN = "monoskill.statechange.ai";
 const ALLOWED_EVENTS = new Set(["source_input_completed", "copy_cli", "copy_ai_prompt"]);
 const ALLOWED_SOURCE_TYPES = new Set(["github-shorthand", "git-url", "local-path"]);
 

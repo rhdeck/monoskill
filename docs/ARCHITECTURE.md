@@ -66,5 +66,5 @@ Project scope needs no confirmation. Global scope requires `--yes`, while `--dry
 ## Current boundaries
 
 - Monoskill deploys generated skill directories into Codex and Claude Code harness roots. Portable `.skill` archive extraction and third-party harness adapters remain outside the deployment surface.
-- The repository contains the CLI package and a complete website draft. The website has no authorized production host or public deployment yet.
+- The repository contains the CLI package and the static website deployed through Netlify at `https://monoskill.statechange.ai/`. Its production metadata, security headers, redirect, and build contract live in `netlify.toml` and `website/`.
 - Network access is required only for remote Git sources; local-source builds remain local.

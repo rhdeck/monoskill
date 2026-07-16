@@ -2,9 +2,11 @@
   "name": "Monoskill",
   "short_name": "Monoskill",
   "description": "Compile many agent skills into one provenance-aware router skill.",
-  "start_url": "/",
+  "id": "https://monoskill.statechange.ai/",
+  "start_url": "https://monoskill.statechange.ai/",
+  "scope": "https://monoskill.statechange.ai/",
   "display": "browser",
   "background_color": "#17151d",
   "theme_color": "#17151d",
-  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+  "icons": [{ "src": "https://monoskill.statechange.ai/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
 }

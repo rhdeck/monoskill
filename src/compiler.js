@@ -2,7 +2,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { cp, lstat, mkdir, mkdtemp, readFile, readdir, realpath, rename, rm, stat, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { basename, dirname, join, relative, resolve } from "node:path";
+import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
 import YAML from "yaml";
 import { packageSkill } from "./archive.js";
 import { materializeSource } from "./source.js";
@@ -101,8 +101,7 @@ export async function update(skillDir) {
  * resolving throughout the swap; the retired version is cleaned afterward.
  */
 async function updateAtomicDeployment(currentVersion, manifest) {
-  const canonical = resolve(manifest.deployment.canonicalPath);
-  const versionStore = resolve(manifest.deployment.versionStore ?? dirname(currentVersion));
+  const { canonical, versionStore } = deploymentPaths(manifest, currentVersion);
   await mkdir(versionStore, { recursive: true });
   const nextVersion = join(versionStore, `${Date.now()}-${process.pid}-${randomUUID()}`);
   const nextLink = `${canonical}.next-${process.pid}-${randomUUID()}`;
@@ -132,11 +131,25 @@ async function updateAtomicDeployment(currentVersion, manifest) {
 async function isAtomicDeployment(manifest, currentVersion) {
   if (!manifest.deployment?.canonicalPath) return false;
   try {
-    const canonical = resolve(manifest.deployment.canonicalPath);
+    const { canonical } = deploymentPaths(manifest, currentVersion);
     return (await lstat(canonical)).isSymbolicLink() && await realpath(canonical) === currentVersion;
   } catch {
     return false;
   }
+}
+
+function deploymentPaths(manifest, currentVersion) {
+  const recordedStore = manifest.deployment.versionStore ?? dirname(currentVersion);
+  if (isAbsolute(manifest.deployment.canonicalPath)) {
+    return { canonical: resolve(manifest.deployment.canonicalPath), versionStore: resolve(recordedStore) };
+  }
+  const storeParts = String(recordedStore).split(/[\\/]/).filter(Boolean);
+  let installationRoot = currentVersion;
+  for (let index = 0; index <= storeParts.length; index += 1) installationRoot = dirname(installationRoot);
+  return {
+    canonical: resolve(installationRoot, manifest.deployment.canonicalPath),
+    versionStore: resolve(installationRoot, recordedStore)
+  };
 }
 
 async function compileMaterialized(source, options) {

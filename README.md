@@ -19,7 +19,7 @@ npx github:rhdeck/monoskill add coreyhaines31/marketingskills \
   --agent codex --agent claude-code
 ```
 
-Global installation uses the same layout under the user's home directory and requires explicit non-interactive confirmation:
+Global installation uses the same layout under the user's home directory and requires explicit non-interactive confirmation. Codex honors `CODEX_HOME`; Claude Code honors `CLAUDE_CONFIG_DIR`, so configured harness roots are discovered instead of forced back to the defaults:
 
 ```bash
 npx github:rhdeck/monoskill add coreyhaines31/marketingskills \
@@ -30,7 +30,7 @@ npx github:rhdeck/monoskill add coreyhaines31/marketingskills \
 
 Use `--dry-run` to resolve and compile the source while previewing all destinations without writing to a harness. Add `--json` for machine-readable success or error output. Monoskill refuses the whole operation if the canonical path or any requested agent path already exists; it never guesses that a collision is safe to replace.
 
-Each installed `provenance.json` records the source revision, compiled skill hashes, scope, canonical path, agent targets, and link mode. Drift checks and atomic updates operate on the canonical installation; passing an agent symlink to `update` is also safe:
+Each installed `provenance.json` records the source revision, compiled skill hashes, scope, relocatable canonical path, agent targets, and link mode. Drift checks and atomic updates operate on the canonical installation; passing an agent symlink to `update` is also safe:
 
 ```bash
 npx github:rhdeck/monoskill check .agents/skills/corey-marketing

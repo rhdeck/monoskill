@@ -5,8 +5,16 @@ import { dirname, join, relative, resolve } from "node:path";
 import { build } from "./compiler.js";
 
 const HARNESS_ADAPTERS = {
-  codex: { skillRoot: (root) => join(root, ".codex", "skills") },
-  "claude-code": { skillRoot: (root) => join(root, ".claude", "skills") }
+  codex: {
+    skillRoot: (root, scope) => scope === "global"
+      ? join(resolve(process.env.CODEX_HOME?.trim() || join(root, ".codex")), "skills")
+      : join(root, ".codex", "skills")
+  },
+  "claude-code": {
+    skillRoot: (root, scope) => scope === "global"
+      ? join(resolve(process.env.CLAUDE_CONFIG_DIR?.trim() || join(root, ".claude")), "skills")
+      : join(root, ".claude", "skills")
+  }
 };
 
 /**
@@ -32,10 +40,10 @@ export async function add(source, options) {
 
     const deployment = {
       scope: plan.scope,
-      canonicalPath: plan.canonical,
-      versionStore: plan.versionStore,
+      canonicalPath: relative(plan.root, plan.canonical),
+      versionStore: relative(plan.root, plan.versionStore),
       installedAt: options.dryRun ? null : new Date().toISOString(),
-      targets: plan.targets.map(({ agent, path }) => ({ agent, path, mode: "symlink" }))
+      targets: plan.targets.map(({ agent, path }) => ({ agent, path: relative(plan.root, path), mode: "symlink" }))
     };
     await recordDeployment(stagedSkill, deployment);
 
@@ -91,7 +99,7 @@ export function deploymentPlan(options) {
     canonical,
     versionStore,
     agents,
-    targets: agents.map((agent) => ({ agent, path: join(HARNESS_ADAPTERS[agent].skillRoot(root), options.name) }))
+    targets: agents.map((agent) => ({ agent, path: join(HARNESS_ADAPTERS[agent].skillRoot(root, scope), options.name) }))
   };
 }
 

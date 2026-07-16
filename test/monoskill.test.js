@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { chmod, lstat, mkdtemp, mkdir, readFile, readlink, readdir, realpath, rm, symlink, writeFile } from "node:fs/promises";
+import { chmod, lstat, mkdtemp, mkdir, readFile, readlink, readdir, realpath, rename, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, normalize, relative, resolve, sep } from "node:path";
 import { promisify } from "node:util";
@@ -175,7 +175,12 @@ test("add previews safely and requires explicit confirmation for global harness 
   const project = join(temp, "project");
   const home = join(temp, "home");
   const cli = join(process.cwd(), "bin", "monoskill.js");
-  const env = { ...process.env, HOME: home };
+  const env = {
+    ...process.env,
+    HOME: home,
+    CODEX_HOME: join(home, "custom-codex"),
+    CLAUDE_CONFIG_DIR: join(home, "custom-claude")
+  };
   try {
     await createSkill(source, "seo", "Audit search performance.");
     await commitFixture(source);
@@ -189,8 +194,31 @@ test("add previews safely and requires explicit confirmation for global harness 
     const homeRoot = await realpath(home);
     const canonical = join(homeRoot, ".agents", "skills", "global-skill");
     assert.equal(await pathExists(join(canonical, "SKILL.md")), true);
-    assert.equal((await lstat(join(homeRoot, ".codex", "skills", "global-skill"))).isSymbolicLink(), true);
-    assert.equal((await lstat(join(homeRoot, ".claude", "skills", "global-skill"))).isSymbolicLink(), true);
+    assert.equal((await lstat(join(homeRoot, "custom-codex", "skills", "global-skill"))).isSymbolicLink(), true);
+    assert.equal((await lstat(join(homeRoot, "custom-claude", "skills", "global-skill"))).isSymbolicLink(), true);
+  } finally {
+    await rm(temp, { recursive: true, force: true });
+  }
+});
+
+test("add-managed projects remain atomically updateable after relocation", async () => {
+  const temp = await mkdtemp(join(tmpdir(), "monoskill-relocation-test-"));
+  const source = join(temp, "vendor");
+  const project = join(temp, "project");
+  const moved = join(temp, "moved-project");
+  const cli = join(process.cwd(), "bin", "monoskill.js");
+  try {
+    await createSkill(source, "seo", "Audit search performance.");
+    await commitFixture(source);
+    await mkdir(project);
+    await exec(process.execPath, [cli, "add", source, "--name", "portable", "--agent", "codex"], { cwd: project });
+    await rename(project, moved);
+    await writeFile(join(source, "skills", "seo", "SKILL.md"), skillText("seo", "Audit organic search performance."));
+    await exec("git", ["-C", source, "add", "."]);
+    await exec("git", ["-C", source, "-c", "user.name=Test", "-c", "user.email=test@example.com", "commit", "-qm", "update"]);
+    await exec(process.execPath, [cli, "update", join(moved, ".codex", "skills", "portable")]);
+    assert.equal((await check(join(moved, ".agents", "skills", "portable"))).current, true);
+    assert.equal((await lstat(join(moved, ".agents", "skills", "portable"))).isSymbolicLink(), true);
   } finally {
     await rm(temp, { recursive: true, force: true });
   }

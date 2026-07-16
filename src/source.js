@@ -63,6 +63,11 @@ export function normalizeSource(input) {
   return input;
 }
 
+/**
+ * Normalize remote source syntax. GitHub tree URLs are left as path segments
+ * for remote-ref discovery unless --ref explicitly supplies the ref; in that
+ * case the remaining suffix becomes the inferred skills directory.
+ */
 export function parseRemoteSource(input, ref) {
   const tree = input.match(/^https?:\/\/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?\/tree\/(.+?)\/?$/);
   if (tree) {
@@ -103,6 +108,12 @@ async function resolveTreeRef(parsed) {
   };
 }
 
+/**
+ * Select the longest remote branch/tag prefix from a GitHub tree path, allowing
+ * slash-containing branch names. A full commit SHA is accepted directly. When
+ * --ref is supplied, parseRemoteSource treats it as authoritative and retains
+ * the URL suffix as the inferred skills directory.
+ */
 export function selectTreeRef(treeParts, refs) {
   const joined = treeParts.join("/");
   return refs

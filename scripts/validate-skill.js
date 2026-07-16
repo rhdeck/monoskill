@@ -22,13 +22,17 @@ if (!metadata.description.includes("Monoskill CLI") || !metadata.description.inc
 if (!skill.includes("[references/cli.md](references/cli.md)")) throw new Error("SKILL.md must route command details to references/cli.md");
 if (!agentMetadata?.interface?.default_prompt?.includes("$monoskill")) throw new Error("agents/openai.yaml default_prompt must invoke $monoskill");
 
-const documentedCommands = [...reference.matchAll(/^monoskill ([a-z-]+)/gm)].map((match) => match[1]);
+const documentedCommands = [...reference.matchAll(/^(?:monoskill|npx --yes github:rhdeck\/monoskill) ([a-z-]+)/gm)].map((match) => match[1]);
 const documentedOptions = [...new Set([...reference.matchAll(/(?:^|[\s`])(--[a-z-]+)/gm)].map((match) => match[1]))]
   .filter((option) => !["--help", "--version"].includes(option));
 const { stdout: help } = await exec(process.execPath, [resolve("bin/monoskill.js"), "--help"]);
 const supportedCommands = [...new Set([...help.matchAll(/^  monoskill ([a-z-]+)/gm)].map((match) => match[1]))];
 const supportedOptions = [...new Set([...help.matchAll(/(?:^|\s)(--[a-z-]+)/gm)].map((match) => match[1]))]
   .filter((option) => !["--help", "--version"].includes(option));
+
+if (!reference.includes("npx --yes github:rhdeck/monoskill --help")) {
+  throw new Error("skill reference must bootstrap the CLI for a clean machine");
+}
 
 for (const command of supportedCommands) {
   if (!documentedCommands.includes(command)) throw new Error(`skill reference does not document CLI command: ${command}`);

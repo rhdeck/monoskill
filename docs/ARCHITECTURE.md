@@ -9,9 +9,10 @@ Monoskill compiles a collection of independently authored agent skills into one 
 The package is an ECMAScript-module Node.js CLI requiring Node.js 20 or newer.
 
 - `bin/monoskill.js` is the npm executable entry point. It delegates to the CLI module and owns top-level error reporting.
-- `src/cli.js` parses `build`, `check`, and `update` commands and renders human or JSON output.
+- `src/cli.js` parses `build`, `package`, `check`, and `update` commands and renders human or JSON output.
 - `src/source.js` resolves a local directory, Git URL, or GitHub `owner/repo` shorthand into a materialized Git working tree with a resolved commit.
 - `src/compiler.js` discovers skills, parses YAML frontmatter, hashes and copies upstream trees, renders the compact router, and implements drift checks and atomic updates.
+- `src/archive.js` validates generated skills and writes deterministic, atomically published ZIP-format `.skill` artifacts.
 - `test/monoskill.test.js` exercises the full compile/check/update lifecycle against a temporary local Git repository.
 
 ## Build flow
@@ -36,13 +37,18 @@ The package is an ECMAScript-module Node.js CLI requiring Node.js 20 or newer.
 
 `SKILL.md` is intentionally compact. `references/` preserves upstream content without rewriting internal paths. `provenance.json` is the machine-readable source of truth for `check` and `update`.
 
+## Archive flow
+
+`package` validates an existing generated directory, enumerates its complete tree in lexical order, and writes a ZIP archive with normalized timestamps. Regular file contents and modes, symlinks, and empty directories are preserved. The archive has no enclosing directory: its root has the same generated skill contract shown above.
+
+Archive publication is staged beside the destination. A new artifact is linked into place without an overwrite race; `--force` opts into atomic replacement. `build --archive` compiles in a temporary directory, packages it, and removes the intermediate tree.
+
 ## Drift and update
 
 `check` rebuilds from the recorded source into a temporary directory and compares resolved commits and per-skill hashes. It reports added, removed, and changed skills without mutating the installation. `update` uses the same provenance to rebuild and atomically replace the installed directory.
 
 ## Current boundaries
 
-- Monoskill compiles repositories of skills; it does not yet package `.skill` archives or install into agent harnesses.
+- Monoskill compiles and packages repositories of skills; it does not install archives into agent harnesses.
 - The repository currently contains only the CLI package. The website and AI-facing Monoskill skill are tracked as GitHub initiatives, not current architecture.
 - Network access is required only for remote Git sources; local-source builds remain local.
-

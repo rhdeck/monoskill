@@ -4,9 +4,10 @@ import { cp, mkdir, mkdtemp, readFile, readdir, rename, rm, stat, writeFile } fr
 import { tmpdir } from "node:os";
 import { basename, dirname, join, relative, resolve } from "node:path";
 import YAML from "yaml";
+import { packageSkill } from "./archive.js";
 import { materializeSource } from "./source.js";
 
-const TOOL_VERSION = "0.1.0";
+const TOOL_VERSION = "0.2.0";
 
 export async function build(sourceInput, options) {
   assertSkillName(options.name);
@@ -15,6 +16,18 @@ export async function build(sourceInput, options) {
     return await compileMaterialized(source, options);
   } finally {
     await source.cleanup();
+  }
+}
+
+export async function buildArchive(sourceInput, options) {
+  assertSkillName(options.name);
+  const temp = await mkdtemp(join(tmpdir(), "monoskill-build-archive-"));
+  try {
+    const built = await build(sourceInput, { ...options, output: join(temp, options.name) });
+    const packaged = await packageSkill(built.output, { output: options.output, force: options.force });
+    return { ...built, output: packaged.output, entryCount: packaged.entryCount };
+  } finally {
+    await rm(temp, { recursive: true, force: true });
   }
 }
 

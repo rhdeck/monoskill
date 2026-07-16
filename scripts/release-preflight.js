@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import semver from "semver";
 
 const EXPECTED_REPOSITORY = "git+https://github.com/rhdeck/monoskill.git";
+const EXPECTED_GITHUB_REPOSITORY = "rhdeck/monoskill";
 const DEFAULT_REGISTRY = "https://registry.npmjs.org";
 const REQUIRED_STATIC_FILES = ["LICENSE", "README.md", "bin/monoskill.js", "package.json"];
 
@@ -93,6 +94,26 @@ export async function assertVersionUnpublished({ registry, name, version, fetchI
   fail(`registry version check failed closed with HTTP ${response.status}`);
 }
 
+/** Prove anonymously that the source repository and exact release commit are public before publish. */
+export async function assertPublicRepository({ headSha, fetchImpl = fetch }) {
+  const request = async (url) => {
+    let response;
+    try {
+      response = await fetchImpl(url, { headers: { accept: "application/vnd.github+json" } });
+    } catch (error) {
+      fail(`could not verify public GitHub source: ${error.message}`);
+    }
+    if (!response.ok) fail(`anonymous GitHub source check failed closed with HTTP ${response.status}`);
+    return response.json();
+  };
+  const repository = await request(`https://api.github.com/repos/${EXPECTED_GITHUB_REPOSITORY}`);
+  if (repository.full_name !== EXPECTED_GITHUB_REPOSITORY || repository.private !== false) {
+    fail(`${EXPECTED_GITHUB_REPOSITORY} is not confirmed public`);
+  }
+  const commit = await request(`https://api.github.com/repos/${EXPECTED_GITHUB_REPOSITORY}/commits/${headSha}`);
+  if (commit.sha !== headSha) fail(`release commit ${headSha} is not anonymously readable from GitHub`);
+}
+
 function git(root, ...args) {
   try {
     return execFileSync("git", args, { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
@@ -131,6 +152,7 @@ export async function runPreflight({ root, simulate, env = process.env }) {
   }
   validateReleaseIdentity({ pkg, tag, headSha, eventSha, tagSha, simulate });
   assertPackagedWorktreeClean(root);
+  await assertPublicRepository({ headSha });
 
   const packOutput = execFileSync("npm", ["pack", "--dry-run", "--json", "--ignore-scripts"], {
     cwd: root,

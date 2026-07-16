@@ -8,11 +8,13 @@ import { parse } from "yaml";
 
 import {
   assertVersionUnpublished,
+  assertPublicRepository,
   expectedTarballFiles,
   validatePackageMetadata,
   validateReleaseIdentity,
   validateTarball,
 } from "../scripts/release-preflight.js";
+import { validateAttestations } from "../scripts/smoke-registry-release.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -105,6 +107,46 @@ test("registry check distinguishes unpublished, immutable, and indeterminate ver
     }),
     /could not verify immutable version.*offline/,
   );
+});
+
+test("public-source gate requires anonymous repository and exact commit visibility", async () => {
+  const response = (body, status = 200) => ({ status, ok: status === 200, json: async () => body });
+  await assert.doesNotReject(() => assertPublicRepository({
+    headSha: "a".repeat(40),
+    fetchImpl: async (url) => url.includes("/commits/")
+      ? response({ sha: "a".repeat(40) })
+      : response({ full_name: "rhdeck/monoskill", private: false }),
+  }));
+  await assert.rejects(() => assertPublicRepository({
+    headSha: "a".repeat(40), fetchImpl: async () => response({ full_name: "rhdeck/monoskill", private: true }),
+  }), /not confirmed public/);
+  await assert.rejects(() => assertPublicRepository({
+    headSha: "a".repeat(40), fetchImpl: async () => response({}, 404),
+  }), /failed closed with HTTP 404/);
+});
+
+test("registry provenance is bound to the package, workflow, tag, commit, and hosted runner", () => {
+  const sha = "a".repeat(40);
+  const digest = "b".repeat(128);
+  const pkg = { name: "monoskill", version: "0.3.0" };
+  const subject = [{ name: "pkg:npm/monoskill@0.3.0", digest: { sha512: digest } }];
+  const attestation = (statement) => ({ bundle: { dsseEnvelope: { payload: Buffer.from(JSON.stringify(statement)).toString("base64url") } } });
+  const publish = { subject, predicateType: "https://github.com/npm/attestation/tree/main/specs/publish/v0.1",
+    predicate: { name: "monoskill", version: "0.3.0", registry: "https://registry.npmjs.org" } };
+  const provenance = { subject, predicateType: "https://slsa.dev/provenance/v1", predicate: {
+    buildDefinition: { externalParameters: { workflow: { repository: "https://github.com/rhdeck/monoskill",
+      path: ".github/workflows/publish.yml", ref: "refs/tags/v0.3.0" } },
+    internalParameters: { github: { event_name: "push" } }, resolvedDependencies: [{ digest: { gitCommit: sha } }] },
+    runDetails: { builder: { id: "https://github.com/actions/runner/github-hosted" } },
+  } };
+  const input = { metadata: { dist: { integrity: `sha512-${Buffer.from(digest, "hex").toString("base64")}` } },
+    bundle: { attestations: [attestation(publish), attestation(provenance)] }, pkg, githubSha: sha };
+  assert.doesNotThrow(() => validateAttestations(input));
+  const wrong = structuredClone(input);
+  const decoded = provenance;
+  decoded.predicate.buildDefinition.externalParameters.workflow.path = ".github/workflows/other.yml";
+  wrong.bundle.attestations[1] = attestation(decoded);
+  assert.throws(() => validateAttestations(wrong), /does not match the authorized GitHub release workflow/);
 });
 
 test("publish workflow is a single GitHub-hosted OIDC path with no token or cache fallback", async () => {

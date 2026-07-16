@@ -126,4 +126,6 @@ npm run check
 npm run validate:skill
 ```
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for change and verification expectations. Report suspected vulnerabilities privately according to [SECURITY.md](SECURITY.md).
+
 MIT

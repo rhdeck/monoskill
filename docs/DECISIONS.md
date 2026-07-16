@@ -2,6 +2,10 @@
 
 This log records settled, load-bearing product and implementation choices. Newest entries go first.
 
+## 2026-07-16 — Publish the source repository only through a disclosure gate
+
+Monoskill's source repository is intended to be public so users can inspect and install the CLI and agent skill, and so npm trusted publishing can attach provenance to public releases. A visibility change requires a history-aware secret scan, targeted review of every reachable ref, inspection of the GitHub collaboration and Actions surfaces, a merged audit receipt, and anonymous post-flip verification. A credential or private-data finding blocks publication until rotation and remediation are complete; cleanup after publication is not an acceptable sequence.
+
 ## 2026-07-16 — Keep the agent skill narrow and CLI-backed
 
 The distributable `monoskill` agent skill triggers only on explicit Monoskill or compile-as-one intent. Its root contains the mental model and safety workflow, while exact commands live in one progressively disclosed reference whose command and option names are validated against CLI help.

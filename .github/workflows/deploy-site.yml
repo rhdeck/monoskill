@@ -15,17 +15,20 @@ concurrency:
 
 jobs:
   deploy:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: "24"
+          node-version: "20"
           cache: npm
       - run: npm ci
       - run: npm test
       - run: npm run check
       - run: npm run website:build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run website:test
       - name: Deploy the verified static build
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}

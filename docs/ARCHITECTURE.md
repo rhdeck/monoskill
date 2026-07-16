@@ -69,7 +69,7 @@ Project scope needs no confirmation. Global scope requires `--yes`, while `--dry
 
 - Monoskill deploys generated skill directories into Codex and Claude Code harness roots. Portable `.skill` archive extraction and third-party harness adapters remain outside the deployment surface.
 - The repository contains the CLI package and the static website deployed through Netlify at `https://monoskill.statechange.ai/`. Its production metadata, security headers, redirect, and build contract live in `netlify.toml` and `website/`.
-- `.github/workflows/deploy-site.yml` is the continuous production bridge for the organization-owned repository. It runs only on `main` pushes or an explicit dispatch, holds read-only GitHub permissions, rebuilds the verified static artifact, and deploys to the existing Netlify site using an encrypted repository secret.
+- `.github/workflows/deploy-site.yml` is the continuous production bridge for the organization-owned repository. It runs only from the `main` ref, whether triggered by a push or explicit dispatch, holds read-only GitHub permissions, rebuilds and browser-tests the verified static artifact on the same Node runtime as Netlify, and deploys to the existing site using an encrypted repository secret.
 - Network access is required only for remote Git sources; local-source builds remain local.
 - Release simulation reads the public npm registry to prove the candidate version is unpublished but has no outward write. The tag-driven workflow is the only publish path and cannot authenticate with a traditional npm write token.
 - Consumer CLI examples and the website generator use the exact verified registry version. GitHub remains the source, provenance, and agent-skill discovery surface, not the CLI bootstrap.

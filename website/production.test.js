@@ -40,12 +40,16 @@ test("GitHub main is the fail-closed Netlify production path", async () => {
   const workflow = await read("../.github/workflows/deploy-site.yml");
   assert.match(workflow, /push:\s*\n\s*branches:\s*\n\s*- main/);
   assert.match(workflow, /permissions:\s*\n\s*contents: read/);
+  assert.match(workflow, /if: github\.ref == 'refs\/heads\/main'/);
+  assert.match(workflow, /node-version: "20"/);
   assert.doesNotMatch(workflow, /pull_request:/);
   assert.deepEqual(
     workflow.match(/^\s*NETLIFY_AUTH_TOKEN:.*$/gm),
     ["          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}"],
   );
   assert.match(workflow, /netlify-cli@24\.11\.1 deploy/);
+  assert.match(workflow, /playwright install --with-deps chromium/);
+  assert.match(workflow, /npm run website:test/);
   assert.match(workflow, /--dir website\/dist/);
   assert.match(workflow, /--site f4a7a382-4d6a-4d80-9109-62fb16a7293c/);
 });

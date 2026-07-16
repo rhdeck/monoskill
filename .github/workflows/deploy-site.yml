@@ -1,0 +1,42 @@
+name: Deploy website to Netlify
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: netlify-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "20.20.2"
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run check
+      - run: npm run website:build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run website:test
+      - run: npm install --global netlify-cli@24.11.1
+      - name: Deploy the verified static build
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ vars.NETLIFY_SITE_ID }}
+        run: >-
+          netlify deploy
+          --prod
+          --dir website/dist
+          --site "${NETLIFY_SITE_ID}"
+          --message "GitHub ${GITHUB_SHA}"

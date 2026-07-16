@@ -31,8 +31,8 @@ The generated CLI command is version-exact: `npx --yes monoskill@0.3.2`. The sep
 ## Production checklist
 
 1. Run `npm test`, `npm run check`, `npm run website:build`, and `npm run website:test`.
-2. Link the repository to the `statechange-monoskill` Netlify site with `netlify link --name statechange-monoskill`.
-3. Publish the production build and its `netlify.toml` headers with `netlify deploy --build --prod`.
+2. Merge to `main`; `.github/workflows/deploy-site.yml` rebuilds and deploys the verified output to the existing `statechange-monoskill` Netlify site.
+3. Use `npx --yes netlify-cli@24.11.1 link --name statechange-monoskill` followed by `npx --yes netlify-cli@24.11.1 deploy --build --prod` only for an explicitly authorized recovery deploy.
 4. Verify the actual production surface with `curl -fsSI https://monoskill.statechange.ai/`, `curl -fsSI https://monoskill.statechange.ai/og-image.png`, and `npx lighthouse https://monoskill.statechange.ai/ --only-categories=performance,accessibility,best-practices,seo`.
 5. Confirm the Open Graph image response is `image/png` at exactly 1200 × 630 and every public project link works without authentication.
 6. Confirm the three custom events arrive with only the allowlisted `source_type` property. Source and generated-name values must never enter the analytics payload.

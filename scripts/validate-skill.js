@@ -30,7 +30,6 @@ const documentedCommands = reference.split("\n")
   .map((line) => line.slice(cleanInvocation.length + 1).split(" ")[0]);
 const documentedOptions = [...new Set([...reference.matchAll(/(?:^|[\s`])(--[a-z-]+)/gm)].map((match) => match[1]))]
   .filter((option) => !["--help", "--version"].includes(option));
-const { stdout: help } = await exec(process.execPath, [resolve("bin/monoskill.js"), "--help"]);
 const registryProbe = await mkdtemp(resolve(os.tmpdir(), "monoskill-registry-contract-"));
 let publishedHelp;
 let registryVersion;
@@ -43,11 +42,8 @@ try {
 if (registryVersion.trim() !== publishedVersion) {
   throw new Error(`registry bootstrap resolved ${registryVersion.trim()}, expected ${publishedVersion}`);
 }
-if (help.trim() !== publishedHelp.trim()) {
-  throw new Error(`working-tree CLI help differs from the published ${publishedVersion} executable used by the skill`);
-}
-const supportedCommands = [...new Set([...help.matchAll(/^  monoskill ([a-z-]+)/gm)].map((match) => match[1]))];
-const supportedOptions = [...new Set([...help.matchAll(/(?:^|\s)(--[a-z-]+)/gm)].map((match) => match[1]))]
+const supportedCommands = [...new Set([...publishedHelp.matchAll(/^  monoskill ([a-z-]+)/gm)].map((match) => match[1]))];
+const supportedOptions = [...new Set([...publishedHelp.matchAll(/(?:^|\s)(--[a-z-]+)/gm)].map((match) => match[1]))]
   .filter((option) => !["--help", "--version"].includes(option));
 
 if (!reference.includes(`${cleanInvocation} --help`)) {
@@ -80,7 +76,7 @@ for (const option of documentedOptions) {
   if (!supportedOptions.includes(option)) throw new Error(`skill reference documents unsupported CLI option: ${option}`);
 }
 
-console.log(`Validated monoskill skill: all ${supportedCommands.length} commands and ${supportedOptions.length} functional options match CLI help`);
+console.log(`Validated monoskill skill: all ${supportedCommands.length} commands and ${supportedOptions.length} functional options match published ${publishedVersion} CLI help`);
 
 function parseFrontmatter(raw) {
   const match = raw.match(/^---\s*\r?\n([\s\S]*?)\r?\n---(?:\s*\r?\n|$)/);

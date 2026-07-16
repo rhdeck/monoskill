@@ -4,7 +4,7 @@ This log records settled, load-bearing product and implementation choices. Newes
 
 ## 2026-07-16 — Bootstrap consumers from the exact public registry release
 
-After the OIDC workflow published and verified `monoskill@0.3.0` with npm provenance, every consumer CLI command moved from a pinned GitHub checkout to `npx --yes monoskill@0.3.0`. The website generator, README, and bundled agent skill share that exact executable contract, while `npx skills add rhdeck/monoskill --skill monoskill` remains the separate standard agent-skill installer. Contract tests compare the working CLI help to the registry artifact and reject any return of the old GitHub bootstrap.
+After the OIDC workflow published and verified `monoskill@0.3.0` with npm provenance, every consumer CLI command moved from a pinned GitHub checkout to `npx --yes monoskill@0.3.0`. The website generator, README, and bundled agent skill share that exact executable contract, while `npx skills add rhdeck/monoskill --skill monoskill` remains the separate standard agent-skill installer. Contract tests validate the bundled skill against the exact registry artifact it invokes and reject any return of the old GitHub bootstrap without freezing future unreleased CLI work to 0.3.0's help text.
 
 ## 2026-07-16 — Publish only through a version-matched npm OIDC workflow
 

@@ -2,6 +2,10 @@
 
 This log records settled, load-bearing product and implementation choices. Newest entries go first.
 
+## 2026-07-16 — Publish only through a version-matched npm OIDC workflow
+
+The sole automated publisher is the tag-triggered, GitHub-hosted `.github/workflows/publish.yml`, bound in npm as `rhdeck / monoskill / publish.yml` with no environment and allowed action `npm publish`. It uses Node 24 and npm 11.5.1, has only `contents: read` and `id-token: write`, carries no npm token fallback or release cache, and serializes all package releases. Preflight requires exact package metadata, `v<package-version>`, identical tag/event/checkout commits, an unpublished immutable version, and an exact tarball; simulation plus packed-install smoke exercises every repository-controlled step except the outward publish. Issue #13's public-repository cutover precedes the first release so trusted publishing can generate npm's automatic provenance attestation.
+
 ## 2026-07-16 — Publish the source repository only through a disclosure gate
 
 Monoskill's source repository is intended to be public so users can inspect and install the CLI and agent skill, and so npm trusted publishing can attach provenance to public releases. A visibility change requires a history-aware secret scan, targeted review of every reachable ref, inspection of the GitHub collaboration and Actions surfaces, a merged audit receipt, and anonymous post-flip verification. A credential or private-data finding blocks publication until rotation and remediation are complete; cleanup after publication is not an acceptable sequence.

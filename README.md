@@ -126,6 +126,23 @@ npm run check
 npm run validate:skill
 ```
 
+## Releasing (maintainers)
+
+Releases use npm Trusted Publishing from `.github/workflows/publish.yml`; there is no npm write token or manual workflow fallback. The npm package binding is exact:
+
+- Provider: GitHub Actions
+- Organization or user: `rhdeck`
+- Repository: `monoskill`
+- Workflow filename: `publish.yml`
+- Environment: none
+- Allowed action: `npm publish`
+
+The only trigger is a pushed `v*` tag. Before publishing, the GitHub-hosted workflow requires Node 24 and npm 11.5.1, runs the complete release simulation, then fails unless the tag is exactly `v<package.json version>`, the tag, event, and checkout resolve to the same commit, the registry version is still absent, and the dry-run tarball contains exactly the intended package files. Releases are serialized package-wide and never cancel one another. Do not create a tag until its package version is ready: npm versions are immutable, so a failed or incorrect published version is repaired only with a new version, never by moving or replaying the tag.
+
+Run `npm run release:simulate` before tagging to exercise tests, syntax and skill validation, metadata, registry availability, tarball inspection, and installation/execution from the packed artifact. It performs no publish. The actual tag must still run the non-simulated preflight in GitHub Actions.
+
+OIDC publishing works from a private GitHub repository, but npm automatic provenance does not. Issue #13 is therefore sequenced before the first release to make this repository public and verify anonymous source access. Once public, an OIDC publish of this public package receives npm's automatic provenance attestation; the workflow deliberately does not disable it or add a redundant `--provenance` flag.
+
 See [CONTRIBUTING.md](CONTRIBUTING.md) for change and verification expectations. Report suspected vulnerabilities privately according to [SECURITY.md](SECURITY.md).
 
 MIT

@@ -2,6 +2,13 @@
   "name": "monoskill",
   "version": "0.3.0",
   "description": "Compile a repository of agent skills into one provenance-aware router skill.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rhdeck/monoskill.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "bin": {
     "monoskill": "bin/monoskill.js"
@@ -17,7 +24,10 @@
     "website:build": "node website/build.js",
     "website:serve": "node website/server.js",
     "website:test": "playwright test --config website/playwright.config.js",
-    "prepublishOnly": "npm test"
+    "release:preflight": "node scripts/release-preflight.js",
+    "release:simulate": "npm test && npm run check && node scripts/release-preflight.js --simulate && npm run smoke:packed",
+    "smoke:packed": "node scripts/smoke-packed-cli.js",
+    "prepublishOnly": "npm run release:preflight"
   },
   "keywords": [
     "agent-skills",

@@ -18,6 +18,8 @@ The package is an ECMAScript-module Node.js CLI requiring Node.js 20 or newer.
 - `skills/monoskill/` is the distributable agent-facing adapter. Its compact root routes detailed CLI syntax to one reference; `scripts/validate-skill.js` checks its metadata and documented command surface against the CLI help.
 - `.github/workflows/ci.yml` runs the full tests, syntax and skill-contract checks, and a standard-tooling install smoke on pull requests and `main`.
 - `website/` is a dependency-light static brand site and client-side install-prompt generator. Its generator mirrors the live `add <source> --name <name>` deployment contract, shell-quotes every argument, and emits value-free analytics events. Unit and Playwright tests cover validation, generation, privacy, keyboard use, responsive behavior, and reduced motion.
+- `.github/workflows/publish.yml` is the sole automated npm publisher. A GitHub-hosted Node 24 job uses npm OIDC, serializes releases package-wide, exercises the non-publishing simulation, then rechecks the real tag and immutable registry boundary immediately before `npm publish`.
+- `scripts/release-preflight.js` owns release metadata, tag/commit identity, immutable-version, and exact dry-run tarball invariants. `scripts/smoke-packed-cli.js` installs the produced tarball in an isolated directory and executes its binary.
 
 The website remains outside the npm package's `files` allowlist. Its development-only Playwright dependency does not ship to CLI consumers.
 
@@ -68,3 +70,4 @@ Project scope needs no confirmation. Global scope requires `--yes`, while `--dry
 - Monoskill deploys generated skill directories into Codex and Claude Code harness roots. Portable `.skill` archive extraction and third-party harness adapters remain outside the deployment surface.
 - The repository contains the CLI package and the static website deployed through Netlify at `https://monoskill.statechange.ai/`. Its production metadata, security headers, redirect, and build contract live in `netlify.toml` and `website/`.
 - Network access is required only for remote Git sources; local-source builds remain local.
+- Release simulation reads the public npm registry to prove the candidate version is unpublished but has no outward write. The tag-driven workflow is the only publish path and cannot authenticate with a traditional npm write token.

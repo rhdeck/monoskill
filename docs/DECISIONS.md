@@ -2,6 +2,10 @@
 
 This log records settled, load-bearing product and implementation choices. Newest entries go first.
 
+## 2026-07-16 — Keep the agent skill narrow and CLI-backed
+
+The distributable `monoskill` agent skill triggers only on explicit Monoskill or compile-as-one intent. Its root contains the mental model and safety workflow, while exact commands live in one progressively disclosed reference whose command and option names are validated against CLI help.
+
 ## 2026-07-16 — Name the one-command workflow `add` and deploy one canonical copy
 
 The source-to-harness command is `add`, matching the familiar `skills add` verb while preserving Monoskill's distinct unit: it compiles all discovered upstream skills and deploys one router skill. Project scope is the default; global scope requires `--yes`. Each scope stores the compiled directory under `.agents/skills/<name>` and links explicit Codex and Claude Code harness targets to it. Collisions are refused rather than inferred safe, deployment provenance is recorded, and `check`/`update` continue to operate after installation. This canonical-copy-plus-links layout prevents separately copied harness targets from drifting.

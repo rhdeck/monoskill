@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run check
+      - name: Verify standard skill discovery and installation
+        run: |
+          install_root=$(mktemp -d)
+          cd "$install_root"
+          npx --yes skills add "$GITHUB_WORKSPACE" --skill monoskill --agent codex --yes
+          test -f .agents/skills/monoskill/SKILL.md
+          test -f .agents/skills/monoskill/agents/openai.yaml
+          test -f .agents/skills/monoskill/references/cli.md

@@ -15,6 +15,8 @@ The package is an ECMAScript-module Node.js CLI requiring Node.js 20 or newer.
 - `src/deploy.js` plans project or global harness targets, compiles into isolated staging, records deployment provenance, refuses collisions, and atomically publishes one canonical skill plus per-agent symlinks.
 - `src/archive.js` validates generated skills and writes deterministic, atomically published ZIP-format `.skill` artifacts.
 - `test/monoskill.test.js` exercises the full compile/check/update lifecycle against a temporary local Git repository.
+- `skills/monoskill/` is the distributable agent-facing adapter. Its compact root routes detailed CLI syntax to one reference; `scripts/validate-skill.js` checks its metadata and documented command surface against the CLI help.
+- `.github/workflows/ci.yml` runs the full tests, syntax and skill-contract checks, and a standard-tooling install smoke on pull requests and `main`.
 
 ## Build flow
 
@@ -61,5 +63,5 @@ Project scope needs no confirmation. Global scope requires `--yes`, while `--dry
 ## Current boundaries
 
 - Monoskill deploys generated skill directories into Codex and Claude Code harness roots. Portable `.skill` archive extraction and third-party harness adapters remain outside the deployment surface.
-- The repository currently contains only the CLI package. The website and AI-facing Monoskill skill are tracked as GitHub initiatives, not current architecture.
+- The website remains a tracked initiative rather than current architecture.
 - Network access is required only for remote Git sources; local-source builds remain local.

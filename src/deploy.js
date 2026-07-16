@@ -45,7 +45,11 @@ export async function add(source, options) {
       installedAt: options.dryRun ? null : new Date().toISOString(),
       targets: plan.targets.map(({ agent, path }) => ({ agent, path: relative(plan.root, path), mode: "symlink" }))
     };
-    await recordDeployment(stagedSkill, deployment);
+    try {
+      await recordDeployment(stagedSkill, deployment);
+    } catch (error) {
+      throw stageError("deployment", error);
+    }
 
     if (options.dryRun) {
       return { ...compiled, output: plan.canonical, ...plan, dryRun: true, deployment };

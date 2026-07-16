@@ -13,16 +13,20 @@ export async function materializeSource(input, ref) {
   if (existsSync(localPath)) {
     try {
       const root = await realpath(localPath);
-      return {
-        root,
-        input,
-        url: await gitValue(root, ["config", "--get", "remote.origin.url"]) || pathToFileURL(root).href,
-        commit: await gitValue(root, ["rev-parse", "HEAD"]) || `local-${Date.now()}`,
-        requestedRef: ref ?? null,
-        suggestedSkillsDir: null,
-        cleanup: async () => {}
-      };
+      if (!ref) {
+        return {
+          root,
+          input,
+          url: pathToFileURL(root).href,
+          commit: await gitValue(root, ["rev-parse", "HEAD"]) || `local-${Date.now()}`,
+          requestedRef: null,
+          suggestedSkillsDir: null,
+          cleanup: async () => {}
+        };
+      }
+      return cloneSource(input, { url: pathToFileURL(root).href, ref, skillsDir: null });
     } catch (error) {
+      if (error.stage === "source") throw error;
       throw sourceError(`could not read local source ${input}`, error);
     }
   }
@@ -34,6 +38,10 @@ export async function materializeSource(input, ref) {
     if (error.stage === "source") throw error;
     throw sourceError(`could not resolve ${input}`, error);
   }
+  return cloneSource(input, parsed);
+}
+
+async function cloneSource(input, parsed) {
   const url = parsed.url;
   const temp = await mkdtemp(join(tmpdir(), "monoskill-"));
   const root = join(temp, basename(input.replace(/\.git$/, "")) || "source");

@@ -136,6 +136,7 @@ test("add compiles one canonical project skill and links explicit harness target
   try {
     await createSkill(source, "seo", "Audit search performance.");
     await commitFixture(source);
+    await exec("git", ["-C", source, "remote", "add", "origin", "https://example.invalid/wrong.git"]);
     await mkdir(project);
     const { stdout } = await exec(process.execPath, [cli, "add", source, "--name", "vendor-marketing", "--agent", "codex", "--json"], { cwd: project });
     const result = JSON.parse(stdout);
@@ -147,6 +148,7 @@ test("add compiles one canonical project skill and links explicit harness target
     assert.equal(resolve(dirname(codex), await readlink(codex)), canonical);
     assert.equal(await pathExists(join(projectRoot, ".claude", "skills", "vendor-marketing")), false);
     const manifest = JSON.parse(await readFile(join(canonical, "provenance.json"), "utf8"));
+    assert.match(manifest.source.url, /^file:/);
     assert.equal(manifest.deployment.scope, "project");
     assert.deepEqual(manifest.deployment.targets.map((target) => target.agent), ["codex"]);
     assert.equal((await check(canonical)).current, true);
@@ -234,6 +236,20 @@ test("source parser supports shorthand, clone URLs, and GitHub tree paths", () =
     treeParts: ["main", "packages", "skills"]
   });
   assert.equal(selectTreeRef(["feature", "nested", "skills"], ["main", "feature", "feature/nested"]), "feature/nested");
+});
+
+test("CLI integrates GitHub shorthand and full clone URL sources", { skip: process.env.MONOSKILL_NETWORK_TESTS !== "1" }, async () => {
+  const temp = await mkdtemp(join(tmpdir(), "monoskill-network-sources-test-"));
+  const cli = join(process.cwd(), "bin", "monoskill.js");
+  try {
+    const shorthand = await exec(process.execPath, [cli, "add", "coreyhaines31/marketingskills", "--name", "shorthand", "--dry-run", "--json"], { cwd: temp });
+    const fullUrl = await exec(process.execPath, [cli, "add", "https://github.com/coreyhaines31/marketingskills.git", "--name", "full-url", "--dry-run", "--json"], { cwd: temp });
+    assert.equal(JSON.parse(shorthand.stdout).skillCount, 47);
+    assert.equal(JSON.parse(fullUrl.stdout).skillCount, 47);
+    assert.equal(await pathExists(join(temp, ".agents")), false);
+  } finally {
+    await rm(temp, { recursive: true, force: true });
+  }
 });
 
 test("project add refuses harness parents symlinked outside the project", async () => {

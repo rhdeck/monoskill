@@ -96,7 +96,9 @@ async function collectEntries(root) {
     }
   }
   await walk(root);
-  return entries.sort((a, b) => compareNames(a.name, b.name));
+  const sorted = entries.sort((a, b) => compareNames(a.name, b.name));
+  assertPortableNames(sorted);
+  return sorted;
 }
 
 async function writeZip(output, entries) {
@@ -114,7 +116,12 @@ async function writeZip(output, entries) {
 
 async function publishArchive(staged, output, force) {
   if (force) {
-    await rename(staged, output);
+    try {
+      await rename(staged, output);
+    } catch (error) {
+      if (!["EEXIST", "EPERM"].includes(error.code) || !existsSync(output)) throw error;
+      await replaceArchiveOnRenameLimitedPlatform(staged, output);
+    }
     return;
   }
   try {
@@ -137,7 +144,11 @@ function assertOutputOutsideSkill(root, output) {
 }
 
 function archiveName(root, path, directory = false) {
-  const name = relative(root, path).split(sep).join("/");
+  const relativePath = relative(root, path);
+  if (sep !== "\\" && relativePath.includes("\\")) {
+    throw new Error(`cannot package path containing a backslash: ${relativePath}`);
+  }
+  const name = relativePath.split(sep).join("/");
   return directory ? `${name}/` : name;
 }
 
@@ -162,4 +173,28 @@ async function assertEntryType(root, relativePath, type) {
 
 function compareNames(left, right) {
   return Buffer.compare(Buffer.from(left), Buffer.from(right));
+}
+
+function assertPortableNames(entries) {
+  const names = new Map();
+  for (const entry of entries) {
+    const key = entry.name.replace(/\/$/, "").normalize("NFC").toLowerCase();
+    const existing = names.get(key);
+    if (existing && existing !== entry.name) {
+      throw new Error(`archive paths collide on portable filesystems: ${existing} and ${entry.name}`);
+    }
+    names.set(key, entry.name);
+  }
+}
+
+async function replaceArchiveOnRenameLimitedPlatform(staged, output) {
+  const backup = `${output}.backup-${process.pid}-${Date.now()}`;
+  await rename(output, backup);
+  try {
+    await rename(staged, output);
+  } catch (error) {
+    await rename(backup, output);
+    throw error;
+  }
+  await rm(backup, { force: true });
 }

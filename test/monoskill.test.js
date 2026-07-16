@@ -69,6 +69,12 @@ test("package produces a deterministic, lossless .skill archive and protects exi
     const outputAlias = join(temp, "compiled-alias");
     await symlink(compiled, outputAlias, "dir");
     await assert.rejects(packageSkill(compiled, { output: join(outputAlias, "nested.skill") }), /outside the skill directory/);
+    if (sep !== "\\") {
+      const unsafeName = join(compiled, "unsafe\\name");
+      await writeFile(unsafeName, "unsafe");
+      await assert.rejects(packageSkill(compiled, { output: join(temp, "unsafe.skill") }), /path containing a backslash/);
+      await rm(unsafeName);
+    }
 
     const first = await packageSkill(compiled, { output: firstArchive });
     const second = await packageSkill(compiled, { output: secondArchive });

@@ -11,6 +11,12 @@ NODE_VERSION = "20.20.2"
   status = 301
   force = true
 
+[[redirects]]
+  from = "https://monoskill.statechange.ai/*"
+  to = "https://monoskill.com/:splat"
+  status = 301
+  force = true
+
 [[headers]]
   for = "/*"
   [headers.values]

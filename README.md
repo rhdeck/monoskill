@@ -11,7 +11,7 @@ npx github:rhdeck/monoskill add coreyhaines31/marketingskills \
   --name corey-marketing
 ```
 
-The canonical compiled directory is `.agents/skills/corey-marketing`. By default Monoskill links both `.codex/skills/corey-marketing` and `.claude/skills/corey-marketing` to it, so there is one copy to check and update. Limit the links by repeating `--agent`:
+The canonical skill path is `.agents/skills/corey-marketing`; it atomically points to the active compiled version. By default Monoskill links both `.codex/skills/corey-marketing` and `.claude/skills/corey-marketing` to it, so there is one active copy to check and update. Limit the links by repeating `--agent`:
 
 ```bash
 npx github:rhdeck/monoskill add coreyhaines31/marketingskills \

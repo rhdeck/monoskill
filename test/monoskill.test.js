@@ -8,7 +8,7 @@ import test from "node:test";
 import yauzl from "yauzl";
 import { packageSkill } from "../src/archive.js";
 import { build, check, update } from "../src/compiler.js";
-import { parseRemoteSource } from "../src/source.js";
+import { parseRemoteSource, selectTreeRef } from "../src/source.js";
 
 const exec = promisify(execFile);
 
@@ -150,12 +150,16 @@ test("add compiles one canonical project skill and links explicit harness target
     assert.equal(manifest.deployment.scope, "project");
     assert.deepEqual(manifest.deployment.targets.map((target) => target.agent), ["codex"]);
     assert.equal((await check(canonical)).current, true);
+    const previousVersion = await realpath(canonical);
 
     await writeFile(join(source, "skills", "seo", "SKILL.md"), skillText("seo", "Audit organic search performance."));
     await exec("git", ["-C", source, "add", "."]);
     await exec("git", ["-C", source, "-c", "user.name=Test", "-c", "user.email=test@example.com", "commit", "-qm", "update"]);
     await update(codex);
     assert.equal((await check(canonical)).current, true);
+    assert.equal((await lstat(canonical)).isSymbolicLink(), true);
+    assert.notEqual(await realpath(canonical), previousVersion);
+    assert.equal(await pathExists(previousVersion), false);
     assert.equal((await lstat(codex)).isSymbolicLink(), true);
     assert.equal(JSON.parse(await readFile(join(canonical, "provenance.json"), "utf8")).deployment.targets[0].agent, "codex");
 
@@ -197,9 +201,30 @@ test("source parser supports shorthand, clone URLs, and GitHub tree paths", () =
   assert.equal(parseRemoteSource("git@github.com:owner/repo.git").url, "git@github.com:owner/repo.git");
   assert.deepEqual(parseRemoteSource("https://github.com/owner/repo/tree/main/packages/skills"), {
     url: "https://github.com/owner/repo.git",
-    ref: "main",
-    skillsDir: "packages/skills"
+    ref: null,
+    skillsDir: null,
+    treeParts: ["main", "packages", "skills"]
   });
+  assert.equal(selectTreeRef(["feature", "nested", "skills"], ["main", "feature", "feature/nested"]), "feature/nested");
+});
+
+test("project add refuses harness parents symlinked outside the project", async () => {
+  const temp = await mkdtemp(join(tmpdir(), "monoskill-path-safety-test-"));
+  const source = join(temp, "vendor");
+  const project = join(temp, "project");
+  const outside = join(temp, "outside");
+  const cli = join(process.cwd(), "bin", "monoskill.js");
+  try {
+    await createSkill(source, "seo", "Audit search performance.");
+    await commitFixture(source);
+    await mkdir(project);
+    await mkdir(outside);
+    await symlink(outside, join(project, ".agents"), "dir");
+    await assert.rejects(exec(process.execPath, [cli, "add", source, "--name", "escape"], { cwd: project }), /project harness parent must not be a symlink/);
+    assert.equal(await pathExists(join(outside, "skills", "escape")), false);
+  } finally {
+    await rm(temp, { recursive: true, force: true });
+  }
 });
 
 test("add JSON errors identify source, compilation, and target-discovery boundaries", async () => {

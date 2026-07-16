@@ -52,9 +52,9 @@ When an installation was created by `add`, deployment metadata is retained acros
 
 ## Harness deployment
 
-`add` is the source-to-installed-skill operation. It uses `.agents/skills/<name>` as the canonical compiled directory in either the current project or the user's home directory. Codex and Claude Code receive relative directory symlinks from their conventional `.codex/skills` and `.claude/skills` roots. A relative link keeps a project tree relocatable while a single canonical copy prevents agent targets from drifting independently.
+`add` is the source-to-installed-skill operation. It uses `.agents/skills/<name>` as the canonical path in either the current project or the user's home directory. That path is an atomically replaceable pointer to a private version under `.agents/skills/.monoskill/<name>/`; Codex and Claude Code receive relative directory symlinks from their adapter-discovered `.codex/skills` and `.claude/skills` roots. Relative links keep a project tree relocatable while a single active compiled copy prevents agent targets from drifting independently.
 
-Target discovery and collision checks happen before compilation. Compilation happens in a temporary directory; harness mutation begins only after it succeeds. Deployment creates the canonical directory first, creates requested links second, and removes everything created by that attempt if a later deployment step fails. Existing canonical paths, files, directories, or even dangling links are collisions and are never replaced.
+Target discovery and collision checks happen before compilation. Project target discovery refuses any existing harness parent symlink that would escape the project root. Compilation happens in a temporary directory; harness mutation begins only after it succeeds. Deployment publishes the private version and canonical pointer first, creates requested links second, and removes published skill/link artifacts if a later deployment step fails. Existing canonical paths, files, directories, or even dangling links are collisions and are never replaced.
 
 Project scope needs no confirmation. Global scope requires `--yes`, while `--dry-run` performs source resolution and compilation but no harness writes. JSON errors carry the failed boundary so automation can distinguish source, compilation, target-discovery, and deployment failures.
 

@@ -11,19 +11,29 @@ const exec = promisify(execFile);
 export async function materializeSource(input, ref) {
   const localPath = resolve(input);
   if (existsSync(localPath)) {
-    const root = await realpath(localPath);
-    return {
-      root,
-      input,
-      url: await gitValue(root, ["config", "--get", "remote.origin.url"]) || pathToFileURL(root).href,
-      commit: await gitValue(root, ["rev-parse", "HEAD"]) || `local-${Date.now()}`,
-      requestedRef: ref ?? null,
-      suggestedSkillsDir: null,
-      cleanup: async () => {}
-    };
+    try {
+      const root = await realpath(localPath);
+      return {
+        root,
+        input,
+        url: await gitValue(root, ["config", "--get", "remote.origin.url"]) || pathToFileURL(root).href,
+        commit: await gitValue(root, ["rev-parse", "HEAD"]) || `local-${Date.now()}`,
+        requestedRef: ref ?? null,
+        suggestedSkillsDir: null,
+        cleanup: async () => {}
+      };
+    } catch (error) {
+      throw sourceError(`could not read local source ${input}`, error);
+    }
   }
 
-  const parsed = parseRemoteSource(input, ref);
+  let parsed;
+  try {
+    parsed = await resolveTreeRef(parseRemoteSource(input, ref));
+  } catch (error) {
+    if (error.stage === "source") throw error;
+    throw sourceError(`could not resolve ${input}`, error);
+  }
   const url = parsed.url;
   const temp = await mkdtemp(join(tmpdir(), "monoskill-"));
   const root = join(temp, basename(input.replace(/\.git$/, "")) || "source");
@@ -44,7 +54,7 @@ export async function materializeSource(input, ref) {
     };
   } catch (error) {
     await rm(temp, { recursive: true, force: true });
-    throw new Error(`could not fetch ${input}: ${error.stderr?.trim() || error.message}`);
+    throw sourceError(`could not fetch ${input}`, error);
   }
 }
 
@@ -54,15 +64,59 @@ export function normalizeSource(input) {
 }
 
 export function parseRemoteSource(input, ref) {
-  const tree = input.match(/^https?:\/\/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?\/tree\/([^/]+)(?:\/(.*))?\/?$/);
+  const tree = input.match(/^https?:\/\/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?\/tree\/(.+?)\/?$/);
   if (tree) {
+    const treeParts = decodeURIComponent(tree[3]).split("/").filter(Boolean);
+    const explicitPrefix = ref && treeParts.join("/").startsWith(`${ref}/`) ? ref.split("/").length : 1;
     return {
       url: `https://github.com/${tree[1]}/${tree[2]}.git`,
-      ref: ref ?? decodeURIComponent(tree[3]),
-      skillsDir: tree[4] ? decodeURIComponent(tree[4].replace(/\/$/, "")) : null
+      ref: ref ?? null,
+      skillsDir: ref ? treeParts.slice(explicitPrefix).join("/") || null : null,
+      treeParts: ref ? null : treeParts
     };
   }
-  return { url: normalizeSource(input), ref: ref ?? null, skillsDir: null };
+  return { url: normalizeSource(input), ref: ref ?? null, skillsDir: null, treeParts: null };
+}
+
+async function resolveTreeRef(parsed) {
+  if (!parsed.treeParts) return parsed;
+  const joined = parsed.treeParts.join("/");
+  let stdout;
+  try {
+    ({ stdout } = await exec("git", ["ls-remote", "--heads", "--tags", parsed.url]));
+  } catch (error) {
+    throw sourceError(`could not inspect refs for ${parsed.url}`, error);
+  }
+  const refs = stdout.split("\n")
+    .map((line) => line.split("\t")[1] ?? "")
+    .filter((name) => name.startsWith("refs/heads/") || (name.startsWith("refs/tags/") && !name.endsWith("^{}")))
+    .map((name) => name.replace(/^refs\/(?:heads|tags)\//, ""));
+  const resolvedRef = selectTreeRef(parsed.treeParts, refs);
+  if (!resolvedRef) {
+    throw sourceError(`could not resolve a branch, tag, or commit from GitHub tree path ${joined}`, new Error("pass --ref and --skills-dir explicitly"));
+  }
+  return {
+    ...parsed,
+    ref: resolvedRef,
+    skillsDir: joined === resolvedRef ? null : joined.slice(resolvedRef.length + 1),
+    treeParts: null
+  };
+}
+
+export function selectTreeRef(treeParts, refs) {
+  const joined = treeParts.join("/");
+  return refs
+    .filter((name) => joined === name || joined.startsWith(`${name}/`))
+    .sort((a, b) => b.length - a.length)[0]
+    ?? (/^[0-9a-f]{40}(?:\/|$)/i.test(joined) ? treeParts[0] : null);
+}
+
+function sourceError(message, error) {
+  const detail = error.stderr?.trim() || error.message;
+  const wrapped = new Error(`${message}: ${detail}`);
+  wrapped.stage = "source";
+  wrapped.cause = error;
+  return wrapped;
 }
 
 async function gitValue(cwd, args) {

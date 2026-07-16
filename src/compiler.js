@@ -1,6 +1,6 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
-import { cp, mkdir, mkdtemp, readFile, readdir, realpath, rename, rm, stat, writeFile } from "node:fs/promises";
+import { cp, lstat, mkdir, mkdtemp, readFile, readdir, realpath, rename, rm, stat, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, relative, resolve } from "node:path";
 import YAML from "yaml";
@@ -60,6 +60,10 @@ export async function update(skillDir) {
   const drift = await check(skillDir);
   if (drift.current) return { current: true, commit: manifest.source.commit, skillCount: manifest.skills.length };
 
+  if (await isAtomicDeployment(manifest, skillDir)) {
+    return updateAtomicDeployment(skillDir, manifest);
+  }
+
   const parent = dirname(skillDir);
   const temp = await mkdtemp(join(parent, ".monoskill-update-"));
   try {
@@ -87,6 +91,51 @@ export async function update(skillDir) {
     return { current: false, previousCommit: manifest.source.commit, commit: result.commit, skillCount: result.skillCount };
   } finally {
     await rm(temp, { recursive: true, force: true });
+  }
+}
+
+/**
+ * Refresh an add-managed installation without ever removing its public path.
+ * A complete new version is built privately, then a temporary canonical link
+ * is renamed over the old link in one filesystem operation. Harness links keep
+ * resolving throughout the swap; the retired version is cleaned afterward.
+ */
+async function updateAtomicDeployment(currentVersion, manifest) {
+  const canonical = resolve(manifest.deployment.canonicalPath);
+  const versionStore = resolve(manifest.deployment.versionStore ?? dirname(currentVersion));
+  await mkdir(versionStore, { recursive: true });
+  const nextVersion = join(versionStore, `${Date.now()}-${process.pid}-${randomUUID()}`);
+  const nextLink = `${canonical}.next-${process.pid}-${randomUUID()}`;
+  let result;
+  try {
+    result = await build(manifest.source.url, {
+      name: manifest.skill.name,
+      description: manifest.skill.descriptionOverride,
+      ref: manifest.source.requestedRef,
+      skillsDir: manifest.source.skillsDir,
+      output: nextVersion
+    });
+    const nextManifest = await readManifest(nextVersion);
+    nextManifest.deployment = { ...manifest.deployment, updatedAt: new Date().toISOString() };
+    await writeFile(join(nextVersion, "provenance.json"), `${JSON.stringify(nextManifest, null, 2)}\n`);
+    await symlink(relative(dirname(canonical), nextVersion), nextLink, "dir");
+    await rename(nextLink, canonical);
+  } catch (error) {
+    await rm(nextLink, { force: true });
+    await rm(nextVersion, { recursive: true, force: true });
+    throw error;
+  }
+  await rm(currentVersion, { recursive: true, force: true }).catch(() => {});
+  return { current: false, previousCommit: manifest.source.commit, commit: result.commit, skillCount: result.skillCount };
+}
+
+async function isAtomicDeployment(manifest, currentVersion) {
+  if (!manifest.deployment?.canonicalPath) return false;
+  try {
+    const canonical = resolve(manifest.deployment.canonicalPath);
+    return (await lstat(canonical)).isSymbolicLink() && await realpath(canonical) === currentVersion;
+  } catch {
+    return false;
   }
 }
 

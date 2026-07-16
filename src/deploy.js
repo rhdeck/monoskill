@@ -1,15 +1,23 @@
 import { cp, lstat, mkdir, mkdtemp, readFile, rename, rm, symlink, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
+import { randomUUID } from "node:crypto";
 import { dirname, join, relative, resolve } from "node:path";
 import { build } from "./compiler.js";
 
-const AGENTS = {
-  codex: { project: [".codex", "skills"], global: [".codex", "skills"] },
-  "claude-code": { project: [".claude", "skills"], global: [".claude", "skills"] }
+const HARNESS_ADAPTERS = {
+  codex: { skillRoot: (root) => join(root, ".codex", "skills") },
+  "claude-code": { skillRoot: (root) => join(root, ".claude", "skills") }
 };
 
+/**
+ * Resolve, compile, and transactionally deploy one generated router skill.
+ * The canonical path is an atomically replaceable symlink to a private version
+ * directory; requested harnesses receive relative links to that canonical path.
+ * Any failed link step rolls back every artifact created by this invocation.
+ */
 export async function add(source, options) {
   const plan = deploymentPlan(options);
+  await validateProjectParents(plan);
   await refuseCollisions(plan);
 
   const stagingRoot = await mkdtemp(join(tmpdir(), "monoskill-add-"));
@@ -19,12 +27,13 @@ export async function add(source, options) {
     try {
       compiled = await build(source, { ...options, output: stagedSkill });
     } catch (error) {
-      throw stageError(error.message.startsWith("could not fetch") ? "source" : "compilation", error);
+      throw stageError(error.stage === "source" ? "source" : "compilation", error);
     }
 
     const deployment = {
       scope: plan.scope,
       canonicalPath: plan.canonical,
+      versionStore: plan.versionStore,
       installedAt: options.dryRun ? null : new Date().toISOString(),
       targets: plan.targets.map(({ agent, path }) => ({ agent, path, mode: "symlink" }))
     };
@@ -37,7 +46,8 @@ export async function add(source, options) {
     const created = [];
     try {
       await mkdir(dirname(plan.canonical), { recursive: true });
-      await publishCanonical(stagedSkill, plan.canonical);
+      const version = await publishVersionedCanonical(stagedSkill, plan);
+      created.push(version);
       created.push(plan.canonical);
       for (const target of plan.targets) {
         await mkdir(dirname(target.path), { recursive: true });
@@ -54,6 +64,11 @@ export async function add(source, options) {
   }
 }
 
+/**
+ * Discover supported harness destinations for a project or user scope without
+ * touching the filesystem. Project scope is rooted at cwd; global scope uses
+ * the active HOME. Codex and Claude Code adapters own their path conventions.
+ */
 export function deploymentPlan(options) {
   if (!options.name) throw stageError("target discovery", new Error("add requires --name <name>"));
   if (!/^[a-z0-9-]{1,63}$/.test(options.name)) {
@@ -69,22 +84,24 @@ export function deploymentPlan(options) {
   const root = options.global ? resolve(options.home ?? homedir()) : resolve(options.projectRoot ?? process.cwd());
   const agents = normalizeAgents(options.agent);
   const canonical = join(root, ".agents", "skills", options.name);
+  const versionStore = join(root, ".agents", "skills", ".monoskill", options.name);
   return {
     scope,
     root,
     canonical,
+    versionStore,
     agents,
-    targets: agents.map((agent) => ({ agent, path: join(root, ...AGENTS[agent][scope], options.name) }))
+    targets: agents.map((agent) => ({ agent, path: join(HARNESS_ADAPTERS[agent].skillRoot(root), options.name) }))
   };
 }
 
 function normalizeAgents(values = []) {
-  const requested = values.length ? values : Object.keys(AGENTS);
-  const expanded = requested.includes("*") ? Object.keys(AGENTS) : requested;
+  const requested = values.length ? values : Object.keys(HARNESS_ADAPTERS);
+  const expanded = requested.includes("*") ? Object.keys(HARNESS_ADAPTERS) : requested;
   const agents = [...new Set(expanded)];
-  const unsupported = agents.filter((agent) => !AGENTS[agent]);
+  const unsupported = agents.filter((agent) => !HARNESS_ADAPTERS[agent]);
   if (unsupported.length) {
-    throw stageError("target discovery", new Error(`unsupported agent: ${unsupported.join(", ")} (supported: ${Object.keys(AGENTS).join(", ")})`));
+    throw stageError("target discovery", new Error(`unsupported agent: ${unsupported.join(", ")} (supported: ${Object.keys(HARNESS_ADAPTERS).join(", ")})`));
   }
   return agents;
 }
@@ -106,17 +123,50 @@ async function recordDeployment(skillDir, deployment) {
   await writeFile(path, `${JSON.stringify(manifest, null, 2)}\n`);
 }
 
-async function publishCanonical(stagedSkill, canonical) {
+async function publishVersionedCanonical(stagedSkill, plan) {
+  await mkdir(plan.versionStore, { recursive: true });
+  const version = join(plan.versionStore, `${Date.now()}-${process.pid}-${randomUUID()}`);
+  await publishDirectory(stagedSkill, version);
   try {
-    await rename(stagedSkill, canonical);
+    await symlink(relative(dirname(plan.canonical), version), plan.canonical, "dir");
+  } catch (error) {
+    await rm(version, { recursive: true, force: true });
+    throw error;
+  }
+  return version;
+}
+
+async function publishDirectory(stagedSkill, destination) {
+  try {
+    await rename(stagedSkill, destination);
   } catch (error) {
     if (error.code !== "EXDEV") throw error;
-    const localStaging = `${canonical}.staging-${process.pid}-${Date.now()}`;
+    const localStaging = `${destination}.staging-${process.pid}-${Date.now()}`;
     try {
       await cp(stagedSkill, localStaging, { recursive: true });
-      await rename(localStaging, canonical);
+      await rename(localStaging, destination);
     } finally {
       await rm(localStaging, { recursive: true, force: true });
+    }
+  }
+}
+
+async function validateProjectParents(plan) {
+  if (plan.scope !== "project") return;
+  const parents = [dirname(plan.canonical), ...plan.targets.map((target) => dirname(target.path))];
+  for (const parent of parents) {
+    let cursor = plan.root;
+    for (const part of relative(plan.root, parent).split(/[\\/]/).filter(Boolean)) {
+      cursor = join(cursor, part);
+      try {
+        const info = await lstat(cursor);
+        if (info.isSymbolicLink()) {
+          throw stageError("target discovery", new Error(`project harness parent must not be a symlink: ${cursor}`));
+        }
+      } catch (error) {
+        if (error.code === "ENOENT") break;
+        throw error;
+      }
     }
   }
 }

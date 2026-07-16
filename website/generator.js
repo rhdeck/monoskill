@@ -86,6 +86,11 @@ export function makeCommand(source, name) {
   return `npx monoskill build ${shellQuoteSource(String(source).trim())} --name ${shellQuote(name)}`;
 }
 
+/**
+ * Produce an agent handoff only after `makeCommand` validates both fields. The
+ * prompt compiles with today's CLI, preserves the generated contract, and names
+ * harness installation as a conditional manual boundary until issue #2 lands.
+ */
 export function makePrompt(source, name) {
   const command = makeCommand(source, name);
   return [

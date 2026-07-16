@@ -10,6 +10,7 @@ test("generates safe commands without leaking pasted values to analytics", async
 
   await page.locator("#source").fill("javascript:alert(private-source)");
   await expect(page.locator("#source")).toHaveAttribute("aria-invalid", "true");
+  await expect(page.locator("#source-message")).toHaveAttribute("aria-live", "polite");
   await expect(page.getByRole("button", { name: "Copy command" })).toBeDisabled();
 
   await page.getByRole("button", { name: /Corey Haines/ }).click();
@@ -18,10 +19,14 @@ test("generates safe commands without leaking pasted values to analytics", async
   expect(await page.evaluate(() => window.__events)).toEqual([]);
   await page.getByRole("button", { name: "Copy command" }).click();
   await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(expected);
+  await page.getByRole("button", { name: "Copied" }).click();
+  await expect(page.getByRole("button", { name: "Copied" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Copy command" })).toBeVisible({ timeout: 2500 });
 
   const events = await page.evaluate(() => window.__events);
   expect(events).toEqual([
     { event: "source_input_completed", source_type: "github-shorthand" },
+    { event: "copy_cli" },
     { event: "copy_cli" }
   ]);
   expect(JSON.stringify(events)).not.toContain("coreyhaines31");

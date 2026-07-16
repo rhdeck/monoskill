@@ -1,9 +1,11 @@
 const ANALYTICS_ENDPOINT = "https://plausible.io/api/event";
 const ANALYTICS_DOMAIN = "monoskill.dev";
+const ALLOWED_EVENTS = new Set(["source_input_completed", "copy_cli", "copy_ai_prompt"]);
 const ALLOWED_SOURCE_TYPES = new Set(["github-shorthand", "git-url", "local-path"]);
 
 /** Build the complete allowlisted Plausible payload without query, hash, source, or name values. */
 export function makeAnalyticsPayload(event, detail, location) {
+  if (!ALLOWED_EVENTS.has(event)) throw new Error("Unsupported analytics event.");
   const props = {};
   if (ALLOWED_SOURCE_TYPES.has(detail?.source_type)) props.source_type = detail.source_type;
   return {

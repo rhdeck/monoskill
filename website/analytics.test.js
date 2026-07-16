@@ -36,3 +36,10 @@ test("collector is silent off production and posts the allowlisted payload on pr
     url: "https://monoskill.dev/"
   });
 });
+
+test("analytics event names are allowlisted", () => {
+  assert.throws(
+    () => makeAnalyticsPayload("private-owner/private-repo", {}, { pathname: "/" }),
+    /Unsupported analytics event/
+  );
+});

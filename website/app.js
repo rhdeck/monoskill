@@ -87,16 +87,18 @@ document.querySelector("#example-button").addEventListener("click", () => {
 });
 
 for (const button of document.querySelectorAll("[data-copy]")) {
+  const originalLabel = button.textContent;
+  let resetTimer;
   button.addEventListener("click", async () => {
     const target = document.querySelector(`#${button.dataset.copy}`);
     trackSourceCompletion();
     try {
       await navigator.clipboard.writeText(target.textContent);
-      const previous = button.textContent;
+      window.clearTimeout(resetTimer);
       button.textContent = "Copied";
       status.textContent = `${button.dataset.label} copied to clipboard.`;
       track(button.dataset.event);
-      window.setTimeout(() => { button.textContent = previous; }, 1800);
+      resetTimer = window.setTimeout(() => { button.textContent = originalLabel; }, 1800);
     } catch {
       status.textContent = "Clipboard access was blocked. Select the text and copy it manually.";
       target.focus();

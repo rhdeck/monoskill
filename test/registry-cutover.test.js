@@ -17,6 +17,20 @@ const consumerSurfaces = [
   "scripts/validate-skill.js",
 ];
 
+const canonicalOwnerSurfaces = [
+  "README.md",
+  "SECURITY.md",
+  "package.json",
+  "scripts/release-preflight.js",
+  "scripts/smoke-registry-release.js",
+  "test/release.test.js",
+  "website/README.md",
+  "website/e2e.spec.js",
+  "website/generator.js",
+  "website/generator.test.js",
+  "website/index.html",
+];
+
 test("consumer CLI surfaces use the exact public registry release", async () => {
   for (const relative of consumerSurfaces) {
     const contents = await readFile(path.join(root, relative), "utf8");
@@ -25,6 +39,13 @@ test("consumer CLI surfaces use the exact public registry release", async () => 
   for (const relative of ["README.md", "website/generator.js", "skills/monoskill/references/cli.md"]) {
     const contents = await readFile(path.join(root, relative), "utf8");
     assert.match(contents, /npx --yes monoskill@0\.3\.2/, relative);
+  }
+});
+
+test("canonical ownership surfaces reject the personal-repository location", async () => {
+  for (const relative of canonicalOwnerSurfaces) {
+    const contents = await readFile(path.join(root, relative), "utf8");
+    assert.doesNotMatch(contents, /rhdeck\/monoskill/, relative);
   }
 });
 

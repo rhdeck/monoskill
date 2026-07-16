@@ -4,7 +4,7 @@ This log records settled, load-bearing product and implementation choices. Newes
 
 ## 2026-07-16 — Move canonical ownership to State Change
 
-The public repository's canonical home is `statechange/monoskill`; `rhdeck/monoskill` remains only as GitHub's transfer redirect and must not be recreated. Version 0.3.2 is the ownership-cutover release: package metadata, trusted-publisher identity, provenance checks, bundled skill discovery, website links, and exact CLI examples all resolve through the organization-owned repository. This supersedes the personal-owner binding recorded below. The npm package name remains the unscoped `monoskill`, and `monoskill.statechange.ai` remains the production origin.
+The public repository's canonical home is `statechange/monoskill`; `rhdeck/monoskill` remains only as GitHub's transfer redirect and must not be recreated. Version 0.3.2 prepares the ownership-cutover release: package metadata, provenance checks, bundled skill discovery, website links, and exact CLI examples resolve through the organization-owned repository. The personal-owner trusted-publisher binding recorded below is superseded only when npm accepts the new binding and the 0.3.2 OIDC provenance receipt succeeds. The npm package name remains the unscoped `monoskill`, and `monoskill.statechange.ai` remains the production origin.
 
 ## 2026-07-16 — Correct the immutable package documentation in 0.3.1
 

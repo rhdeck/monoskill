@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#17151d"/>
+  <g fill="none" stroke="#fb573f" stroke-width="5" opacity=".9">
+    <path d="M70 105C390 105 460 315 715 315"/><path d="M70 190C390 190 460 315 715 315"/>
+    <path d="M70 275C390 275 460 315 715 315"/><path d="M70 360C390 360 460 315 715 315"/>
+    <path d="M70 445C390 445 460 315 715 315"/><path d="M70 530C390 530 460 315 715 315"/>
+  </g>
+  <g fill="#24202c" stroke="#51485f"><rect x="70" y="76" width="240" height="58"/><rect x="70" y="161" width="240" height="58"/><rect x="70" y="246" width="240" height="58"/><rect x="70" y="331" width="240" height="58"/><rect x="70" y="416" width="240" height="58"/><rect x="70" y="501" width="240" height="58"/></g>
+  <rect x="710" y="235" width="28" height="160" fill="#17151d" stroke="#8b7b9a" stroke-width="4"/>
+  <rect x="800" y="100" width="310" height="430" fill="#f5ead9" transform="rotate(2 955 315)"/>
+  <text x="845" y="190" fill="#17151d" font-family="Arial Narrow, sans-serif" font-size="28" font-weight="700" letter-spacing="5">MONOSKILL</text>
+  <text x="845" y="295" fill="#17151d" font-family="Arial Narrow, sans-serif" font-size="66" font-weight="900">MANY SKILLS.</text>
+  <text x="845" y="365" fill="#c93428" font-family="Arial Narrow, sans-serif" font-size="66" font-weight="900">ONE WAY IN.</text>
+  <text x="845" y="450" fill="#17151d" font-family="Arial, sans-serif" font-size="22">Provenance intact.</text>
+</svg>

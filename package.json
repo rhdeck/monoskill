@@ -12,8 +12,10 @@
   ],
   "scripts": {
     "test": "node --test && npm run validate:skill",
-    "check": "node --check bin/monoskill.js && node --check src/*.js && node --check scripts/*.js",
+    "check": "node --check bin/monoskill.js && node --check src/*.js && node --check scripts/*.js && node --check website/*.js",
     "validate:skill": "node scripts/validate-skill.js",
+    "website:serve": "node website/server.js",
+    "website:test": "playwright test --config website/playwright.config.js",
     "prepublishOnly": "npm test"
   },
   "keywords": [
@@ -32,6 +34,7 @@
     "yazl": "^3.3.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "yauzl": "^3.4.0"
   }
 }

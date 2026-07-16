@@ -127,3 +127,13 @@ npm run validate:skill
 ```
 
 MIT
+
+## Website draft
+
+The static website and source-to-command generator live in [`website/`](website/). Run it locally with:
+
+```bash
+npm run website:serve
+```
+
+The website is intentionally not part of the published npm package and is not publicly deployed yet. See [`website/README.md`](website/README.md) for browser checks, metadata assumptions, analytics privacy, and the production checklist.

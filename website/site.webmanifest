@@ -1,0 +1,10 @@
+{
+  "name": "Monoskill",
+  "short_name": "Monoskill",
+  "description": "Compile many agent skills into one provenance-aware router skill.",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#17151d",
+  "theme_color": "#17151d",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

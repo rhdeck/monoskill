@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { parse } from "yaml";
 
-const origin = "https://monoskill.statechange.ai";
+const origin = "https://monoskill.com";
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
 
 test("all discovery metadata uses the production origin", async () => {

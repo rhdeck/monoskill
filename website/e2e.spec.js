@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const canonicalProduction = process.env.WEBSITE_BASE_URL && new URL(process.env.WEBSITE_BASE_URL).hostname === "monoskill.statechange.ai";
+const canonicalProduction = process.env.WEBSITE_BASE_URL && new URL(process.env.WEBSITE_BASE_URL).hostname === "monoskill.com";
 
 test("generates safe commands without leaking pasted values to analytics", async ({ page, context, isMobile }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
@@ -45,7 +45,7 @@ test("generates safe commands without leaking pasted values to analytics", async
     const beacons = await page.evaluate(() => window.__beacons);
     expect(beacons.every(({ url }) => url === "https://plausible.io/api/event")).toBe(true);
     expect(beacons.every(({ payload }) => !JSON.stringify(payload).includes("coreyhaines31"))).toBe(true);
-    expect(beacons.every(({ payload }) => payload.domain === "monoskill.statechange.ai")).toBe(true);
+    expect(beacons.every(({ payload }) => payload.domain === "monoskill.com")).toBe(true);
   } else {
     expect(await page.evaluate(() => window.__beacons)).toEqual([]);
   }

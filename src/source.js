@@ -2,14 +2,19 @@ import { existsSync } from "node:fs";
 import { mkdtemp, realpath, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
 const exec = promisify(execFile);
 
 export async function materializeSource(input, ref) {
-  const localPath = resolve(input);
+  let localPath;
+  try {
+    localPath = input.startsWith("file:") ? fileURLToPath(input) : resolve(input);
+  } catch (error) {
+    throw sourceError(`could not resolve local source ${input}`, error);
+  }
   if (existsSync(localPath)) {
     try {
       const root = await realpath(localPath);
@@ -18,7 +23,7 @@ export async function materializeSource(input, ref) {
           root,
           input,
           url: pathToFileURL(root).href,
-          commit: await gitValue(root, ["rev-parse", "HEAD"]) || `local-${Date.now()}`,
+          commit: await gitValue(root, ["rev-parse", "HEAD"]) || "local",
           requestedRef: null,
           suggestedSkillsDir: null,
           cleanup: async () => {}

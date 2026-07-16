@@ -25,8 +25,18 @@ const HARNESS_ADAPTERS = {
  */
 export async function add(source, options) {
   const plan = deploymentPlan(options);
-  await validateProjectParents(plan);
-  await refuseCollisions(plan);
+  try {
+    await validateProjectParents(plan);
+  } catch (error) {
+    if (error.stage) throw error;
+    throw stageError("target discovery", error);
+  }
+  try {
+    await refuseCollisions(plan);
+  } catch (error) {
+    if (error.stage) throw error;
+    throw stageError("deployment", error);
+  }
 
   const stagingRoot = await mkdtemp(join(tmpdir(), "monoskill-add-"));
   const stagedSkill = join(stagingRoot, options.name);

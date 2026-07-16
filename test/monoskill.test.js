@@ -226,6 +226,27 @@ test("add-managed projects remain atomically updateable after relocation", async
   }
 });
 
+test("non-Git local directories support add, check, drift, and atomic update", async () => {
+  const temp = await mkdtemp(join(tmpdir(), "monoskill-nongit-local-test-"));
+  const source = join(temp, "vendor");
+  const project = join(temp, "project");
+  const cli = join(process.cwd(), "bin", "monoskill.js");
+  try {
+    await createSkill(source, "seo", "Audit search performance.");
+    await mkdir(project);
+    await exec(process.execPath, [cli, "add", source, "--name", "local-skills", "--agent", "codex"], { cwd: project });
+    const canonical = join(project, ".agents", "skills", "local-skills");
+    assert.equal((await check(canonical)).current, true);
+    assert.equal(JSON.parse(await readFile(join(canonical, "provenance.json"), "utf8")).source.commit, "local");
+    await writeFile(join(source, "skills", "seo", "SKILL.md"), skillText("seo", "Audit organic search performance."));
+    assert.equal((await check(canonical)).current, false);
+    await exec(process.execPath, [cli, "update", join(project, ".codex", "skills", "local-skills")]);
+    assert.equal((await check(canonical)).current, true);
+  } finally {
+    await rm(temp, { recursive: true, force: true });
+  }
+});
+
 test("source parser supports shorthand, clone URLs, and GitHub tree paths", () => {
   assert.equal(parseRemoteSource("owner/repo").url, "https://github.com/owner/repo.git");
   assert.equal(parseRemoteSource("git@github.com:owner/repo.git").url, "git@github.com:owner/repo.git");

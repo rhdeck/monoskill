@@ -17,21 +17,10 @@ const consumerSurfaces = [
   "scripts/validate-skill.js",
 ];
 
-const canonicalOwnerSurfaces = [
-  "README.md",
-  "SECURITY.md",
-  "docs/ARCHITECTURE.md",
-  "docs/PUBLIC_DISCLOSURE_AUDIT.md",
-  "package.json",
-  "scripts/release-preflight.js",
-  "scripts/smoke-registry-release.js",
-  "test/release.test.js",
-  "website/README.md",
-  "website/e2e.spec.js",
-  "website/generator.js",
-  "website/generator.test.js",
-  "website/index.html",
-];
+const historicalOwnerExceptions = new Map([
+  ["docs/DECISIONS.md", 1],
+  ["docs/PUBLIC_DISCLOSURE_AUDIT.md", 2],
+]);
 
 test("consumer CLI surfaces use the exact public registry release", async () => {
   for (const relative of consumerSurfaces) {
@@ -44,10 +33,14 @@ test("consumer CLI surfaces use the exact public registry release", async () => 
   }
 });
 
-test("canonical ownership surfaces reject the personal-repository location", async () => {
-  for (const relative of canonicalOwnerSurfaces) {
-    const contents = await readFile(path.join(root, relative), "utf8");
-    assert.doesNotMatch(contents, /rhdeck\/monoskill/, relative);
+test("tracked text surfaces reject the personal repository outside explicit history", async () => {
+  const tracked = execFileSync("git", ["ls-files", "-z"], { cwd: root })
+    .toString("utf8").split("\0").filter(Boolean);
+  for (const relative of tracked) {
+    const contents = await readFile(path.join(root, relative));
+    if (contents.includes(0)) continue;
+    const count = [...contents.toString("utf8").matchAll(/rhdeck\/monoskill/g)].length;
+    assert.equal(count, historicalOwnerExceptions.get(relative) ?? 0, relative);
   }
 });
 

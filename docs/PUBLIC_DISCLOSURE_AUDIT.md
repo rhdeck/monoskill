@@ -2,7 +2,7 @@
 
 ## Decision
 
-The 2026-07-16 disclosure audit found no secret or private-data blocker to publishing `statechange/monoskill`. Repository visibility may change to public only after the preparation PR containing this report merges and the pre-flip gate below is repeated against the then-current remote refs and collaboration surfaces.
+The 2026-07-16 disclosure audit found no secret or private-data blocker to making the then-canonical `rhdeck/monoskill` repository public. The preparation PR merged, the pre-flip gate was repeated against current refs and collaboration surfaces, and the repository was made public. The later transfer to `statechange/monoskill` did not rewrite Git history, so the audit remains the disclosure receipt for the transferred repository.
 
 One disclosure defect was found outside Git history: seven running-register issue comments exposed absolute workstation and internal worker paths. Those comments were edited in place before the clean collaboration-corpus rescan. No credential required rotation and no history rewrite was required.
 
@@ -66,7 +66,7 @@ No sensitive filename or blob at least 100 KiB was reachable. No customer data, 
 
 Ordinary CI runs on `pull_request` and pushes to `main`. Repository Actions settings give `GITHUB_TOKEN` read-only default permissions and prohibit workflow approval of pull requests. CI has no job-level write permission, secret reference, privileged environment, `pull_request_target`, or self-hosted runner. Untrusted pull-request code therefore receives no repository credential with useful write authority.
 
-The trusted-publishing branch adds a separate tag-push workflow. It grants only `contents: read` and `id-token: write`, uses a GitHub-hosted runner, and invokes `npm publish` without `NODE_AUTH_TOKEN`, `NPM_TOKEN`, `_authToken`, or an Actions cache. The package metadata sets the repository to `git+https://github.com/statechange/monoskill.git`, which resolves to `https://github.com/statechange/monoskill` as required by the release contract.
+The trusted-publishing branch added a separate tag-push workflow. It grants only `contents: read` and `id-token: write`, uses a GitHub-hosted runner, and invokes `npm publish` without `NODE_AUTH_TOKEN`, `NPM_TOKEN`, `_authToken`, or an Actions cache. At the original publication gate, package metadata named `git+https://github.com/rhdeck/monoskill.git`; the ownership-cutover release updates that identity to `git+https://github.com/statechange/monoskill.git` and requires matching provenance before completion.
 
 ## Public repository contract
 

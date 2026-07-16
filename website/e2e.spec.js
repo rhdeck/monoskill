@@ -6,6 +6,12 @@ test("generates safe commands without leaking pasted values to analytics", async
   await page.evaluate(() => {
     window.__events = [];
     window.addEventListener("monoskill:analytics", (event) => window.__events.push(event.detail));
+    window.__beacons = [];
+    const sendBeacon = navigator.sendBeacon.bind(navigator);
+    navigator.sendBeacon = (url, body) => {
+      body.text().then((text) => window.__beacons.push({ url, payload: JSON.parse(text) }));
+      return sendBeacon(url, body);
+    };
   });
 
   await page.locator("#source").fill("javascript:alert(private-source)");
@@ -32,6 +38,15 @@ test("generates safe commands without leaking pasted values to analytics", async
     { event: "copy_cli" }
   ]);
   expect(JSON.stringify(events)).not.toContain("coreyhaines31");
+  if (process.env.WEBSITE_BASE_URL) {
+    await expect.poll(() => page.evaluate(() => window.__beacons.length)).toBeGreaterThanOrEqual(2);
+    const beacons = await page.evaluate(() => window.__beacons);
+    expect(beacons.every(({ url }) => url === "https://plausible.io/api/event")).toBe(true);
+    expect(beacons.every(({ payload }) => !JSON.stringify(payload).includes("coreyhaines31"))).toBe(true);
+    expect(beacons.every(({ payload }) => payload.domain === "monoskill.statechange.ai")).toBe(true);
+  } else {
+    expect(await page.evaluate(() => window.__beacons)).toEqual([]);
+  }
   await expect(page.locator("body")).not.toHaveCSS("overflow-x", "scroll");
 
   await page.getByRole("radio", { name: /Global/ }).check();
@@ -39,7 +54,7 @@ test("generates safe commands without leaking pasted values to analytics", async
   await expect(page.locator("#prompt-output")).toContainText("--global --dry-run --json");
 
   await page.screenshot({
-    path: `artifacts/${isMobile ? "mobile" : "desktop"}-verified.png`,
+    path: `artifacts/${isMobile ? "mobile" : "desktop"}-${process.env.WEBSITE_RECEIPT_SUFFIX || "local-verified"}.png`,
     fullPage: false
   });
 });

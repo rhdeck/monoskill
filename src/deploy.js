@@ -1,4 +1,4 @@
-import { cp, lstat, mkdir, mkdtemp, readFile, rename, rm, symlink, writeFile } from "node:fs/promises";
+import { cp, lstat, mkdir, mkdtemp, readFile, rename, rm, rmdir, symlink, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { randomUUID } from "node:crypto";
 import { dirname, join, relative, resolve } from "node:path";
@@ -21,7 +21,8 @@ const HARNESS_ADAPTERS = {
  * Resolve, compile, and transactionally deploy one generated router skill.
  * The canonical path is an atomically replaceable symlink to a private version
  * directory; requested harnesses receive relative links to that canonical path.
- * Any failed link step rolls back every artifact created by this invocation.
+ * Any failed link step rolls back published skill/link artifacts and removes
+ * parent scaffolding created by this invocation when it is still empty.
  */
 export async function add(source, options) {
   const plan = deploymentPlan(options);
@@ -66,18 +67,23 @@ export async function add(source, options) {
     }
 
     const created = [];
+    const createdDirectories = [];
     try {
-      await mkdir(dirname(plan.canonical), { recursive: true });
+      createdDirectories.push(...await ensureDirectory(dirname(plan.canonical)));
+      createdDirectories.push(...await ensureDirectory(plan.versionStore));
       const version = await publishVersionedCanonical(stagedSkill, plan);
       created.push(version);
       created.push(plan.canonical);
       for (const target of plan.targets) {
-        await mkdir(dirname(target.path), { recursive: true });
+        createdDirectories.push(...await ensureDirectory(dirname(target.path)));
         await symlink(relative(dirname(target.path), plan.canonical), target.path, "dir");
         created.push(target.path);
       }
     } catch (error) {
       for (const path of created.reverse()) await rm(path, { recursive: true, force: true });
+      for (const path of [...new Set(createdDirectories)].sort((a, b) => b.length - a.length)) {
+        await rmdir(path).catch(() => {});
+      }
       throw stageError("deployment", error);
     }
     return { ...compiled, output: plan.canonical, ...plan, dryRun: false, deployment };
@@ -146,7 +152,6 @@ async function recordDeployment(skillDir, deployment) {
 }
 
 async function publishVersionedCanonical(stagedSkill, plan) {
-  await mkdir(plan.versionStore, { recursive: true });
   const version = join(plan.versionStore, `${Date.now()}-${process.pid}-${randomUUID()}`);
   await publishDirectory(stagedSkill, version);
   try {
@@ -156,6 +161,19 @@ async function publishVersionedCanonical(stagedSkill, plan) {
     throw error;
   }
   return version;
+}
+
+async function ensureDirectory(path) {
+  const firstCreated = await mkdir(path, { recursive: true });
+  if (!firstCreated) return [];
+  const created = [];
+  let cursor = resolve(path);
+  const first = resolve(firstCreated);
+  while (true) {
+    created.push(cursor);
+    if (cursor === first) return created;
+    cursor = dirname(cursor);
+  }
 }
 
 async function publishDirectory(stagedSkill, destination) {

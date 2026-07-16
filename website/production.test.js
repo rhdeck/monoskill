@@ -42,6 +42,9 @@ test("GitHub main is the fail-closed Netlify production path", async () => {
   assert.match(workflow, /permissions:\s*\n\s*contents: read/);
   assert.match(workflow, /if: github\.ref == 'refs\/heads\/main'/);
   assert.match(workflow, /node-version: "20"/);
+  assert.match(workflow, /actions\/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10/);
+  assert.match(workflow, /actions\/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38/);
+  assert.doesNotMatch(workflow, /uses:\s+[^\s]+@v\d/);
   assert.doesNotMatch(workflow, /pull_request:/);
   assert.deepEqual(
     workflow.match(/^\s*NETLIFY_AUTH_TOKEN:.*$/gm),

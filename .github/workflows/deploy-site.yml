@@ -1,0 +1,37 @@
+name: Deploy website to Netlify
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: netlify-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run check
+      - run: npm run website:build
+      - name: Deploy the verified static build
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: >-
+          npx --yes netlify-cli@24.11.1 deploy
+          --prod
+          --dir website/dist
+          --site f4a7a382-4d6a-4d80-9109-62fb16a7293c
+          --message "GitHub ${GITHUB_SHA}"

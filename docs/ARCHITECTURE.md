@@ -16,6 +16,7 @@ The package is an ECMAScript-module Node.js CLI requiring Node.js 20 or newer.
 - `src/archive.js` validates generated skills and writes deterministic, atomically published ZIP-format `.skill` artifacts.
 - `test/monoskill.test.js` exercises the full compile/check/update lifecycle against a temporary local Git repository.
 - `skills/monoskill/` is the distributable agent-facing adapter. Its compact root routes detailed CLI syntax to one reference; `scripts/validate-skill.js` checks its metadata and documented command surface against the CLI help.
+- `.github/workflows/ci.yml` runs the full tests, syntax and skill-contract checks, and a standard-tooling install smoke on pull requests and `main`.
 
 ## Build flow
 

@@ -22,7 +22,10 @@ if (!metadata.description.includes("Monoskill CLI") || !metadata.description.inc
 if (!skill.includes("[references/cli.md](references/cli.md)")) throw new Error("SKILL.md must route command details to references/cli.md");
 if (!agentMetadata?.interface?.default_prompt?.includes("$monoskill")) throw new Error("agents/openai.yaml default_prompt must invoke $monoskill");
 
-const documentedCommands = [...reference.matchAll(/^(?:monoskill|npx --yes github:rhdeck\/monoskill) ([a-z-]+)/gm)].map((match) => match[1]);
+const cleanInvocation = "npx --yes github:rhdeck/monoskill#82fff64";
+const documentedCommands = reference.split("\n")
+  .filter((line) => line.startsWith(`${cleanInvocation} `))
+  .map((line) => line.slice(cleanInvocation.length + 1).split(" ")[0]);
 const documentedOptions = [...new Set([...reference.matchAll(/(?:^|[\s`])(--[a-z-]+)/gm)].map((match) => match[1]))]
   .filter((option) => !["--help", "--version"].includes(option));
 const { stdout: help } = await exec(process.execPath, [resolve("bin/monoskill.js"), "--help"]);
@@ -30,8 +33,21 @@ const supportedCommands = [...new Set([...help.matchAll(/^  monoskill ([a-z-]+)/
 const supportedOptions = [...new Set([...help.matchAll(/(?:^|\s)(--[a-z-]+)/gm)].map((match) => match[1]))]
   .filter((option) => !["--help", "--version"].includes(option));
 
-if (!reference.includes("npx --yes github:rhdeck/monoskill --help")) {
+if (!reference.includes(`${cleanInvocation} --help`)) {
   throw new Error("skill reference must bootstrap the CLI for a clean machine");
+}
+
+const requiredExamples = [
+  `${cleanInvocation} add <source> --name <name> --dry-run --json`,
+  `${cleanInvocation} add <source> --name <name> --agent codex --agent claude-code --global --yes --json`,
+  `${cleanInvocation} build <source> --name <name> --output <dir>`,
+  `${cleanInvocation} build <source> --name <name> --archive --output <file.skill>`,
+  `${cleanInvocation} package <skill-dir> --output <file.skill>`,
+  `${cleanInvocation} check <skill-dir> --json`,
+  `${cleanInvocation} update <skill-dir>`
+];
+for (const example of requiredExamples) {
+  if (!reference.includes(example)) throw new Error(`skill reference is missing command contract: ${example}`);
 }
 
 for (const command of supportedCommands) {

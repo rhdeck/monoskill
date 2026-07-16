@@ -29,12 +29,13 @@ jobs:
       - run: npm run website:build
       - run: npx playwright install --with-deps chromium
       - run: npm run website:test
+      - run: npm install --global netlify-cli@24.11.1
       - name: Deploy the verified static build
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ vars.NETLIFY_SITE_ID }}
         run: >-
-          npx --no-install netlify deploy
+          netlify deploy
           --prod
           --dir website/dist
           --site "${NETLIFY_SITE_ID}"

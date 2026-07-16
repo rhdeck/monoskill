@@ -48,7 +48,6 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
-    "netlify-cli": "24.11.1",
     "semver": "^7.7.2",
     "yauzl": "^3.4.0"
   }

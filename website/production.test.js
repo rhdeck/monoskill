@@ -61,8 +61,9 @@ test("GitHub main is the fail-closed Netlify production path", async () => {
     "npm run website:build",
     "npx playwright install --with-deps chromium",
     "npm run website:test",
+    "npm install --global netlify-cli@24.11.1",
   ]);
-  assert.match(steps.at(-1).run, /npx --no-install netlify deploy/);
+  assert.match(steps.at(-1).run, /^netlify deploy/);
   assert.match(steps.at(-1).run, /--prod/);
   assert.match(steps.at(-1).run, /--dir website\/dist/);
   assert.match(steps.at(-1).run, /--site "\$\{NETLIFY_SITE_ID\}"/);

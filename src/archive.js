@@ -1,36 +1,47 @@
 import { createWriteStream, existsSync } from "node:fs";
-import { link, lstat, mkdir, mkdtemp, readFile, readdir, readlink, rename, rm, stat } from "node:fs/promises";
+import { link, lstat, mkdir, mkdtemp, readFile, readdir, readlink, realpath, rename, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, dirname, extname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { pipeline } from "node:stream/promises";
 import yazl from "yazl";
 
-// ZIP's DOS timestamp has no timezone. Using a local 1980 epoch and omitting the
-// extended timestamp makes the encoded bytes identical in every timezone.
+// yazl intentionally encodes DOS timestamps from local calendar fields. A local
+// 1980 epoch plus forceDosTimestamp produces the same fields in every timezone;
+// Date.UTC would become December 1979 in negative-offset zones.
 const ARCHIVE_MTIME = new Date(1980, 0, 1, 0, 0, 0);
 const ZIP_OPTIONS = { mtime: ARCHIVE_MTIME, forceDosTimestamp: true };
 
+/**
+ * Validate and package a generated skill as a deterministic ZIP-format .skill.
+ * Existing output is preserved unless force is true. Returns artifact metadata.
+ */
 export async function packageSkill(skillDir, options = {}) {
-  const root = resolve(skillDir);
+  const root = await resolveExistingDirectory(skillDir);
   const manifest = await validateGeneratedSkill(root);
   const output = resolve(options.output ?? `${manifest.skill.name}.skill`);
   assertSkillArchivePath(output);
-  assertOutputOutsideSkill(root, output);
   if (!options.force && existsSync(output)) throw new Error(`archive already exists: ${output} (pass --force to replace it)`);
 
   await mkdir(dirname(output), { recursive: true });
-  const tempDir = await mkdtemp(join(dirname(output), ".monoskill-package-"));
+  const physicalParent = await realpath(dirname(output));
+  const physicalOutput = join(physicalParent, basename(output));
+  assertOutputOutsideSkill(root, physicalOutput);
+  const tempDir = await mkdtemp(join(physicalParent, ".monoskill-package-"));
   const staged = join(tempDir, basename(output));
   try {
     const entries = await collectEntries(root);
     await writeZip(staged, entries);
-    await publishArchive(staged, output, options.force);
+    await publishArchive(staged, physicalOutput, options.force);
     return { output, skillName: manifest.skill.name, skillCount: manifest.skills.length, entryCount: entries.length };
   } finally {
     await rm(tempDir, { recursive: true, force: true });
   }
 }
 
+/**
+ * Assert the generated root contract and return its parsed provenance manifest.
+ * Required entrypoints must be real files/directories, not redirecting symlinks.
+ */
 export async function validateGeneratedSkill(skillDir) {
   const root = resolve(skillDir);
   let info;
@@ -41,9 +52,10 @@ export async function validateGeneratedSkill(skillDir) {
   }
   if (!info.isDirectory()) throw new Error(`skill path is not a directory: ${root}`);
 
-  for (const required of ["SKILL.md", "agents/openai.yaml", "provenance.json", "references"]) {
-    if (!existsSync(join(root, required))) throw new Error(`invalid generated skill: missing ${required}`);
-  }
+  await assertEntryType(root, "SKILL.md", "file");
+  await assertEntryType(root, "agents/openai.yaml", "file");
+  await assertEntryType(root, "provenance.json", "file");
+  await assertEntryType(root, "references", "directory");
 
   let manifest;
   try {
@@ -61,9 +73,7 @@ export async function validateGeneratedSkill(skillDir) {
     if (!skill?.name || !/^[a-z0-9-]{1,63}$/.test(skill.name)) {
       throw new Error("invalid generated skill: every provenance skill must have a safe name");
     }
-    if (!existsSync(join(root, "references", skill.name, "SKILL.md"))) {
-      throw new Error(`invalid generated skill: missing references/${skill.name}/SKILL.md`);
-    }
+    await assertEntryType(root, `references/${skill.name}/SKILL.md`, "file");
   }
   return manifest;
 }
@@ -71,7 +81,7 @@ export async function validateGeneratedSkill(skillDir) {
 async function collectEntries(root) {
   const entries = [];
   async function walk(dir) {
-    const children = (await readdir(dir, { withFileTypes: true })).sort((a, b) => a.name.localeCompare(b.name));
+    const children = (await readdir(dir, { withFileTypes: true })).sort((a, b) => compareNames(a.name, b.name));
     for (const child of children) {
       const path = join(dir, child.name);
       const info = await lstat(path);
@@ -86,7 +96,7 @@ async function collectEntries(root) {
     }
   }
   await walk(root);
-  return entries.sort((a, b) => a.name.localeCompare(b.name));
+  return entries.sort((a, b) => compareNames(a.name, b.name));
 }
 
 async function writeZip(output, entries) {
@@ -129,4 +139,27 @@ function assertOutputOutsideSkill(root, output) {
 function archiveName(root, path, directory = false) {
   const name = relative(root, path).split(sep).join("/");
   return directory ? `${name}/` : name;
+}
+
+async function resolveExistingDirectory(path) {
+  try {
+    return await realpath(resolve(path));
+  } catch {
+    throw new Error(`skill directory does not exist: ${resolve(path)}`);
+  }
+}
+
+async function assertEntryType(root, relativePath, type) {
+  let info;
+  try {
+    info = await lstat(join(root, relativePath));
+  } catch {
+    throw new Error(`invalid generated skill: missing ${relativePath}`);
+  }
+  const matches = type === "file" ? info.isFile() : info.isDirectory();
+  if (!matches) throw new Error(`invalid generated skill: ${relativePath} must be a ${type}`);
+}
+
+function compareNames(left, right) {
+  return Buffer.compare(Buffer.from(left), Buffer.from(right));
 }

@@ -53,6 +53,8 @@ test("package produces a deterministic, lossless .skill archive and protects exi
   const compiled = join(temp, "compiled");
   const firstArchive = join(temp, "first.skill");
   const secondArchive = join(temp, "second.skill");
+  const utcArchive = join(temp, "utc.skill");
+  const kiritimatiArchive = join(temp, "kiritimati.skill");
   const extracted = join(temp, "extracted");
   try {
     await createSkill(source, "copywriting", "Write and revise marketing copy.");
@@ -64,12 +66,21 @@ test("package produces a deterministic, lossless .skill archive and protects exi
     await build(source, { name: "vendor-marketing", output: compiled });
 
     await assert.rejects(packageSkill(compiled, { output: join(compiled, "nested.skill") }), /outside the skill directory/);
+    const outputAlias = join(temp, "compiled-alias");
+    await symlink(compiled, outputAlias, "dir");
+    await assert.rejects(packageSkill(compiled, { output: join(outputAlias, "nested.skill") }), /outside the skill directory/);
 
     const first = await packageSkill(compiled, { output: firstArchive });
     const second = await packageSkill(compiled, { output: secondArchive });
     assert.equal(first.skillCount, 1);
     assert.deepEqual(await readFile(firstArchive), await readFile(secondArchive));
     assert.equal((await readFile(firstArchive)).subarray(0, 4).toString("hex"), "504b0304");
+
+    const cli = join(process.cwd(), "bin", "monoskill.js");
+    await exec(process.execPath, [cli, "package", compiled, "--output", utcArchive], { env: { ...process.env, TZ: "UTC" } });
+    await exec(process.execPath, [cli, "package", compiled, "--output", kiritimatiArchive], { env: { ...process.env, TZ: "Pacific/Kiritimati" } });
+    assert.deepEqual(await readFile(utcArchive), await readFile(kiritimatiArchive));
+    assert.deepEqual(await readFile(firstArchive), await readFile(utcArchive));
 
     await extractArchive(firstArchive, extracted);
     assert.deepEqual(await describeTree(extracted), await describeTree(compiled));

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://monoskill.statechange.ai/sitemap.xml

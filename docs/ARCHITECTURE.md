@@ -17,6 +17,9 @@ The package is an ECMAScript-module Node.js CLI requiring Node.js 20 or newer.
 - `test/monoskill.test.js` exercises the full compile/check/update lifecycle against a temporary local Git repository.
 - `skills/monoskill/` is the distributable agent-facing adapter. Its compact root routes detailed CLI syntax to one reference; `scripts/validate-skill.js` checks its metadata and documented command surface against the CLI help.
 - `.github/workflows/ci.yml` runs the full tests, syntax and skill-contract checks, and a standard-tooling install smoke on pull requests and `main`.
+- `website/` is a dependency-light static brand site and client-side install-prompt generator. Its generator mirrors the live `add <source> --name <name>` deployment contract, shell-quotes every argument, and emits value-free analytics events. Unit and Playwright tests cover validation, generation, privacy, keyboard use, responsive behavior, and reduced motion.
+
+The website remains outside the npm package's `files` allowlist. Its development-only Playwright dependency does not ship to CLI consumers.
 
 ## Build flow
 
@@ -63,5 +66,5 @@ Project scope needs no confirmation. Global scope requires `--yes`, while `--dry
 ## Current boundaries
 
 - Monoskill deploys generated skill directories into Codex and Claude Code harness roots. Portable `.skill` archive extraction and third-party harness adapters remain outside the deployment surface.
-- The website remains a tracked initiative rather than current architecture.
+- The repository contains the CLI package and the static website deployed through Netlify at `https://monoskill.statechange.ai/`. Its production metadata, security headers, redirect, and build contract live in `netlify.toml` and `website/`.
 - Network access is required only for remote Git sources; local-source builds remain local.

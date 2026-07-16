@@ -129,3 +129,13 @@ npm run validate:skill
 See [CONTRIBUTING.md](CONTRIBUTING.md) for change and verification expectations. Report suspected vulnerabilities privately according to [SECURITY.md](SECURITY.md).
 
 MIT
+
+## Website
+
+The static website and source-to-command generator live in [`website/`](website/). Run it locally with:
+
+```bash
+npm run website:serve
+```
+
+The website is intentionally not part of the published npm package. Production is available at [monoskill.statechange.ai](https://monoskill.statechange.ai/); see [`website/README.md`](website/README.md) for browser checks, metadata, analytics privacy, and the Netlify production contract.

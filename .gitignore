@@ -2,3 +2,10 @@ node_modules/
 *.tgz
 .DS_Store
 coverage/
+website/artifacts/
+website/dist/
+artifacts/
+.playwright-cli/
+test-results/
+playwright-report/
+.netlify/

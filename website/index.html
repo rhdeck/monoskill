@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Monoskill · Many skills, one way in</title>
+  <meta name="description" content="Compile a repository of agent skills into one compact, provenance-aware router skill.">
+  <meta name="theme-color" content="#17151d">
+  <meta name="color-scheme" content="dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Monoskill">
+  <meta property="og:url" content="https://monoskill.statechange.ai/">
+  <meta property="og:title" content="Monoskill · Many skills, one way in">
+  <meta property="og:description" content="One package. One trigger surface. Provenance intact.">
+  <meta property="og:image" content="https://monoskill.statechange.ai/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Many skill fragments converging into one Monoskill package.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://monoskill.statechange.ai/og-image.png">
+  <link rel="canonical" href="https://monoskill.statechange.ai/">
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="./site.webmanifest">
+  <link rel="stylesheet" href="./styles.css?v=1">
+  <script type="module" src="./app.js?v=1"></script>
+</head>
+<body>
+  <a class="skip-link" href="#generator">Skip to generator</a>
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="Monoskill home">
+      <svg aria-hidden="true" viewBox="0 0 32 32"><path d="M16 2 28 9v14l-12 7L4 23V9l12-7Zm0 4.2L8 10.8v9.8l8 4.7 8-4.7v-9.8l-8-4.6Zm-1.5 3.3h3v5h5v3h-5v5h-3v-5h-5v-3h5v-5Z"/></svg>
+      <span>Monoskill</span>
+    </a>
+    <nav aria-label="Primary">
+      <a href="#generator">Generator</a>
+      <a href="#provenance">Provenance</a>
+      <a href="https://github.com/rhdeck/monoskill">GitHub</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow">A compiler for agent skills</p>
+        <h1 id="hero-title">Many skills.<br><strong>One way in.</strong></h1>
+        <p class="lede">Compile a whole skill repository into one compact router. Keep every source tree and its provenance attached.</p>
+        <a class="primary-link" href="#generator">Build the mono-skill <span aria-hidden="true">↓</span></a>
+      </div>
+
+      <div class="convergence" data-ready="false" aria-label="Multiple skill fragments converging into one portable mono-skill">
+        <div class="fragments" aria-hidden="true">
+          <span>copywriting</span><span>seo-audit</span>
+          <span>content-strategy</span><span>launch-strategy</span>
+          <span>cold-email</span><span>pricing-strategy</span>
+        </div>
+        <svg class="threads" viewBox="0 0 700 420" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M15 34 C280 34 300 210 505 210"/><path d="M15 98 C280 98 300 210 505 210"/>
+          <path d="M15 164 C280 164 300 210 505 210"/><path d="M15 256 C280 256 300 210 505 210"/>
+          <path d="M15 322 C280 322 300 210 505 210"/><path d="M15 386 C280 386 300 210 505 210"/>
+          <path class="spine" d="M505 210 H680"/>
+        </svg>
+        <div class="throat" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="package">
+          <span class="package-kicker">Compiled mono-skill</span>
+          <strong>one trigger</strong>
+          <span class="package-file">SKILL.md</span>
+          <span class="seal">Provenance<br>intact</span>
+        </div>
+      </div>
+
+      <ul class="principles" aria-label="Monoskill properties">
+        <li><span>01</span><strong>Compact root</strong><small>Load only the routes you need.</small></li>
+        <li><span>02</span><strong>Complete sources</strong><small>Scripts, assets, and references stay together.</small></li>
+        <li><span>03</span><strong>Deterministic trail</strong><small>Commit and content hashes ship with it.</small></li>
+      </ul>
+    </section>
+
+    <section class="generator-section" id="generator" aria-labelledby="generator-title">
+      <div class="section-heading">
+        <p class="eyebrow">Source to command</p>
+        <h2 id="generator-title">Paste once. Leave ready.</h2>
+        <button class="example-button" id="example-button" type="button">Try Corey Haines’s marketing skills</button>
+      </div>
+
+      <form id="generator-form" data-ready="false" novalidate>
+        <div class="fields">
+          <label for="source"><span>01</span> Skill source</label>
+          <input id="source" name="source" autocomplete="off" spellcheck="false" placeholder="coreyhaines31/marketingskills" aria-describedby="source-message">
+          <p class="field-message" id="source-message" aria-live="polite" aria-atomic="true">GitHub shorthand, Git URL, or a local path.</p>
+
+          <label for="name"><span>02</span> Mono-skill name</label>
+          <input id="name" name="name" autocomplete="off" spellcheck="false" placeholder="marketing-skills" aria-describedby="name-message">
+          <p class="field-message" id="name-message" aria-live="polite" aria-atomic="true">This becomes the folder and skill trigger name.</p>
+
+          <fieldset class="scope-picker">
+            <legend><span>03</span> Install scope</legend>
+            <label class="scope-option">
+              <input type="radio" name="scope" value="project" checked>
+              <span><strong>Project</strong><small>Safe default. Installs in this repository.</small></span>
+            </label>
+            <label class="scope-option">
+              <input type="radio" name="scope" value="global">
+              <span><strong>Global</strong><small>Explicitly installs for your user harnesses.</small></span>
+            </label>
+          </fieldset>
+        </div>
+
+        <div class="outputs">
+          <article class="output-block">
+            <header><h3><span>04</span> Install command</h3><button type="button" data-copy="command-output" data-label="CLI command" data-event="copy_cli" disabled>Copy command</button></header>
+            <pre id="command-output" tabindex="0">monoskill add &lt;source&gt; --name &lt;name&gt;</pre>
+          </article>
+          <article class="output-block prompt-block">
+            <header><h3><span>05</span> AI-ready prompt</h3><button type="button" data-copy="prompt-output" data-label="AI prompt" data-event="copy_ai_prompt" disabled>Copy prompt</button></header>
+            <pre id="prompt-output" tabindex="0">Your AI-ready installation prompt will appear here.</pre>
+          </article>
+          <p class="dependency-note">The prompt installs the shipped <code>$monoskill</code> skill, previews every target with the pinned 0.3.0 CLI, then deploys one canonical copy with Codex and Claude Code links.</p>
+        </div>
+      </form>
+      <p class="sr-only" id="copy-status" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="provenance" id="provenance" aria-labelledby="provenance-title">
+      <div>
+        <p class="eyebrow">Nothing flattened. Nothing lost.</p>
+        <h2 id="provenance-title">The package keeps its receipts.</h2>
+      </div>
+      <ol>
+        <li><span>Source</span><code>owner/repository</code></li>
+        <li><span>Resolved commit</span><code>4f8d2c9…</code></li>
+        <li><span>Skill hashes</span><code>sha256 × every tree</code></li>
+        <li><span>Portable output</span><code>references/ + provenance.json</code></li>
+      </ol>
+    </section>
+  </main>
+
+  <footer>
+    <a class="brand" href="#top"><span>Monoskill</span></a>
+    <p>One package. One trigger surface. Provenance intact.</p>
+    <nav aria-label="Project links">
+      <a href="https://www.npmjs.com/package/monoskill">npm</a>
+      <a href="https://github.com/rhdeck/monoskill">GitHub</a>
+      <a href="https://github.com/rhdeck/monoskill/blob/main/docs/ARCHITECTURE.md">Format &amp; provenance</a>
+      <a href="https://github.com/rhdeck/monoskill#portable-skill-archives">Portable .skill workflow</a>
+    </nav>
+  </footer>
+</body>
+</html>

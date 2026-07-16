@@ -58,6 +58,7 @@ h1 strong { color: var(--thread); font-weight: inherit; }
 .convergence { position: relative; grid-column: 5 / -1; grid-row: 1; min-height: 31rem; align-self: start; margin-top: 0.5rem; }
 .fragments { position: absolute; inset: 0 auto 0 0; width: 32%; display: flex; flex-direction: column; justify-content: space-around; z-index: 2; }
 .fragments span { width: fit-content; max-width: 100%; padding: 0.45rem 0.65rem; border: 1px solid var(--line); background: var(--ink-raised); color: var(--muted); font-family: var(--mono); font-size: clamp(0.6rem, 0.8vw, 0.75rem); animation: fragment-drift 5s calc(var(--i) * -0.6s) ease-in-out infinite alternate; }
+.fragments span:nth-child(1) { --i: 0; }.fragments span:nth-child(2) { --i: 1; }.fragments span:nth-child(3) { --i: 2; }.fragments span:nth-child(4) { --i: 3; }.fragments span:nth-child(5) { --i: 4; }.fragments span:nth-child(6) { --i: 5; }
 .threads { position: absolute; inset: 0 11% 0 7%; width: 77%; height: 100%; overflow: visible; }
 .threads path { fill: none; stroke: var(--thread); stroke-width: 1.8; vector-effect: non-scaling-stroke; stroke-dasharray: 800; stroke-dashoffset: 800; animation: draw-thread 2.2s calc(0.15s * var(--i, 1)) var(--ease-out) forwards; filter: drop-shadow(0 0 5px oklch(0.69 0.205 31 / 0.5)); }
 .threads path:nth-child(2) { --i: 2; }.threads path:nth-child(3) { --i: 3; }.threads path:nth-child(4) { --i: 4; }.threads path:nth-child(5) { --i: 5; }.threads path:nth-child(6) { --i: 6; }

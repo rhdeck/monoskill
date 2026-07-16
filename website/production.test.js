@@ -47,7 +47,7 @@ test("GitHub main is the fail-closed Netlify production path", async () => {
     workflow.match(/^\s*NETLIFY_AUTH_TOKEN:.*$/gm),
     ["          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}"],
   );
-  assert.match(workflow, /netlify-cli@24\.11\.1 deploy/);
+  assert.match(workflow, /npx --no-install netlify deploy/);
   assert.match(workflow, /playwright install --with-deps chromium/);
   assert.match(workflow, /npm run website:test/);
   assert.match(workflow, /--dir website\/dist/);

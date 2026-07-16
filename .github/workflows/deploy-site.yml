@@ -33,7 +33,7 @@ jobs:
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
         run: >-
-          npx --yes netlify-cli@24.11.1 deploy
+          npx --no-install netlify deploy
           --prod
           --dir website/dist
           --site f4a7a382-4d6a-4d80-9109-62fb16a7293c

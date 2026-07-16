@@ -19,6 +19,11 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 test("package metadata and dry-run tarball satisfy the release contract", async () => {
   const pkg = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"));
   assert.doesNotThrow(() => validatePackageMetadata(pkg));
+  assert.throws(() => validatePackageMetadata({ ...pkg, version: "01.2.3" }), /not a publishable semantic version/);
+  assert.throws(
+    () => validatePackageMetadata({ ...pkg, publishConfig: { ...pkg.publishConfig, registry: "https://example.test" } }),
+    /publishConfig.registry must be exactly/,
+  );
 
   const [pack] = JSON.parse(execFileSync("npm", ["pack", "--dry-run", "--json", "--ignore-scripts"], {
     cwd: root,
@@ -129,6 +134,8 @@ test("publish workflow is a single GitHub-hosted OIDC path with no token or cach
   assert.ok(commands.includes("npm run release:simulate"));
   assert.ok(commands.includes("npm run release:preflight"));
   assert.deepEqual(commands.filter((command) => /^npm publish\s*$/.test(command)), ["npm publish"]);
+  assert.ok(commands.includes("npm run smoke:registry"));
+  assert.ok(commands.indexOf("npm run smoke:registry") > commands.indexOf("npm publish"));
   assert.doesNotMatch(source, /NODE_AUTH_TOKEN|NPM_TOKEN|_authToken|actions\/cache/i);
   assert.doesNotMatch(source, /^\s+cache:/im);
   assert.doesNotMatch(source, /workflow_dispatch|workflow_call|self-hosted/);

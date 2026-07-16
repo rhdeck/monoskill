@@ -19,7 +19,7 @@ The package is an ECMAScript-module Node.js CLI requiring Node.js 20 or newer.
 - `.github/workflows/ci.yml` runs the full tests, syntax and skill-contract checks, and a standard-tooling install smoke on pull requests and `main`.
 - `website/` is a dependency-light static brand site and client-side install-prompt generator. Its generator mirrors the live `add <source> --name <name>` deployment contract, shell-quotes every argument, and emits value-free analytics events. Unit and Playwright tests cover validation, generation, privacy, keyboard use, responsive behavior, and reduced motion.
 - `.github/workflows/publish.yml` is the sole automated npm publisher. A GitHub-hosted Node 24 job uses npm OIDC, serializes releases package-wide, exercises the non-publishing simulation, then rechecks the real tag and immutable registry boundary immediately before `npm publish`.
-- `scripts/release-preflight.js` owns release metadata, tag/commit identity, immutable-version, and exact dry-run tarball invariants. `scripts/smoke-packed-cli.js` installs the produced tarball in an isolated directory and executes its binary.
+- `scripts/release-preflight.js` owns release metadata, clean packaged bytes, tag/commit identity, immutable-version, and exact dry-run tarball invariants. `scripts/smoke-packed-cli.js` installs the produced tarball in an isolated directory and executes its binary. After publishing, `scripts/smoke-registry-release.js` proves clean-cache registry identity, SLSA provenance, deterministic archives, and project/global add-check-update behavior against a pinned upstream commit.
 
 The website remains outside the npm package's `files` allowlist. Its development-only Playwright dependency does not ship to CLI consumers.
 

@@ -34,3 +34,5 @@ jobs:
         run: npm run release:preflight
       - name: Publish with npm trusted publishing
         run: npm publish
+      - name: Verify the clean-cache registry release and provenance
+        run: npm run smoke:registry

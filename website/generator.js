@@ -5,7 +5,7 @@ const LOCAL_PATH = /^(?:\.{0,2}\/|~\/|\/)/;
 const BARE_LOCAL_PATH = /^[A-Za-z0-9_][A-Za-z0-9._' ()@+-]*(?:\/[A-Za-z0-9._' ()@+-]+)*$/;
 const SKILL_NAME = /^[a-z0-9-]{1,63}$/;
 const SUPPORTED_PROTOCOLS = new Set(["https:", "http:", "ssh:", "git:", "file:"]);
-const CLI_BOOTSTRAP = "npx --yes github:rhdeck/monoskill#82fff64";
+const CLI_BOOTSTRAP = "npx --yes monoskill@0.3.0";
 const SKILL_BOOTSTRAP = "npx skills add rhdeck/monoskill --skill monoskill";
 const SCOPES = new Set(["project", "global"]);
 
@@ -96,7 +96,7 @@ export function makeCommand(source, name, scope = "project") {
 /**
  * Produce an agent handoff only after `makeCommand` validates both fields. The
  * prompt bootstraps the shipped `$monoskill` skill through standard tooling,
- * previews every target with the pinned matching CLI, and deploys only after
+ * previews every target with the exact published CLI, and deploys only after
  * collision inspection. Global scope is explicitly user-authorized by the
  * generator choice and retains the CLI's required `--yes` confirmation.
  */
@@ -111,6 +111,6 @@ export function makePrompt(source, name, scope = "project") {
     preview,
     "If the preview is clean, run this exact install command:",
     command,
-    "Verify the canonical path and agent links, then inspect SKILL.md, agents/openai.yaml, provenance.json, and one bundled references/<skill>/SKILL.md. Run the pinned check command against the canonical installation and report the resolved source commit, installed targets, and drift result. Never replace a collision without explicit authorization."
+    "Verify the canonical path and agent links, then inspect SKILL.md, agents/openai.yaml, provenance.json, and one bundled references/<skill>/SKILL.md. Run the exact-version check command against the canonical installation and report the resolved source commit, installed targets, and drift result. Never replace a collision without explicit authorization."
   ].join("\n\n");
 }

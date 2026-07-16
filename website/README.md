@@ -26,6 +26,8 @@ npm run website:test
 
 The Playwright test starts the local server and covers desktop, mobile, keyboard focus, validation, copy generation, analytics privacy, and reduced motion. Visual receipts are written to `website/artifacts/` and are intentionally ignored by git.
 
+The generated CLI command is version-exact: `npx --yes monoskill@0.3.0`. The separate agent prompt retains `npx skills add rhdeck/monoskill --skill monoskill` because the skill installer discovers the repository's bundled skill rather than the npm CLI tarball.
+
 ## Production checklist
 
 1. Run `npm test`, `npm run check`, `npm run website:build`, and `npm run website:test`.

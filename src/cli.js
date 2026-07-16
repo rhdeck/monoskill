@@ -38,7 +38,7 @@ export async function run(argv) {
     return;
   }
   if (command === "--version" || command === "-v") {
-    console.log("0.3.1");
+    console.log("0.3.2");
     return;
   }
 

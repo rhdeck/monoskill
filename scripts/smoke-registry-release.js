@@ -33,7 +33,7 @@ export function validateAttestations({ metadata, bundle, pkg, githubSha }) {
   const definition = provenance.predicate?.buildDefinition;
   const workflow = definition?.externalParameters?.workflow;
   const dependency = definition?.resolvedDependencies?.find((item) => item.digest?.gitCommit === githubSha);
-  if (workflow?.repository !== "https://github.com/rhdeck/monoskill" ||
+  if (workflow?.repository !== "https://github.com/statechange/monoskill" ||
       workflow?.path !== ".github/workflows/publish.yml" || workflow?.ref !== `refs/tags/v${pkg.version}` ||
       !dependency || provenance.predicate?.runDetails?.builder?.id !== "https://github.com/actions/runner/github-hosted" ||
       definition?.internalParameters?.github?.event_name !== "push") {

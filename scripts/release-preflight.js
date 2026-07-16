@@ -7,8 +7,8 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 import semver from "semver";
 
-const EXPECTED_REPOSITORY = "git+https://github.com/rhdeck/monoskill.git";
-const EXPECTED_GITHUB_REPOSITORY = "rhdeck/monoskill";
+const EXPECTED_REPOSITORY = "git+https://github.com/statechange/monoskill.git";
+const EXPECTED_GITHUB_REPOSITORY = "statechange/monoskill";
 const DEFAULT_REGISTRY = "https://registry.npmjs.org";
 const REQUIRED_STATIC_FILES = ["LICENSE", "README.md", "bin/monoskill.js", "package.json"];
 

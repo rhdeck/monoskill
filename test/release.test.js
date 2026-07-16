@@ -38,23 +38,23 @@ test("package metadata and dry-run tarball satisfy the release contract", async 
 });
 
 test("release identity rejects mismatched tags, commits, and tag targets", () => {
-  const pkg = { version: "0.3.1" };
+  const pkg = { version: "0.3.2" };
   assert.doesNotThrow(() => validateReleaseIdentity({
-    pkg, tag: "v0.3.1", headSha: "abc", eventSha: "abc", tagSha: "abc", simulate: false,
+    pkg, tag: "v0.3.2", headSha: "abc", eventSha: "abc", tagSha: "abc", simulate: false,
   }));
   assert.throws(
     () => validateReleaseIdentity({ pkg, tag: "v0.3", headSha: "abc", eventSha: "abc", simulate: true }),
-    /tag must be exactly v0\.3\.1/,
+    /tag must be exactly v0\.3\.2/,
   );
   assert.throws(
-    () => validateReleaseIdentity({ pkg, tag: "v0.3.1", headSha: "abc", eventSha: "def", simulate: true }),
+    () => validateReleaseIdentity({ pkg, tag: "v0.3.2", headSha: "abc", eventSha: "def", simulate: true }),
     /does not match event commit/,
   );
   assert.throws(
     () => validateReleaseIdentity({
-      pkg, tag: "v0.3.1", headSha: "abc", eventSha: "abc", tagSha: "def", simulate: false,
+      pkg, tag: "v0.3.2", headSha: "abc", eventSha: "abc", tagSha: "def", simulate: false,
     }),
-    /tag v0\.3\.1 resolves to def/,
+    /tag v0\.3\.2 resolves to def/,
   );
 });
 
@@ -87,23 +87,23 @@ test("tarball inspection rejects missing, extra, duplicate, and non-executable c
 test("registry check distinguishes unpublished, immutable, and indeterminate versions", async () => {
   const response = (status) => ({ status, ok: status >= 200 && status < 300 });
   await assert.doesNotReject(() => assertVersionUnpublished({
-    registry: "https://registry.example", name: "monoskill", version: "0.3.1", fetchImpl: async () => response(404),
+    registry: "https://registry.example", name: "monoskill", version: "0.3.2", fetchImpl: async () => response(404),
   }));
   await assert.rejects(
     () => assertVersionUnpublished({
-      registry: "https://registry.example", name: "monoskill", version: "0.3.1", fetchImpl: async () => response(200),
+      registry: "https://registry.example", name: "monoskill", version: "0.3.2", fetchImpl: async () => response(200),
     }),
     /already exists; npm versions are immutable/,
   );
   await assert.rejects(
     () => assertVersionUnpublished({
-      registry: "https://registry.example", name: "monoskill", version: "0.3.1", fetchImpl: async () => response(503),
+      registry: "https://registry.example", name: "monoskill", version: "0.3.2", fetchImpl: async () => response(503),
     }),
     /failed closed with HTTP 503/,
   );
   await assert.rejects(
     () => assertVersionUnpublished({
-      registry: "https://registry.example", name: "monoskill", version: "0.3.1", fetchImpl: async () => { throw new Error("offline"); },
+      registry: "https://registry.example", name: "monoskill", version: "0.3.2", fetchImpl: async () => { throw new Error("offline"); },
     }),
     /could not verify immutable version.*offline/,
   );
@@ -115,10 +115,10 @@ test("public-source gate requires anonymous repository and exact commit visibili
     headSha: "a".repeat(40),
     fetchImpl: async (url) => url.includes("/commits/")
       ? response({ sha: "a".repeat(40) })
-      : response({ full_name: "rhdeck/monoskill", private: false }),
+      : response({ full_name: "statechange/monoskill", private: false }),
   }));
   await assert.rejects(() => assertPublicRepository({
-    headSha: "a".repeat(40), fetchImpl: async () => response({ full_name: "rhdeck/monoskill", private: true }),
+    headSha: "a".repeat(40), fetchImpl: async () => response({ full_name: "statechange/monoskill", private: true }),
   }), /not confirmed public/);
   await assert.rejects(() => assertPublicRepository({
     headSha: "a".repeat(40), fetchImpl: async () => response({}, 404),
@@ -128,14 +128,14 @@ test("public-source gate requires anonymous repository and exact commit visibili
 test("registry provenance is bound to the package, workflow, tag, commit, and hosted runner", () => {
   const sha = "a".repeat(40);
   const digest = "b".repeat(128);
-  const pkg = { name: "monoskill", version: "0.3.1" };
-  const subject = [{ name: "pkg:npm/monoskill@0.3.1", digest: { sha512: digest } }];
+  const pkg = { name: "monoskill", version: "0.3.2" };
+  const subject = [{ name: "pkg:npm/monoskill@0.3.2", digest: { sha512: digest } }];
   const attestation = (statement) => ({ bundle: { dsseEnvelope: { payload: Buffer.from(JSON.stringify(statement)).toString("base64url") } } });
   const publish = { subject, predicateType: "https://github.com/npm/attestation/tree/main/specs/publish/v0.1",
-    predicate: { name: "monoskill", version: "0.3.1", registry: "https://registry.npmjs.org" } };
+    predicate: { name: "monoskill", version: "0.3.2", registry: "https://registry.npmjs.org" } };
   const provenance = { subject, predicateType: "https://slsa.dev/provenance/v1", predicate: {
-    buildDefinition: { externalParameters: { workflow: { repository: "https://github.com/rhdeck/monoskill",
-      path: ".github/workflows/publish.yml", ref: "refs/tags/v0.3.1" } },
+    buildDefinition: { externalParameters: { workflow: { repository: "https://github.com/statechange/monoskill",
+      path: ".github/workflows/publish.yml", ref: "refs/tags/v0.3.2" } },
     internalParameters: { github: { event_name: "push" } }, resolvedDependencies: [{ digest: { gitCommit: sha } }] },
     runDetails: { builder: { id: "https://github.com/actions/runner/github-hosted" } },
   } };

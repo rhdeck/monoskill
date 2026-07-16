@@ -7,7 +7,7 @@ import YAML from "yaml";
 import { packageSkill } from "./archive.js";
 import { materializeSource } from "./source.js";
 
-const TOOL_VERSION = "0.3.0";
+const TOOL_VERSION = "0.3.1";
 
 export async function build(sourceInput, options) {
   assertSkillName(options.name);

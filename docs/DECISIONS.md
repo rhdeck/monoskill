@@ -2,9 +2,9 @@
 
 This log records settled, load-bearing product and implementation choices. Newest entries go first.
 
-## 2026-07-16 — Bootstrap consumers from the exact public registry release
+## 2026-07-16 — Correct the immutable package documentation in 0.3.1
 
-After the OIDC workflow published and verified `monoskill@0.3.0` with npm provenance, every consumer CLI command moved from a pinned GitHub checkout to `npx --yes monoskill@0.3.0`. The website generator, README, and bundled agent skill share that exact executable contract, while `npx skills add rhdeck/monoskill --skill monoskill` remains the separate standard agent-skill installer. Contract tests validate the bundled skill against the exact registry artifact it invokes and reject any return of the old GitHub bootstrap without freezing future unreleased CLI work to 0.3.0's help text.
+The immutable 0.3.0 tarball was built before the consumer cutover and therefore retained stale GitHub-backed commands in its packed README even though the repository and website had moved to the registry. Version 0.3.1 is the bounded corrective release: package metadata, CLI output, generated provenance, README, website, bundled skill, and tests share exact `npx --yes monoskill@0.3.1` commands. A regression test opens the actual npm tarball README and refuses stale GitHub or older exact-version bootstraps. The skill validator uses the local candidate only while that exact version is conclusively unpublished, then switches to the immutable registry artifact after publication; indeterminate registry errors fail closed.
 
 ## 2026-07-16 — Publish only through a version-matched npm OIDC workflow
 

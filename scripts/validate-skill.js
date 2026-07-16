@@ -8,6 +8,7 @@ import YAML from "yaml";
 const exec = promisify(execFile);
 
 const root = resolve("skills/monoskill");
+const packageManifest = JSON.parse(await readFile(resolve("package.json"), "utf8"));
 const skill = await readFile(resolve(root, "SKILL.md"), "utf8");
 const reference = await readFile(resolve(root, "references/cli.md"), "utf8");
 const metadata = parseFrontmatter(skill);
@@ -23,7 +24,7 @@ if (!metadata.description.includes("Monoskill CLI") || !metadata.description.inc
 if (!skill.includes("[references/cli.md](references/cli.md)")) throw new Error("SKILL.md must route command details to references/cli.md");
 if (!agentMetadata?.interface?.default_prompt?.includes("$monoskill")) throw new Error("agents/openai.yaml default_prompt must invoke $monoskill");
 
-const publishedVersion = "0.3.0";
+const publishedVersion = packageManifest.version;
 const cleanInvocation = `npx --yes monoskill@${publishedVersion}`;
 const documentedCommands = reference.split("\n")
   .filter((line) => line.startsWith(`${cleanInvocation} `))
@@ -34,8 +35,16 @@ const registryProbe = await mkdtemp(resolve(os.tmpdir(), "monoskill-registry-con
 let publishedHelp;
 let registryVersion;
 try {
-  ({ stdout: publishedHelp } = await exec("npx", ["--yes", `monoskill@${publishedVersion}`, "--help"], { cwd: registryProbe }));
-  ({ stdout: registryVersion } = await exec("npx", ["--yes", `monoskill@${publishedVersion}`, "--version"], { cwd: registryProbe }));
+  const registryResponse = await fetch(`https://registry.npmjs.org/monoskill/${publishedVersion}`);
+  if (registryResponse.status === 404) {
+    ({ stdout: publishedHelp } = await exec(process.execPath, [resolve("bin/monoskill.js"), "--help"]));
+    ({ stdout: registryVersion } = await exec(process.execPath, [resolve("bin/monoskill.js"), "--version"]));
+  } else if (registryResponse.ok) {
+    ({ stdout: publishedHelp } = await exec("npx", ["--yes", `monoskill@${publishedVersion}`, "--help"], { cwd: registryProbe }));
+    ({ stdout: registryVersion } = await exec("npx", ["--yes", `monoskill@${publishedVersion}`, "--version"], { cwd: registryProbe }));
+  } else {
+    throw new Error(`registry contract check failed closed with HTTP ${registryResponse.status}`);
+  }
 } finally {
   await rm(registryProbe, { recursive: true, force: true });
 }
@@ -76,7 +85,7 @@ for (const option of documentedOptions) {
   if (!supportedOptions.includes(option)) throw new Error(`skill reference documents unsupported CLI option: ${option}`);
 }
 
-console.log(`Validated monoskill skill: all ${supportedCommands.length} commands and ${supportedOptions.length} functional options match published ${publishedVersion} CLI help`);
+console.log(`Validated monoskill skill: all ${supportedCommands.length} commands and ${supportedOptions.length} functional options match ${publishedVersion} CLI help`);
 
 function parseFrontmatter(raw) {
   const match = raw.match(/^---\s*\r?\n([\s\S]*?)\r?\n---(?:\s*\r?\n|$)/);

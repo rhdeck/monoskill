@@ -38,18 +38,18 @@ test("shell quotes source and name as separate literal arguments", () => {
   assert.equal(shellQuoteSource("~/repo's skills"), "\"${HOME}\"/'repo'\\''s skills'");
   assert.equal(
     makeCommand("./repo's skills", "marketing-skills"),
-    "npx --yes monoskill@0.3.0 add './repo'\\''s skills' --name 'marketing-skills'"
+    "npx --yes monoskill@0.3.1 add './repo'\\''s skills' --name 'marketing-skills'"
   );
   assert.equal(
     makeCommand("~/skills/local", "local-skills"),
-    "npx --yes monoskill@0.3.0 add \"${HOME}\"/'skills/local' --name 'local-skills'"
+    "npx --yes monoskill@0.3.1 add \"${HOME}\"/'skills/local' --name 'local-skills'"
   );
 });
 
 test("project and global commands match the exact registry add contract", () => {
   const project = makeCommand("coreyhaines31/marketingskills", "corey-marketing");
   const global = makeCommand("coreyhaines31/marketingskills", "corey-marketing", "global");
-  assert.equal(project, "npx --yes monoskill@0.3.0 add 'coreyhaines31/marketingskills' --name 'corey-marketing'");
+  assert.equal(project, "npx --yes monoskill@0.3.1 add 'coreyhaines31/marketingskills' --name 'corey-marketing'");
   assert.equal(global, `${project} --agent codex --agent claude-code --global --yes`);
   assert.throws(() => makeCommand("owner/repo", "repo", "system"), /invalid scope/);
 });
@@ -57,7 +57,7 @@ test("project and global commands match the exact registry add contract", () => 
 test("AI prompt installs the skill, previews, and embeds the selected add command", () => {
   const command = makeCommand("coreyhaines31/marketingskills", "corey-marketing");
   const prompt = makePrompt("coreyhaines31/marketingskills", "corey-marketing");
-  assert.match(command, /^npx --yes monoskill@0\.3\.0 add /);
+  assert.match(command, /^npx --yes monoskill@0\.3\.1 add /);
   assert.ok(prompt.includes(command));
   assert.match(prompt, /npx skills add rhdeck\/monoskill --skill monoskill/);
   assert.match(prompt, /--dry-run --json/);

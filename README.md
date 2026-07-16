@@ -7,14 +7,14 @@ Compile a repository full of agent skills into one provenance-aware router skill
 `add` resolves the source, compiles every upstream skill into one router, and installs that one generated skill. Project scope is the safe default:
 
 ```bash
-npx --yes monoskill@0.3.0 add coreyhaines31/marketingskills \
+npx --yes monoskill@0.3.1 add coreyhaines31/marketingskills \
   --name corey-marketing
 ```
 
 The canonical skill path is `.agents/skills/corey-marketing`; it atomically points to the active compiled version. By default Monoskill links both `.codex/skills/corey-marketing` and `.claude/skills/corey-marketing` to it, so there is one active copy to check and update. Limit the links by repeating `--agent`:
 
 ```bash
-npx --yes monoskill@0.3.0 add coreyhaines31/marketingskills \
+npx --yes monoskill@0.3.1 add coreyhaines31/marketingskills \
   --name corey-marketing \
   --agent codex --agent claude-code
 ```
@@ -22,7 +22,7 @@ npx --yes monoskill@0.3.0 add coreyhaines31/marketingskills \
 Global installation uses the same layout under the user's home directory and requires explicit non-interactive confirmation. Codex honors `CODEX_HOME`; Claude Code honors `CLAUDE_CONFIG_DIR`, so configured harness roots are discovered instead of forced back to the defaults:
 
 ```bash
-npx --yes monoskill@0.3.0 add coreyhaines31/marketingskills \
+npx --yes monoskill@0.3.1 add coreyhaines31/marketingskills \
   --name corey-marketing \
   --agent codex --agent claude-code \
   --global --yes
@@ -33,8 +33,8 @@ Use `--dry-run` to resolve and compile the source while previewing all destinati
 Each installed `provenance.json` records the source revision, compiled skill hashes, scope, relocatable canonical path, agent targets, and link mode. Drift checks and atomic updates operate on the canonical installation; passing an agent symlink to `update` is also safe:
 
 ```bash
-npx --yes monoskill@0.3.0 check .agents/skills/corey-marketing
-npx --yes monoskill@0.3.0 update .codex/skills/corey-marketing
+npx --yes monoskill@0.3.1 check .agents/skills/corey-marketing
+npx --yes monoskill@0.3.1 update .codex/skills/corey-marketing
 ```
 
 The command is named `add` to match the familiar `skills add` source-to-harness flow. Its installed unit remains deliberately different: Monoskill always compiles many source skills into one provenance-aware router rather than selecting or installing the upstream skills individually.
@@ -44,7 +44,7 @@ Failure messages name the boundary that failed: source resolution, compilation, 
 ## Compile without installing
 
 ```bash
-npx --yes monoskill@0.3.0 build coreyhaines31/marketingskills \
+npx --yes monoskill@0.3.1 build coreyhaines31/marketingskills \
   --name corey-marketing \
   --output ~/.agents/skills/corey-marketing
 ```
@@ -65,7 +65,7 @@ corey-marketing/
 Detect vendor drift without modifying the installed skill:
 
 ```bash
-npx --yes monoskill@0.3.0 check ~/.agents/skills/corey-marketing
+npx --yes monoskill@0.3.1 check ~/.agents/skills/corey-marketing
 ```
 
 Exit status is `0` when current and `2` when the upstream commit changed or skills were added, removed, or changed. Use `--json` for automation.
@@ -73,7 +73,7 @@ Exit status is `0` when current and `2` when the upstream commit changed or skil
 Rebuild from the source recorded in `provenance.json`:
 
 ```bash
-npx --yes monoskill@0.3.0 update ~/.agents/skills/corey-marketing
+npx --yes monoskill@0.3.1 update ~/.agents/skills/corey-marketing
 ```
 
 The replacement is staged and swapped atomically. A failed swap restores the previous skill.
@@ -85,14 +85,14 @@ A `.skill` file is a standard ZIP archive whose root is the generated skill root
 Package an existing compiled skill:
 
 ```bash
-npx --yes monoskill@0.3.0 package ./corey-marketing
+npx --yes monoskill@0.3.1 package ./corey-marketing
 # writes ./corey-marketing.skill
 ```
 
 Or compile directly to one portable file without retaining an intermediate directory:
 
 ```bash
-npx --yes monoskill@0.3.0 build coreyhaines31/marketingskills \
+npx --yes monoskill@0.3.1 build coreyhaines31/marketingskills \
   --name corey-marketing \
   --archive
 ```

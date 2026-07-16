@@ -159,4 +159,4 @@ The static website and source-to-command generator live in [`website/`](website/
 npm run website:serve
 ```
 
-The website is intentionally not part of the published npm package. Production is available at [monoskill.statechange.ai](https://monoskill.statechange.ai/); see [`website/README.md`](website/README.md) for browser checks, metadata, analytics privacy, and the Netlify production contract.
+The website is intentionally not part of the published npm package. Production is available at [monoskill.com](https://monoskill.com/); see [`website/README.md`](website/README.md) for browser checks, metadata, analytics privacy, and the Netlify production contract.

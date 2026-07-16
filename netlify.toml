@@ -7,7 +7,7 @@ NODE_VERSION = "20.20.2"
 
 [[redirects]]
   from = "https://statechange-monoskill.netlify.app/*"
-  to = "https://monoskill.statechange.ai/:splat"
+  to = "https://monoskill.com/:splat"
   status = 301
   force = true
 

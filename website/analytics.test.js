@@ -15,9 +15,9 @@ test("analytics payload excludes source, inferred name, query, and hash values",
     hash: "#private-skill"
   });
   assert.deepEqual(payload, {
-    domain: "monoskill.statechange.ai",
+    domain: "monoskill.com",
     name: "source_input_completed",
-    url: "https://monoskill.statechange.ai/generator",
+    url: "https://monoskill.com/generator",
     props: { source_type: "git-url" }
   });
   assert.equal(JSON.stringify(payload).includes("private"), false);
@@ -28,12 +28,12 @@ test("collector is silent off production and posts the allowlisted payload on pr
   const beacon = (endpoint, body) => { calls.push({ endpoint, body }); return true; };
   assert.equal(collectAnalytics("copy_cli", {}, { hostname: "localhost", pathname: "/" }, beacon), false);
   assert.equal(calls.length, 0);
-  assert.equal(collectAnalytics("copy_cli", { source: "secret" }, { hostname: "monoskill.statechange.ai", pathname: "/" }, beacon), true);
+  assert.equal(collectAnalytics("copy_cli", { source: "secret" }, { hostname: "monoskill.com", pathname: "/" }, beacon), true);
   assert.equal(calls[0].endpoint, "https://plausible.io/api/event");
   assert.deepEqual(JSON.parse(await calls[0].body.text()), {
-    domain: "monoskill.statechange.ai",
+    domain: "monoskill.com",
     name: "copy_cli",
-    url: "https://monoskill.statechange.ai/"
+    url: "https://monoskill.com/"
   });
 });
 

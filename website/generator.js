@@ -5,6 +5,9 @@ const LOCAL_PATH = /^(?:\.{0,2}\/|~\/|\/)/;
 const BARE_LOCAL_PATH = /^[A-Za-z0-9_][A-Za-z0-9._' ()@+-]*(?:\/[A-Za-z0-9._' ()@+-]+)*$/;
 const SKILL_NAME = /^[a-z0-9-]{1,63}$/;
 const SUPPORTED_PROTOCOLS = new Set(["https:", "http:", "ssh:", "git:", "file:"]);
+const CLI_BOOTSTRAP = "npx --yes github:rhdeck/monoskill#82fff64";
+const SKILL_BOOTSTRAP = "npx skills add rhdeck/monoskill --skill monoskill";
+const SCOPES = new Set(["project", "global"]);
 
 /**
  * Classify source text the live CLI can materialize: GitHub owner/repo
@@ -76,28 +79,38 @@ export function shellQuoteSource(value) {
 }
 
 /**
- * Generate the live CLI's `build <source> --name <name>` invocation. Inputs
+ * Generate the live CLI's `add <source> --name <name>` invocation. Inputs
  * must pass the same source shapes and skill-name limits presented by the UI;
- * both arguments are emitted as independent POSIX shell literals.
+ * both arguments are emitted as independent POSIX shell literals. Project
+ * scope is the safe default; global scope makes both target agents and the
+ * CLI's required non-interactive confirmation explicit.
  */
-export function makeCommand(source, name) {
+export function makeCommand(source, name, scope = "project") {
   if (!validateSource(source).valid) throw new Error("Cannot generate a command for an invalid source.");
   if (!validateSkillName(name)) throw new Error("Cannot generate a command for an invalid skill name.");
-  return `npx monoskill build ${shellQuoteSource(String(source).trim())} --name ${shellQuote(name)}`;
+  if (!SCOPES.has(scope)) throw new Error("Cannot generate a command for an invalid scope.");
+  const base = `${CLI_BOOTSTRAP} add ${shellQuoteSource(String(source).trim())} --name ${shellQuote(name)}`;
+  return scope === "global" ? `${base} --agent codex --agent claude-code --global --yes` : base;
 }
 
 /**
  * Produce an agent handoff only after `makeCommand` validates both fields. The
- * prompt compiles with today's CLI, preserves the generated contract, and names
- * harness installation as a conditional manual boundary until issue #2 lands.
+ * prompt bootstraps the shipped `$monoskill` skill through standard tooling,
+ * previews every target with the pinned matching CLI, and deploys only after
+ * collision inspection. Global scope is explicitly user-authorized by the
+ * generator choice and retains the CLI's required `--yes` confirmation.
  */
-export function makePrompt(source, name) {
-  const command = makeCommand(source, name);
+export function makePrompt(source, name, scope = "project") {
+  const command = makeCommand(source, name, scope);
+  const preview = `${command.replace(/ --global --yes$/, " --global")} --dry-run --json`;
   return [
-    "Install or load the lightweight Monoskill skill if this harness provides it.",
-    `Compile the skill source into one provenance-aware router named ${JSON.stringify(name)}.`,
-    "Run this command exactly:",
+    "Install the shipped Monoskill agent skill with standard skill tooling:",
+    SKILL_BOOTSTRAP,
+    `Use $monoskill to deploy the source as one provenance-aware router named ${JSON.stringify(name)} at ${scope} scope. Read the skill's CLI reference before acting.`,
+    "Preview source resolution, compilation, collisions, and every destination without writing to a harness:",
+    preview,
+    "If the preview is clean, run this exact install command:",
     command,
-    `When it succeeds, install or link ./${name} in this harness as a skill. Do not discard SKILL.md, agents/openai.yaml, references/, or provenance.json. Report the resolved source commit and where the skill was installed. If this harness cannot install local skills, stop after compilation and explain the exact remaining manual step.`
+    "Verify the canonical path and agent links, then inspect SKILL.md, agents/openai.yaml, provenance.json, and one bundled references/<skill>/SKILL.md. Run the pinned check command against the canonical installation and report the resolved source commit, installed targets, and drift result. Never replace a collision without explicit authorization."
   ].join("\n\n");
 }

@@ -13,6 +13,7 @@ const sourceInput = document.querySelector("#source");
 const nameInput = document.querySelector("#name");
 const sourceMessage = document.querySelector("#source-message");
 const nameMessage = document.querySelector("#name-message");
+const scopeInputs = document.querySelectorAll('input[name="scope"]');
 const commandOutput = document.querySelector("#command-output");
 const promptOutput = document.querySelector("#prompt-output");
 const status = document.querySelector("#copy-status");
@@ -33,9 +34,13 @@ function trackSourceCompletion() {
   completionWasTracked = true;
 }
 
-function render() {
+function selectedScope() {
+  return document.querySelector('input[name="scope"]:checked').value;
+}
+
+function render({ inferName = true } = {}) {
   const sourceResult = validateSource(sourceInput.value);
-  if (!nameWasEdited && sourceResult.valid) nameInput.value = inferSkillName(sourceResult.value);
+  if (inferName && !nameWasEdited && sourceResult.valid) nameInput.value = inferSkillName(sourceResult.value);
   const nameValid = validateSkillName(nameInput.value);
 
   sourceInput.setAttribute("aria-invalid", String(sourceInput.value.length > 0 && !sourceResult.valid));
@@ -51,14 +56,14 @@ function render() {
   for (const button of document.querySelectorAll("[data-copy]")) button.disabled = !ready;
 
   if (!ready) {
-    commandOutput.textContent = "npx monoskill build <source> --name <name>";
+    commandOutput.textContent = "monoskill add <source> --name <name>";
     promptOutput.textContent = "Your AI-ready installation prompt will appear here.";
     completionWasTracked = false;
     return;
   }
 
-  commandOutput.textContent = makeCommand(sourceResult.value, nameInput.value);
-  promptOutput.textContent = makePrompt(sourceResult.value, nameInput.value);
+  commandOutput.textContent = makeCommand(sourceResult.value, nameInput.value, selectedScope());
+  promptOutput.textContent = makePrompt(sourceResult.value, nameInput.value, selectedScope());
 }
 
 sourceInput.addEventListener("input", () => {
@@ -75,6 +80,7 @@ nameInput.addEventListener("blur", () => {
   if (normalized) nameInput.value = normalized;
   render();
 });
+for (const input of scopeInputs) input.addEventListener("change", () => render({ inferName: false }));
 form.addEventListener("submit", (event) => event.preventDefault());
 
 document.querySelector("#example-button").addEventListener("click", () => {

@@ -14,8 +14,10 @@ test("generates safe commands without leaking pasted values to analytics", async
   await expect(page.getByRole("button", { name: "Copy command" })).toBeDisabled();
 
   await page.getByRole("button", { name: /Corey Haines/ }).click();
-  const expected = "npx monoskill build 'coreyhaines31/marketingskills' --name 'corey-marketing'";
+  const expected = "npx --yes github:rhdeck/monoskill#82fff64 add 'coreyhaines31/marketingskills' --name 'corey-marketing'";
   await expect(page.locator("#command-output")).toHaveText(expected);
+  await expect(page.locator("#prompt-output")).toContainText("npx skills add rhdeck/monoskill --skill monoskill");
+  await expect(page.locator("#prompt-output")).toContainText("--dry-run --json");
   expect(await page.evaluate(() => window.__events)).toEqual([]);
   await page.getByRole("button", { name: "Copy command" }).click();
   await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(expected);
@@ -31,6 +33,10 @@ test("generates safe commands without leaking pasted values to analytics", async
   ]);
   expect(JSON.stringify(events)).not.toContain("coreyhaines31");
   await expect(page.locator("body")).not.toHaveCSS("overflow-x", "scroll");
+
+  await page.getByRole("radio", { name: /Global/ }).check();
+  await expect(page.locator("#command-output")).toHaveText(`${expected} --agent codex --agent claude-code --global --yes`);
+  await expect(page.locator("#prompt-output")).toContainText("--global --dry-run --json");
 
   await page.screenshot({
     path: `artifacts/${isMobile ? "mobile" : "desktop"}-verified.png`,

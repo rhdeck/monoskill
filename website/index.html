@@ -87,18 +87,30 @@
           <label for="name"><span>02</span> Mono-skill name</label>
           <input id="name" name="name" autocomplete="off" spellcheck="false" placeholder="marketing-skills" aria-describedby="name-message">
           <p class="field-message" id="name-message" aria-live="polite" aria-atomic="true">This becomes the folder and skill trigger name.</p>
+
+          <fieldset class="scope-picker">
+            <legend><span>03</span> Install scope</legend>
+            <label class="scope-option">
+              <input type="radio" name="scope" value="project" checked>
+              <span><strong>Project</strong><small>Safe default. Installs in this repository.</small></span>
+            </label>
+            <label class="scope-option">
+              <input type="radio" name="scope" value="global">
+              <span><strong>Global</strong><small>Explicitly installs for your user harnesses.</small></span>
+            </label>
+          </fieldset>
         </div>
 
         <div class="outputs">
           <article class="output-block">
-            <header><h3><span>03</span> CLI command</h3><button type="button" data-copy="command-output" data-label="CLI command" data-event="copy_cli" disabled>Copy command</button></header>
-            <pre id="command-output" tabindex="0">npx monoskill build &lt;source&gt; --name &lt;name&gt;</pre>
+            <header><h3><span>04</span> Install command</h3><button type="button" data-copy="command-output" data-label="CLI command" data-event="copy_cli" disabled>Copy command</button></header>
+            <pre id="command-output" tabindex="0">monoskill add &lt;source&gt; --name &lt;name&gt;</pre>
           </article>
           <article class="output-block prompt-block">
-            <header><h3><span>04</span> AI-ready prompt</h3><button type="button" data-copy="prompt-output" data-label="AI prompt" data-event="copy_ai_prompt" disabled>Copy prompt</button></header>
+            <header><h3><span>05</span> AI-ready prompt</h3><button type="button" data-copy="prompt-output" data-label="AI prompt" data-event="copy_ai_prompt" disabled>Copy prompt</button></header>
             <pre id="prompt-output" tabindex="0">Your AI-ready installation prompt will appear here.</pre>
           </article>
-          <p class="dependency-note">The prompt compiles with today’s CLI. Harness-specific one-command deployment is <a href="https://github.com/rhdeck/monoskill/issues/2">still in progress</a>.</p>
+          <p class="dependency-note">The prompt installs the shipped <code>$monoskill</code> skill, previews every target with the pinned 0.3.0 CLI, then deploys one canonical copy with Codex and Claude Code links.</p>
         </div>
       </form>
       <p class="sr-only" id="copy-status" role="status" aria-live="polite"></p>
@@ -125,7 +137,7 @@
       <a href="https://www.npmjs.com/package/monoskill">npm</a>
       <a href="https://github.com/rhdeck/monoskill">GitHub</a>
       <a href="https://github.com/rhdeck/monoskill/blob/main/docs/ARCHITECTURE.md">Format &amp; provenance</a>
-      <a href="https://github.com/rhdeck/monoskill/issues/1">Portable .skill workflow</a>
+      <a href="https://github.com/rhdeck/monoskill#portable-skill-archives">Portable .skill workflow</a>
     </nav>
   </footer>
 </body>

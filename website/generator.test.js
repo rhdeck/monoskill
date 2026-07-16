@@ -38,19 +38,36 @@ test("shell quotes source and name as separate literal arguments", () => {
   assert.equal(shellQuoteSource("~/repo's skills"), "\"${HOME}\"/'repo'\\''s skills'");
   assert.equal(
     makeCommand("./repo's skills", "marketing-skills"),
-    "npx monoskill build './repo'\\''s skills' --name 'marketing-skills'"
+    "npx --yes github:rhdeck/monoskill#82fff64 add './repo'\\''s skills' --name 'marketing-skills'"
   );
   assert.equal(
     makeCommand("~/skills/local", "local-skills"),
-    "npx monoskill build \"${HOME}\"/'skills/local' --name 'local-skills'"
+    "npx --yes github:rhdeck/monoskill#82fff64 add \"${HOME}\"/'skills/local' --name 'local-skills'"
   );
 });
 
-test("AI prompt embeds the exact live build command and honest deployment boundary", () => {
+test("project and global commands match the pinned add contract", () => {
+  const project = makeCommand("coreyhaines31/marketingskills", "corey-marketing");
+  const global = makeCommand("coreyhaines31/marketingskills", "corey-marketing", "global");
+  assert.equal(project, "npx --yes github:rhdeck/monoskill#82fff64 add 'coreyhaines31/marketingskills' --name 'corey-marketing'");
+  assert.equal(global, `${project} --agent codex --agent claude-code --global --yes`);
+  assert.throws(() => makeCommand("owner/repo", "repo", "system"), /invalid scope/);
+});
+
+test("AI prompt installs the skill, previews, and embeds the selected add command", () => {
   const command = makeCommand("coreyhaines31/marketingskills", "corey-marketing");
   const prompt = makePrompt("coreyhaines31/marketingskills", "corey-marketing");
-  assert.match(command, /^npx monoskill build /);
+  assert.match(command, /^npx --yes github:rhdeck\/monoskill#82fff64 add /);
   assert.ok(prompt.includes(command));
-  assert.match(prompt, /cannot install local skills/);
+  assert.match(prompt, /npx skills add rhdeck\/monoskill --skill monoskill/);
+  assert.match(prompt, /--dry-run --json/);
+  assert.match(prompt, /Use \$monoskill/);
   assert.match(prompt, /provenance\.json/);
+});
+
+test("global AI prompt previews without confirmation and installs with explicit confirmation", () => {
+  const prompt = makePrompt("owner/repo", "repo", "global");
+  assert.match(prompt, /--global --dry-run --json/);
+  assert.match(prompt, /--global --yes/);
+  assert.doesNotMatch(prompt, /--global --yes --dry-run/);
 });

@@ -90,6 +90,13 @@ input:focus { border-color: var(--focus); }
 input[aria-invalid="true"] { border-color: var(--thread); }
 .field-message { min-height: 1.5rem; margin: 0 0 1.4rem; color: var(--muted); font-size: 0.8rem; }
 input[aria-invalid="true"] + .field-message { color: oklch(0.79 0.14 35); }
+.scope-picker { margin: 0; padding: 0; border: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+.scope-picker legend { width: 100%; margin-bottom: 0.65rem; padding: 0; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.scope-picker legend span { margin-right: 0.7rem; color: var(--thread-hot); font-family: var(--mono); }
+.scope-option { position: relative; min-height: 5.5rem; padding: 0.85rem; border: 1px solid var(--line); display: flex; align-items: flex-start; gap: 0.65rem; cursor: pointer; letter-spacing: normal; text-transform: none; }
+.scope-option:has(input:checked) { border-color: var(--thread-hot); background: oklch(0.24 0.04 289); }
+.scope-option input { flex: 0 0 auto; width: 1.1rem; min-height: 1.1rem; margin: 0.15rem 0 0; padding: 0; accent-color: var(--thread); }
+.scope-option span { display: grid; gap: 0.25rem; }.scope-option strong { color: var(--paper); }.scope-option small { color: var(--muted); line-height: 1.35; }
 .outputs { display: grid; gap: 1.5rem; }
 .output-block { border-top: 1px solid var(--line); }
 .output-block header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 3.8rem; }
@@ -134,6 +141,7 @@ footer p { color: var(--muted); font-size: 0.85rem; }
   .principles { grid-template-columns: 1fr; gap: 1.2rem; }
   .section-heading { grid-template-columns: 1fr; }.section-heading .eyebrow { grid-column: 1; }.example-button { margin-top: 1rem; }
   .output-block header { align-items: flex-end; }.output-block button { flex: 0 0 auto; }
+  .scope-picker { grid-template-columns: 1fr; }
   .provenance li { grid-template-columns: 1fr; gap: 0.25rem; }
   footer { align-items: flex-start; flex-direction: column; } footer nav { flex-wrap: wrap; gap: 1rem 1.5rem; }
 }

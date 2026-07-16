@@ -22,13 +22,19 @@ if (!metadata.description.includes("Monoskill CLI") || !metadata.description.inc
 if (!skill.includes("[references/cli.md](references/cli.md)")) throw new Error("SKILL.md must route command details to references/cli.md");
 if (!agentMetadata?.interface?.default_prompt?.includes("$monoskill")) throw new Error("agents/openai.yaml default_prompt must invoke $monoskill");
 
-const cleanInvocation = "npx --yes github:rhdeck/monoskill#82fff64";
+const pinnedRef = "82fff64";
+const cleanInvocation = `npx --yes github:rhdeck/monoskill#${pinnedRef}`;
 const documentedCommands = reference.split("\n")
   .filter((line) => line.startsWith(`${cleanInvocation} `))
   .map((line) => line.slice(cleanInvocation.length + 1).split(" ")[0]);
 const documentedOptions = [...new Set([...reference.matchAll(/(?:^|[\s`])(--[a-z-]+)/gm)].map((match) => match[1]))]
   .filter((option) => !["--help", "--version"].includes(option));
 const { stdout: help } = await exec(process.execPath, [resolve("bin/monoskill.js"), "--help"]);
+const { stdout: pinnedCliSource } = await exec("git", ["show", `${pinnedRef}:src/cli.js`]);
+const pinnedHelp = pinnedCliSource.match(/const HELP = `([\s\S]*?)`;/)?.[1] ?? "";
+if (help.trim() !== pinnedHelp.trim()) {
+  throw new Error(`working-tree CLI help differs from the pinned ${pinnedRef} executable used by the skill`);
+}
 const supportedCommands = [...new Set([...help.matchAll(/^  monoskill ([a-z-]+)/gm)].map((match) => match[1]))];
 const supportedOptions = [...new Set([...help.matchAll(/(?:^|\s)(--[a-z-]+)/gm)].map((match) => match[1]))]
   .filter((option) => !["--help", "--version"].includes(option));

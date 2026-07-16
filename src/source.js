@@ -18,17 +18,19 @@ export async function materializeSource(input, ref) {
       url: await gitValue(root, ["config", "--get", "remote.origin.url"]) || pathToFileURL(root).href,
       commit: await gitValue(root, ["rev-parse", "HEAD"]) || `local-${Date.now()}`,
       requestedRef: ref ?? null,
+      suggestedSkillsDir: null,
       cleanup: async () => {}
     };
   }
 
-  const url = normalizeSource(input);
+  const parsed = parseRemoteSource(input, ref);
+  const url = parsed.url;
   const temp = await mkdtemp(join(tmpdir(), "monoskill-"));
   const root = join(temp, basename(input.replace(/\.git$/, "")) || "source");
   try {
     await exec("git", ["clone", "--quiet", "--depth", "1", url, root]);
-    if (ref) {
-      await exec("git", ["-C", root, "fetch", "--quiet", "--depth", "1", "origin", ref]);
+    if (parsed.ref) {
+      await exec("git", ["-C", root, "fetch", "--quiet", "--depth", "1", "origin", parsed.ref]);
       await exec("git", ["-C", root, "checkout", "--quiet", "--detach", "FETCH_HEAD"]);
     }
     return {
@@ -36,7 +38,8 @@ export async function materializeSource(input, ref) {
       input,
       url,
       commit: await gitValue(root, ["rev-parse", "HEAD"]),
-      requestedRef: ref ?? null,
+      requestedRef: parsed.ref,
+      suggestedSkillsDir: parsed.skillsDir,
       cleanup: () => rm(temp, { recursive: true, force: true })
     };
   } catch (error) {
@@ -48,6 +51,18 @@ export async function materializeSource(input, ref) {
 export function normalizeSource(input) {
   if (/^[\w.-]+\/[\w.-]+$/.test(input)) return `https://github.com/${input}.git`;
   return input;
+}
+
+export function parseRemoteSource(input, ref) {
+  const tree = input.match(/^https?:\/\/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?\/tree\/([^/]+)(?:\/(.*))?\/?$/);
+  if (tree) {
+    return {
+      url: `https://github.com/${tree[1]}/${tree[2]}.git`,
+      ref: ref ?? decodeURIComponent(tree[3]),
+      skillsDir: tree[4] ? decodeURIComponent(tree[4].replace(/\/$/, "")) : null
+    };
+  }
+  return { url: normalizeSource(input), ref: ref ?? null, skillsDir: null };
 }
 
 async function gitValue(cwd, args) {

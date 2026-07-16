@@ -1,13 +1,13 @@
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
-import { cp, mkdir, mkdtemp, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, readdir, realpath, rename, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, relative, resolve } from "node:path";
 import YAML from "yaml";
 import { packageSkill } from "./archive.js";
 import { materializeSource } from "./source.js";
 
-const TOOL_VERSION = "0.2.0";
+const TOOL_VERSION = "0.3.0";
 
 export async function build(sourceInput, options) {
   assertSkillName(options.name);
@@ -55,6 +55,7 @@ export async function check(skillDir) {
 }
 
 export async function update(skillDir) {
+  skillDir = await realpath(skillDir);
   const manifest = await readManifest(skillDir);
   const drift = await check(skillDir);
   if (drift.current) return { current: true, commit: manifest.source.commit, skillCount: manifest.skills.length };
@@ -69,6 +70,11 @@ export async function update(skillDir) {
       skillsDir: manifest.source.skillsDir,
       output: join(temp, basename(skillDir))
     });
+    if (manifest.deployment) {
+      const nextManifest = await readManifest(result.output);
+      nextManifest.deployment = { ...manifest.deployment, updatedAt: new Date().toISOString() };
+      await writeFile(join(result.output, "provenance.json"), `${JSON.stringify(nextManifest, null, 2)}\n`);
+    }
     const backup = `${skillDir}.backup-${Date.now()}`;
     await rename(skillDir, backup);
     try {
@@ -85,7 +91,7 @@ export async function update(skillDir) {
 }
 
 async function compileMaterialized(source, options) {
-  const skillsRoot = resolveSkillsRoot(source.root, options.skillsDir);
+  const skillsRoot = resolveSkillsRoot(source.root, options.skillsDir ?? source.suggestedSkillsDir);
   const skillDirs = await findSkillDirs(skillsRoot);
   if (!skillDirs.length) throw new Error(`no SKILL.md files found under ${skillsRoot}`);
 
@@ -160,7 +166,7 @@ async function findSkillDirs(root) {
       return;
     }
     for (const entry of entries) {
-      if (!entry.isDirectory() || [".git", "node_modules", ".agents", ".claude"].includes(entry.name)) continue;
+      if (!entry.isDirectory() || [".git", "node_modules", ".agents", ".claude", ".codex"].includes(entry.name)) continue;
       await walk(join(dir, entry.name));
     }
   }

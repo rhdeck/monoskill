@@ -1,6 +1,6 @@
 {
   "name": "monoskill",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Compile a repository of agent skills into one provenance-aware router skill.",
   "type": "module",
   "bin": {

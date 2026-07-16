@@ -2,6 +2,47 @@
 
 Compile a repository full of agent skills into one provenance-aware router skill. The generated skill exposes one trigger surface, keeps upstream skills behind progressive-disclosure references, and records exactly which repository revision and content hashes produced it.
 
+## Install in one command
+
+`add` resolves the source, compiles every upstream skill into one router, and installs that one generated skill. Project scope is the safe default:
+
+```bash
+npx github:rhdeck/monoskill add coreyhaines31/marketingskills \
+  --name corey-marketing
+```
+
+The canonical compiled directory is `.agents/skills/corey-marketing`. By default Monoskill links both `.codex/skills/corey-marketing` and `.claude/skills/corey-marketing` to it, so there is one copy to check and update. Limit the links by repeating `--agent`:
+
+```bash
+npx github:rhdeck/monoskill add coreyhaines31/marketingskills \
+  --name corey-marketing \
+  --agent codex --agent claude-code
+```
+
+Global installation uses the same layout under the user's home directory and requires explicit non-interactive confirmation:
+
+```bash
+npx github:rhdeck/monoskill add coreyhaines31/marketingskills \
+  --name corey-marketing \
+  --agent codex --agent claude-code \
+  --global --yes
+```
+
+Use `--dry-run` to resolve and compile the source while previewing all destinations without writing to a harness. Add `--json` for machine-readable success or error output. Monoskill refuses the whole operation if the canonical path or any requested agent path already exists; it never guesses that a collision is safe to replace.
+
+Each installed `provenance.json` records the source revision, compiled skill hashes, scope, canonical path, agent targets, and link mode. Drift checks and atomic updates operate on the canonical installation; passing an agent symlink to `update` is also safe:
+
+```bash
+npx github:rhdeck/monoskill check .agents/skills/corey-marketing
+npx github:rhdeck/monoskill update .codex/skills/corey-marketing
+```
+
+The command is named `add` to match the familiar `skills add` source-to-harness flow. Its installed unit remains deliberately different: Monoskill always compiles many source skills into one provenance-aware router rather than selecting or installing the upstream skills individually.
+
+Failure messages name the boundary that failed: source resolution, compilation, target discovery, or deployment.
+
+## Compile without installing
+
 ```bash
 npx github:rhdeck/monoskill build coreyhaines31/marketingskills \
   --name corey-marketing \
@@ -62,7 +103,7 @@ Before packaging, Monoskill validates the generated root files, the provenance m
 
 ## Source conventions
 
-Sources can be GitHub shorthand (`owner/repo`), any Git clone URL, or a local directory. `monoskill` uses `skills/` when present; otherwise it searches the repository. Override that with `--skills-dir`. Pin a branch, tag, or commit with `--ref`.
+Sources can be GitHub shorthand (`owner/repo`), a full GitHub repository URL, a GitHub `/tree/<ref>/<path>` URL, any Git clone URL, or a local directory. `monoskill` uses `skills/` when present; otherwise it searches the repository. A tree URL supplies its ref and source path; explicit `--ref` and `--skills-dir` values override source inference. Pin a branch, tag, or commit with `--ref`.
 
 Each discovered skill must be a directory containing `SKILL.md` with YAML frontmatter. Its entire directory is preserved so relative links to scripts, references, and assets continue to work.
 

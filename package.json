@@ -23,6 +23,7 @@
     "check": "node --check bin/monoskill.js && node --check src/*.js && node --check scripts/*.js && node --check website/*.js",
     "validate:skill": "node scripts/validate-skill.js",
     "website:build": "node website/build.js",
+    "website:dev": "node website/dev.js",
     "website:serve": "node website/server.js",
     "website:test": "playwright test --config website/playwright.config.js",
     "release:preflight": "node scripts/release-preflight.js",
@@ -48,6 +49,10 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
+    "agentation": "^3.0.2",
+    "esbuild": "^0.25.6",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
     "semver": "^7.7.2",
     "yauzl": "^3.4.0"
   }

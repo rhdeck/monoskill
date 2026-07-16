@@ -52,6 +52,8 @@ h1, h2, h3, p { text-wrap: pretty; }
 h1 { margin: 0; font-family: var(--display); font-size: clamp(4rem, 8.5vw, 8rem); font-stretch: condensed; font-weight: 900; letter-spacing: -0.045em; line-height: 0.82; text-transform: uppercase; text-wrap: balance; }
 h1 strong { color: var(--thread); font-weight: inherit; }
 .lede { max-width: 38rem; margin: 2rem 0; color: var(--muted); font-size: clamp(1.05rem, 1.8vw, 1.35rem); line-height: 1.55; }
+.gift-note { margin: -0.75rem 0 2rem; color: var(--muted); font-size: 0.85rem; }
+.gift-note a, footer p a { color: var(--paper); font-weight: 700; }
 .primary-link { display: inline-flex; min-height: 3.25rem; align-items: center; gap: 1rem; padding: 0.7rem 1.15rem; background: var(--thread); color: var(--ink); font-weight: 800; text-decoration: none; transition: transform 220ms var(--ease-out), background 220ms var(--ease-out); }
 .primary-link:hover { transform: translateY(-2px); background: var(--thread-hot); }
 

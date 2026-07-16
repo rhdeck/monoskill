@@ -1,14 +1,22 @@
 # Monoskill website
 
-Static, dependency-free product site and install-prompt generator.
+Static product site and install-prompt generator. The production artifact is dependency-free; local visual review adds a dev-only Agentation island.
 
 ## Run locally
+
+```bash
+npm run website:dev
+```
+
+Open `http://127.0.0.1:4173`. This development server adds the Agentation toolbar for element-level visual feedback. Annotations stay in the browser unless you explicitly copy or send them. Agentation and its React island are development dependencies; neither enters `website/dist/` or loads on `monoskill.com`.
+
+For a production-like preview without the feedback toolbar:
 
 ```bash
 npm run website:serve
 ```
 
-Open `http://127.0.0.1:4173`. The generator runs entirely in the browser. It does not submit, store, or log source values. On the canonical `monoskill.com` host only, the built-in collector sends these events to Plausible's Events API:
+The generator runs entirely in the browser. It does not submit, store, or log source values. On the canonical `monoskill.com` host only, the built-in collector sends these events to Plausible's Events API:
 
 - `source_input_completed` with `source_type` (`github-shorthand`, `git-url`, or `local-path`)
 - `copy_cli`

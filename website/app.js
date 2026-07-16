@@ -8,6 +8,10 @@ import {
 } from "./generator.js";
 import { collectAnalytics } from "./analytics.js";
 
+if (["127.0.0.1", "localhost"].includes(window.location.hostname)) {
+  import("./agentation.js").catch(() => {});
+}
+
 const form = document.querySelector("#generator-form");
 const sourceInput = document.querySelector("#source");
 const nameInput = document.querySelector("#name");

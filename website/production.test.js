@@ -37,6 +37,30 @@ test("Netlify contract builds the verified static site with restrictive headers"
   assert.match(config, /frame-ancestors 'none'/);
 });
 
+test("Agentation is available locally without entering the production bundle", async () => {
+  const [app, html, dev, entry, packageText] = await Promise.all([
+    read("./app.js"),
+    read("./index.html"),
+    read("./dev.js"),
+    read("./agentation-entry.jsx"),
+    read("../package.json")
+  ]);
+  const packageJson = JSON.parse(packageText);
+
+  assert.equal(packageJson.scripts["website:dev"], "node website/dev.js");
+  assert.equal(packageJson.devDependencies.agentation, "^3.0.2");
+  assert.match(app, /\["127\.0\.0\.1", "localhost"\]/);
+  assert.match(app, /import\("\.\/agentation\.js"\)/);
+  assert.match(dev, /agentation-entry\.jsx/);
+  assert.match(entry, /<Agentation \/>/);
+  assert.doesNotMatch(html, /agentation\.js/);
+});
+
+test("State Change is credited as the giver", async () => {
+  const html = await read("./index.html");
+  assert.match(html, /A free gift from <a href="https:\/\/statechange\.ai\/">State Change<\/a>\./);
+});
+
 test("GitHub main is the fail-closed Netlify production path", async () => {
   const workflow = await read("../.github/workflows/deploy-site.yml");
   const config = parse(workflow);

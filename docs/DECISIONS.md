@@ -2,6 +2,10 @@
 
 This log records settled, load-bearing product and implementation choices. Newest entries go first.
 
+## 2026-07-16 — Move canonical ownership to State Change
+
+The public repository's canonical home is `statechange/monoskill`; `rhdeck/monoskill` remains only as GitHub's transfer redirect and must not be recreated. Version 0.3.2 is the ownership-cutover release: package metadata, trusted-publisher identity, provenance checks, bundled skill discovery, website links, and exact CLI examples all resolve through the organization-owned repository. This supersedes the personal-owner binding recorded below. The npm package name remains the unscoped `monoskill`, and `monoskill.statechange.ai` remains the production origin.
+
 ## 2026-07-16 — Correct the immutable package documentation in 0.3.1
 
 The immutable 0.3.0 tarball was built before the consumer cutover and therefore retained stale GitHub-backed commands in its packed README even though the repository and website had moved to the registry. Version 0.3.1 is the bounded corrective release: package metadata, CLI output, generated provenance, README, website, bundled skill, and tests share exact `npx --yes monoskill@0.3.1` commands. A regression test opens the actual npm tarball README and refuses stale GitHub or older exact-version bootstraps. The skill validator uses the local candidate only while that exact version is conclusively unpublished, then switches to the immutable registry artifact after publication; indeterminate registry errors fail closed.

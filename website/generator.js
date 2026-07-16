@@ -5,8 +5,8 @@ const LOCAL_PATH = /^(?:\.{0,2}\/|~\/|\/)/;
 const BARE_LOCAL_PATH = /^[A-Za-z0-9_][A-Za-z0-9._' ()@+-]*(?:\/[A-Za-z0-9._' ()@+-]+)*$/;
 const SKILL_NAME = /^[a-z0-9-]{1,63}$/;
 const SUPPORTED_PROTOCOLS = new Set(["https:", "http:", "ssh:", "git:", "file:"]);
-const CLI_BOOTSTRAP = "npx --yes monoskill@0.3.1";
-const SKILL_BOOTSTRAP = "npx skills add rhdeck/monoskill --skill monoskill";
+const CLI_BOOTSTRAP = "npx --yes monoskill@0.3.2";
+const SKILL_BOOTSTRAP = "npx skills add statechange/monoskill --skill monoskill";
 const SCOPES = new Set(["project", "global"]);
 
 /**

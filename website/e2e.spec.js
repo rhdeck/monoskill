@@ -22,9 +22,9 @@ test("generates safe commands without leaking pasted values to analytics", async
   await expect(page.getByRole("button", { name: "Copy command" })).toBeDisabled();
 
   await page.getByRole("button", { name: /Corey Haines/ }).click();
-  const expected = "npx --yes monoskill@0.3.1 add 'coreyhaines31/marketingskills' --name 'corey-marketing'";
+  const expected = "npx --yes monoskill@0.3.2 add 'coreyhaines31/marketingskills' --name 'corey-marketing'";
   await expect(page.locator("#command-output")).toHaveText(expected);
-  await expect(page.locator("#prompt-output")).toContainText("npx skills add rhdeck/monoskill --skill monoskill");
+  await expect(page.locator("#prompt-output")).toContainText("npx skills add statechange/monoskill --skill monoskill");
   await expect(page.locator("#prompt-output")).toContainText("--dry-run --json");
   expect(await page.evaluate(() => window.__events)).toEqual([]);
   await page.getByRole("button", { name: "Copy command" }).click();

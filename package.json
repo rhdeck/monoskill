@@ -1,10 +1,10 @@
 {
   "name": "monoskill",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Compile a repository of agent skills into one provenance-aware router skill.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rhdeck/monoskill.git"
+    "url": "git+https://github.com/statechange/monoskill.git"
   },
   "publishConfig": {
     "access": "public",

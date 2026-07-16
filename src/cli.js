@@ -1,10 +1,13 @@
 import { resolve } from "node:path";
-import { build, check, update } from "./compiler.js";
+import { packageSkill } from "./archive.js";
+import { build, buildArchive, check, update } from "./compiler.js";
 
 const HELP = `monoskill — compile many agent skills into one router skill
 
 Usage:
   monoskill build <source> --name <name> [--output <dir>] [--ref <git-ref>]
+  monoskill build <source> --name <name> --archive [--output <file.skill>] [--force]
+  monoskill package <skill-dir> [--output <file.skill>] [--force]
   monoskill check <skill-dir> [--json]
   monoskill update <skill-dir>
 
@@ -12,10 +15,12 @@ Source may be a local directory, Git URL, or GitHub owner/repo shorthand.
 
 Options:
   -n, --name <name>          Generated skill name (build only)
-  -o, --output <dir>        Output directory (default: ./<name>)
+  -o, --output <path>       Output directory, or .skill file with --archive/package
       --ref <git-ref>       Branch, tag, or commit to compile
       --skills-dir <path>   Skill root inside source (auto-detected by default)
       --description <text>  Override generated skill description
+      --archive             Build directly to a portable .skill archive
+      --force               Replace an existing archive
       --json                Machine-readable check output
   -h, --help                Show this help
   -v, --version             Show the version`;
@@ -27,7 +32,7 @@ export async function run(argv) {
     return;
   }
   if (command === "--version" || command === "-v") {
-    console.log("0.1.0");
+    console.log("0.2.0");
     return;
   }
 
@@ -36,10 +41,27 @@ export async function run(argv) {
 
   if (command === "build") {
     if (!options.name) throw new Error("build requires --name <name>");
+    if (options.archive) {
+      const output = resolve(options.output ?? `${options.name}.skill`);
+      const result = await buildArchive(positional, { ...options, output });
+      console.log(`Built ${result.skillCount} skills into ${result.output}`);
+      console.log(`Source: ${result.sourceUrl} @ ${result.commit.slice(0, 12)}`);
+      return;
+    }
+    if (options.force) throw new Error("--force requires package or build --archive");
     const output = resolve(options.output ?? options.name);
     const result = await build(positional, { ...options, output });
     console.log(`Built ${result.skillCount} skills into ${result.output}`);
     console.log(`Source: ${result.sourceUrl} @ ${result.commit.slice(0, 12)}`);
+    return;
+  }
+  if (command === "package") {
+    if (options.archive) throw new Error("package does not accept --archive");
+    const result = await packageSkill(resolve(positional), {
+      output: options.output ? resolve(options.output) : undefined,
+      force: options.force
+    });
+    console.log(`Packaged ${result.skillCount} skills into ${result.output}`);
     return;
   }
   if (command === "check") {
@@ -67,8 +89,8 @@ function parseOptions(args) {
   const aliases = { "-n": "name", "--name": "name", "-o": "output", "--output": "output", "--ref": "ref", "--skills-dir": "skillsDir", "--description": "description" };
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
-    if (arg === "--json") {
-      options.json = true;
+    if (["--json", "--archive", "--force"].includes(arg)) {
+      options[arg.slice(2)] = true;
       continue;
     }
     const key = aliases[arg];

@@ -2,6 +2,10 @@
 
 This log records settled, load-bearing product and implementation choices. Newest entries go first.
 
+## 2026-07-16 — Make `.skill` a deterministic, archive-only build target
+
+A `.skill` artifact is a standard ZIP whose root exactly matches the generated directory contract, without an enclosing folder. `package` converts an existing compiled directory; `build --archive` compiles through a temporary directory and leaves only the archive. Entries are ordered lexically with normalized timestamps, while file modes, symlinks, empty directories, provenance, and complete reference trees are preserved. Direct archive builds record `compiledAt: null` so the build clock cannot change artifact bytes. Archive publication refuses existing paths unless `--force` is explicit.
+
 ## 2026-07-15 — Publish the CLI as `monoskill`
 
 The public npm package and executable are named `monoskill`. The singular name describes the product's core transformation: many upstream skills become one composed skill and one trigger surface.
@@ -21,4 +25,3 @@ The first CLI uses JavaScript rather than a TypeScript build pipeline to keep np
 ## 2026-07-14 — Make updates atomic
 
 `update` compiles into staging, swaps the generated directory only after compilation succeeds, and restores the prior directory if the swap fails. An upstream error must not destroy a working installed skill.
-

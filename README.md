@@ -37,6 +37,29 @@ npx github:rhdeck/monoskill update ~/.agents/skills/corey-marketing
 
 The replacement is staged and swapped atomically. A failed swap restores the previous skill.
 
+## Portable `.skill` archives
+
+A `.skill` file is a standard ZIP archive whose root is the generated skill root. It contains `SKILL.md`, `agents/openai.yaml`, `provenance.json`, the complete `references/` trees, and every other file in the compiled directory. There is no extra enclosing directory, so extracting the archive directly produces a usable skill.
+
+Package an existing compiled skill:
+
+```bash
+npx github:rhdeck/monoskill package ./corey-marketing
+# writes ./corey-marketing.skill
+```
+
+Or compile directly to one portable file without retaining an intermediate directory:
+
+```bash
+npx github:rhdeck/monoskill build coreyhaines31/marketingskills \
+  --name corey-marketing \
+  --archive
+```
+
+Use `--output ./artifacts/corey-marketing.skill` to choose the archive path. Archive output must end in `.skill` and must live outside the input skill directory. Existing artifacts are never replaced unless `--force` is explicit.
+
+Before packaging, Monoskill validates the generated root files, the provenance manifest, and every referenced skill entrypoint. Entries are stored in lexical order with normalized timestamps while preserving file contents, relative paths, filesystem modes, symlinks, and empty directories. Packaging the same compiled tree twice therefore produces byte-identical archives. Direct archive builds also omit the volatile build clock (`compiledAt` is `null`), so compiling the same source and options produces the same bytes.
+
 ## Source conventions
 
 Sources can be GitHub shorthand (`owner/repo`), any Git clone URL, or a local directory. `monoskill` uses `skills/` when present; otherwise it searches the repository. Override that with `--skills-dir`. Pin a branch, tag, or commit with `--ref`.
@@ -48,6 +71,7 @@ Each discovered skill must be a directory containing `SKILL.md` with YAML frontm
 ```bash
 npm install
 npm test
+npm run check
 ```
 
 MIT

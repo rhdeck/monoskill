@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { inferSkillName, makeCommand, makePrompt, normalizeSkillName, shellQuote, validateSkillName, validateSource } from "./generator.js";
+import { inferSkillName, makeCommand, makePrompt, normalizeSkillName, shellQuote, shellQuoteSource, validateSkillName, validateSource } from "./generator.js";
 
 test("accepts every source form supported by the website", () => {
   for (const source of [
@@ -8,6 +8,7 @@ test("accepts every source form supported by the website", () => {
     "https://github.com/coreyhaines31/marketingskills.git",
     "git@github.com:coreyhaines31/marketingskills.git",
     "ssh://git@github.com/coreyhaines31/marketingskills.git",
+    "file:///tmp/local-skills",
     "./local-skills",
     "../local-skills",
     "~/skills/local",
@@ -32,9 +33,14 @@ test("infers and normalizes CLI-compatible names", () => {
 
 test("shell quotes source and name as separate literal arguments", () => {
   assert.equal(shellQuote("repo's skills"), "'repo'\\''s skills'");
+  assert.equal(shellQuoteSource("~/repo's skills"), "\"${HOME}\"/'repo'\\''s skills'");
   assert.equal(
     makeCommand("./repo's skills", "marketing-skills"),
     "npx monoskill build './repo'\\''s skills' --name 'marketing-skills'"
+  );
+  assert.equal(
+    makeCommand("~/skills/local", "local-skills"),
+    "npx monoskill build \"${HOME}\"/'skills/local' --name 'local-skills'"
   );
 });
 

@@ -3,6 +3,7 @@ node_modules/
 .DS_Store
 coverage/
 website/artifacts/
+website/dist/
 artifacts/
 .playwright-cli/
 test-results/

@@ -16,7 +16,7 @@ export function validateSource(raw) {
 
   try {
     const url = new URL(source);
-    if (SUPPORTED_PROTOCOLS.has(url.protocol) && url.hostname) {
+    if (SUPPORTED_PROTOCOLS.has(url.protocol) && (url.hostname || url.protocol === "file:" && url.pathname.startsWith("/"))) {
       return { valid: true, value: source, type: url.protocol === "file:" ? "local-path" : "git-url" };
     }
   } catch {
@@ -54,10 +54,27 @@ export function shellQuote(value) {
   return `'${String(value).replace(/'/g, `'\\''`)}'`;
 }
 
+/**
+ * Render one validated source as a single POSIX shell argument. A leading `~/`
+ * is expressed as the shell's HOME variable plus a separately single-quoted
+ * suffix; quoting the tilde itself would disable expansion. All other content
+ * uses `shellQuote`, so spaces and shell metacharacters remain literal.
+ */
+export function shellQuoteSource(value) {
+  const source = String(value);
+  if (source.startsWith("~/")) return `"\${HOME}"/${shellQuote(source.slice(2))}`;
+  return shellQuote(source);
+}
+
+/**
+ * Generate the live CLI's `build <source> --name <name>` invocation. Inputs
+ * must pass the same source shapes and skill-name limits presented by the UI;
+ * both arguments are emitted as independent POSIX shell literals.
+ */
 export function makeCommand(source, name) {
   if (!validateSource(source).valid) throw new Error("Cannot generate a command for an invalid source.");
   if (!validateSkillName(name)) throw new Error("Cannot generate a command for an invalid skill name.");
-  return `npx monoskill build ${shellQuote(String(source).trim())} --name ${shellQuote(name)}`;
+  return `npx monoskill build ${shellQuoteSource(String(source).trim())} --name ${shellQuote(name)}`;
 }
 
 export function makePrompt(source, name) {

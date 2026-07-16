@@ -25,6 +25,13 @@ function track(event, detail = {}) {
   if (typeof window.plausible === "function") window.plausible(event, { props: detail });
 }
 
+function trackSourceCompletion() {
+  const sourceResult = validateSource(sourceInput.value);
+  if (completionWasTracked || !sourceResult.valid || !validateSkillName(nameInput.value)) return;
+  track("source_input_completed", { source_type: sourceResult.type });
+  completionWasTracked = true;
+}
+
 function render() {
   const sourceResult = validateSource(sourceInput.value);
   if (!nameWasEdited && sourceResult.valid) nameInput.value = inferSkillName(sourceResult.value);
@@ -51,13 +58,13 @@ function render() {
 
   commandOutput.textContent = makeCommand(sourceResult.value, nameInput.value);
   promptOutput.textContent = makePrompt(sourceResult.value, nameInput.value);
-  if (!completionWasTracked) {
-    track("source_input_completed", { source_type: sourceResult.type });
-    completionWasTracked = true;
-  }
 }
 
-sourceInput.addEventListener("input", render);
+sourceInput.addEventListener("input", () => {
+  completionWasTracked = false;
+  render();
+});
+sourceInput.addEventListener("blur", trackSourceCompletion);
 nameInput.addEventListener("input", () => {
   nameWasEdited = true;
   render();
@@ -80,6 +87,7 @@ document.querySelector("#example-button").addEventListener("click", () => {
 for (const button of document.querySelectorAll("[data-copy]")) {
   button.addEventListener("click", async () => {
     const target = document.querySelector(`#${button.dataset.copy}`);
+    trackSourceCompletion();
     try {
       await navigator.clipboard.writeText(target.textContent);
       const previous = button.textContent;

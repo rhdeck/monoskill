@@ -15,6 +15,7 @@ test("generates safe commands without leaking pasted values to analytics", async
   await page.getByRole("button", { name: /Corey Haines/ }).click();
   const expected = "npx monoskill build 'coreyhaines31/marketingskills' --name 'corey-marketing'";
   await expect(page.locator("#command-output")).toHaveText(expected);
+  expect(await page.evaluate(() => window.__events)).toEqual([]);
   await page.getByRole("button", { name: "Copy command" }).click();
   await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(expected);
 

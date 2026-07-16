@@ -1,5 +1,6 @@
-import { readFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { execFile } from "node:child_process";
+import os from "node:os";
 import { resolve } from "node:path";
 import { promisify } from "node:util";
 import YAML from "yaml";
@@ -22,18 +23,28 @@ if (!metadata.description.includes("Monoskill CLI") || !metadata.description.inc
 if (!skill.includes("[references/cli.md](references/cli.md)")) throw new Error("SKILL.md must route command details to references/cli.md");
 if (!agentMetadata?.interface?.default_prompt?.includes("$monoskill")) throw new Error("agents/openai.yaml default_prompt must invoke $monoskill");
 
-const pinnedRef = "82fff64";
-const cleanInvocation = `npx --yes github:rhdeck/monoskill#${pinnedRef}`;
+const publishedVersion = "0.3.0";
+const cleanInvocation = `npx --yes monoskill@${publishedVersion}`;
 const documentedCommands = reference.split("\n")
   .filter((line) => line.startsWith(`${cleanInvocation} `))
   .map((line) => line.slice(cleanInvocation.length + 1).split(" ")[0]);
 const documentedOptions = [...new Set([...reference.matchAll(/(?:^|[\s`])(--[a-z-]+)/gm)].map((match) => match[1]))]
   .filter((option) => !["--help", "--version"].includes(option));
 const { stdout: help } = await exec(process.execPath, [resolve("bin/monoskill.js"), "--help"]);
-const { stdout: pinnedCliSource } = await exec("git", ["show", `${pinnedRef}:src/cli.js`]);
-const pinnedHelp = pinnedCliSource.match(/const HELP = `([\s\S]*?)`;/)?.[1] ?? "";
-if (help.trim() !== pinnedHelp.trim()) {
-  throw new Error(`working-tree CLI help differs from the pinned ${pinnedRef} executable used by the skill`);
+const registryProbe = await mkdtemp(resolve(os.tmpdir(), "monoskill-registry-contract-"));
+let publishedHelp;
+let registryVersion;
+try {
+  ({ stdout: publishedHelp } = await exec("npx", ["--yes", `monoskill@${publishedVersion}`, "--help"], { cwd: registryProbe }));
+  ({ stdout: registryVersion } = await exec("npx", ["--yes", `monoskill@${publishedVersion}`, "--version"], { cwd: registryProbe }));
+} finally {
+  await rm(registryProbe, { recursive: true, force: true });
+}
+if (registryVersion.trim() !== publishedVersion) {
+  throw new Error(`registry bootstrap resolved ${registryVersion.trim()}, expected ${publishedVersion}`);
+}
+if (help.trim() !== publishedHelp.trim()) {
+  throw new Error(`working-tree CLI help differs from the published ${publishedVersion} executable used by the skill`);
 }
 const supportedCommands = [...new Set([...help.matchAll(/^  monoskill ([a-z-]+)/gm)].map((match) => match[1]))];
 const supportedOptions = [...new Set([...help.matchAll(/(?:^|\s)(--[a-z-]+)/gm)].map((match) => match[1]))]

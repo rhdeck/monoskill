@@ -2,6 +2,10 @@
 
 This log records settled, load-bearing product and implementation choices. Newest entries go first.
 
+## 2026-07-16 — Bootstrap consumers from the exact public registry release
+
+After the OIDC workflow published and verified `monoskill@0.3.0` with npm provenance, every consumer CLI command moved from a pinned GitHub checkout to `npx --yes monoskill@0.3.0`. The website generator, README, and bundled agent skill share that exact executable contract, while `npx skills add rhdeck/monoskill --skill monoskill` remains the separate standard agent-skill installer. Contract tests compare the working CLI help to the registry artifact and reject any return of the old GitHub bootstrap.
+
 ## 2026-07-16 — Publish only through a version-matched npm OIDC workflow
 
 The sole automated publisher is the tag-triggered, GitHub-hosted `.github/workflows/publish.yml`, bound in npm as `rhdeck / monoskill / publish.yml` with no environment and allowed action `npm publish`. It uses Node 24 and npm 11.5.1, has only `contents: read` and `id-token: write`, carries no npm token fallback or release cache, and serializes all package releases. Preflight requires exact package/registry metadata, `v<package-version>`, identical tag/event/checkout commits, clean packaged bytes, an unpublished immutable version, and an exact tarball; simulation plus packed-install smoke exercises every pre-publish repository-controlled step except the outward publish. Issue #13's public-repository cutover precedes the first release so trusted publishing can generate npm's automatic provenance attestation. The workflow then verifies the clean-cache registry artifact, provenance, deterministic archives, and project/global lifecycle as its immutable release receipt.

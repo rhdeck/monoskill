@@ -6,7 +6,9 @@ test("generates safe commands without leaking pasted values to analytics", async
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/");
   await expect(page.locator(".skill-field span")).toHaveCount(47);
-  await expect(page.locator(".skill-paths path")).toHaveCount(47);
+  await expect(page.locator(".skill-row")).toHaveCount(10);
+  await expect(page.locator(".skill-paths")).toHaveCount(0);
+  await expect(page.locator(".transfer-funnel")).toHaveCount(1);
   await expect(page.locator(".package-contents i")).toHaveCount(47);
   expect(await page.evaluate(() => document.body.scrollWidth - document.documentElement.clientWidth)).toBe(0);
   await page.evaluate(() => {
@@ -68,19 +70,57 @@ test("generates safe commands without leaking pasted values to analytics", async
 test("honors reduced motion and exposes a keyboard path", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
+  await expect(page.locator(".convergence")).toHaveAttribute("data-animation-step", "settled");
+  expect(await page.locator(".package-contents i").evaluateAll((cells) => cells.filter((cell) => Number(getComputedStyle(cell).opacity) > 0.5).length)).toBe(47);
   await page.keyboard.press("Tab");
   await expect(page.locator(".skip-link")).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page.locator("#source")).toBeInViewport();
-  const duration = await page.locator(".skill-field span").first().evaluate((element) => parseFloat(getComputedStyle(element).animationDuration));
-  expect(duration).toBeLessThan(0.001);
+  await expect(page.locator(".transfer-funnel")).toBeHidden();
+});
+
+test("uses one seekable timeline to synchronize transfer, water, and package fill", async ({ page }, testInfo) => {
+  await page.goto("/");
+  await page.waitForFunction(() => Boolean(window.__monoskillAnimation));
+  expect(await page.evaluate(() => window.__monoskillAnimation.labels)).toEqual([
+    "flooded",
+    "transfer-01", "transfer-02", "transfer-03", "transfer-04", "transfer-05",
+    "transfer-06", "transfer-07", "transfer-08", "transfer-09", "transfer-10",
+    "packed", "settled", "reset"
+  ]);
+
+  const receipt = (pose) => `artifacts/story-${testInfo.project.name}-${pose}.png`;
+  await page.evaluate(() => window.__monoskillAnimation.seek("flooded"));
+  await page.locator(".convergence").screenshot({ path: receipt("flooded") });
+
+  await page.evaluate(() => window.__monoskillAnimation.seek("transfer-06", 0.48));
+  await expect(page.locator(".convergence")).toHaveAttribute("data-animation-step", "transfer-06");
+  await expect(page.locator(".package-count")).toHaveText("25 / 47 packed");
+  expect(await page.locator(".skill-field span").evaluateAll((skills) => skills.filter((skill) => Number(getComputedStyle(skill).opacity) < 0.05).length)).toBe(25);
+  expect(await page.locator(".package-contents i").evaluateAll((cells) => cells.filter((cell) => Number(getComputedStyle(cell).opacity) > 0.5).length)).toBe(25);
+  await page.evaluate(() => window.__monoskillAnimation.seek("transfer-06", 0.72));
+  await page.locator(".convergence").screenshot({ path: receipt("transfer") });
+
+  await page.evaluate(() => window.__monoskillAnimation.seek("settled", 0.8));
+  await expect(page.locator(".convergence")).toHaveAttribute("data-animation-step", "settled");
+  await expect(page.locator(".package-count")).toHaveText("47 skills inside");
+  expect(await page.locator(".package-contents i").evaluateAll((cells) => cells.filter((cell) => Number(getComputedStyle(cell).opacity) > 0.5).length)).toBe(47);
+  await page.locator(".convergence").screenshot({ path: receipt("settled") });
 });
 
 test("stacks the hero at the in-app browser width", async ({ page }) => {
   await page.setViewportSize({ width: 1003, height: 1200 });
   await page.goto("/");
   await expect(page.locator(".skill-field span")).toHaveCount(47);
-  await expect(page.locator(".skill-paths path")).toHaveCount(47);
+  await expect(page.locator(".skill-row")).toHaveCount(10);
+  await expect(page.locator(".skill-paths")).toHaveCount(0);
   expect(await page.locator(".hero").evaluate((element) => getComputedStyle(element).display)).toBe("block");
   expect(await page.evaluate(() => document.body.scrollWidth - document.documentElement.clientWidth)).toBe(0);
+  await page.waitForFunction(() => Boolean(window.__monoskillAnimation));
+  await page.evaluate(() => window.__monoskillAnimation.seek("flooded"));
+  await page.locator(".convergence").screenshot({ path: "artifacts/story-in-app-1003-flooded.png" });
+  await page.evaluate(() => window.__monoskillAnimation.seek("transfer-06", 0.72));
+  await page.locator(".convergence").screenshot({ path: "artifacts/story-in-app-1003-transfer.png" });
+  await page.evaluate(() => window.__monoskillAnimation.seek("settled", 0.8));
+  await page.locator(".convergence").screenshot({ path: "artifacts/story-in-app-1003-settled.png" });
 });

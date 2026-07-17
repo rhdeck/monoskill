@@ -1,6 +1,6 @@
 # Monoskill website
 
-Static product site and install-prompt generator. The production artifact is dependency-free; local visual review adds a dev-only Agentation island.
+Static product site and install-prompt generator. GSAP is bundled into the self-contained production artifact; local visual review adds a dev-only Agentation island.
 
 ## Run locally
 

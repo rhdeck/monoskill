@@ -15,7 +15,7 @@ createServer(async (request, response) => {
     return;
   }
   try {
-    const file = relative === "agentation.js" ? join(root, ".dev", "agentation.js") : join(root, relative);
+    const file = ["agentation.js", "app.js"].includes(relative) ? join(root, ".dev", relative) : join(root, relative);
     const body = await readFile(file);
     response.writeHead(200, {
       "content-type": `${types[extname(relative)] || "application/octet-stream"}; charset=utf-8`,

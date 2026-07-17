@@ -8,12 +8,16 @@ const output = join(root, ".dev");
 
 await mkdir(output, { recursive: true });
 await build({
-  entryPoints: [join(root, "agentation-entry.jsx")],
-  outfile: join(output, "agentation.js"),
+  entryPoints: {
+    app: join(root, "app.js"),
+    agentation: join(root, "agentation-entry.jsx")
+  },
+  outdir: output,
   bundle: true,
   format: "esm",
   jsx: "automatic",
-  sourcemap: "inline"
+  sourcemap: "inline",
+  external: ["./agentation.js"]
 });
 
 await import("./server.js");

@@ -35,7 +35,7 @@ The page is a sequence of three physical states: discovery metadata raises a vis
 
 ## Components
 
-- A code-native convergence field made from semantic skill fragments, SVG paths, and one package silhouette.
+- A code-native convergence field made from ten legible rows of semantic skill fragments, one physical compression funnel, and one package silhouette.
 - A visible, qualified comparison of individual discovery metadata against the compiled entry point.
 - One dominant labeled source input with inferred-name editing immediately downstream.
 - Two copy surfaces for the live CLI command and AI-ready prompt, visually subordinate to the input but available without scrolling on a common laptop viewport.
@@ -44,7 +44,7 @@ The page is a sequence of three physical states: discovery metadata raises a vis
 
 ## Motion
 
-The opening state shows all 47 real Corey Haines skills inside an already-flooded discovery context, with an empty Monoskill visible as their destination. Each skill box follows its own measured path through the compression throat. As the boxes enter, the water falls, the Monoskill reveals a 47-item internal grid, and the filled package settles to the bottom. Input completion tightens the field and briefly seals the package. Copy actions use a restrained color and label transition. Use transform and opacity only, with exponential easing. Reduced motion shows the fully drained end state and retains the full collection count.
+The opening state shows all 47 real Corey Haines skills inside an already-flooded discovery context, with an empty Monoskill visible as their destination. One GSAP master timeline carries the complete story through named poses: `flooded`, ten numbered transfers, `packed`, `settled`, and `reset`. During each transfer, one still-legible row moves through the same visible funnel while that exact timeline label lowers the water and fills the matching package cells. No separate route-line, water, or package animation may run independently. The completed package settles only after all 47 cells are filled. Use transform and opacity, batch geometry reads before timeline writes, pause the sequence when it is off-screen, and expose labels for deterministic visual testing. Reduced motion skips the timeline and shows the fully drained end state with the full collection count.
 
 The four-frame art-direction reference is `docs/storyboards/context-flood-47-skills.png`.
 

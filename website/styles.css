@@ -64,34 +64,32 @@ footer p a { color: var(--paper); font-weight: 700; }
 .primary-link:hover { transform: translateY(-2px); background: var(--thread-hot); }
 
 .convergence { position: relative; grid-column: 6 / -1; grid-row: 1; min-height: 34rem; align-self: start; margin-top: -0.5rem; overflow: hidden; }
-.convergence::after { content: ""; position: absolute; inset: 0; z-index: 10; background: var(--ink); opacity: 0; pointer-events: none; animation: scene-reset 14s linear infinite; }
 .context-basin { position: absolute; inset: 2% 34% 3% 0; overflow: visible; border: 1px solid oklch(0.46 0.07 245); background: oklch(0.18 0.025 252); }
-.basin-label { position: absolute; top: 0.45rem; left: 0.55rem; z-index: 4; color: oklch(0.9 0.04 220 / 0.9); font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.08em; text-transform: uppercase; animation: basin-label-cycle 14s var(--ease-out) infinite; }
-.flood { position: absolute; inset: 0; z-index: 1; overflow: hidden; background: linear-gradient(180deg, oklch(0.66 0.13 232 / 0.54), oklch(0.38 0.14 255 / 0.9)); transform: scaleY(0.93); transform-origin: bottom; animation: context-drains 14s var(--ease-out) infinite; }
-.flood::before, .flood::after { content: ""; position: absolute; left: -8%; top: -0.55rem; width: 116%; height: 1.1rem; border-radius: 50%; background: var(--water-light); opacity: 0.72; animation: water-surface 2.6s ease-in-out infinite alternate; }
-.flood::after { left: -13%; top: -0.15rem; opacity: 0.36; animation-direction: alternate-reverse; }
+.basin-label { position: absolute; top: 0.45rem; left: 0.55rem; z-index: 4; color: oklch(0.9 0.04 220 / 0.9); font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.flood { position: absolute; inset: 0; z-index: 1; overflow: hidden; background: linear-gradient(180deg, oklch(0.66 0.13 232 / 0.54), oklch(0.38 0.14 255 / 0.9)); transform: scaleY(0.93); transform-origin: bottom; }
+.flood::before, .flood::after { content: ""; position: absolute; left: -8%; top: -0.55rem; width: 116%; height: 1.1rem; border-radius: 50%; background: var(--water-light); opacity: 0.72; }
+.flood::after { left: -13%; top: -0.15rem; opacity: 0.36; }
 .flood i { position: absolute; width: 18rem; height: 18rem; border: 1px solid oklch(0.82 0.08 225 / 0.25); border-radius: 50%; opacity: 0.3; }
 .flood i:first-child { left: -7rem; top: 18%; }.flood i:nth-child(2) { right: -8rem; top: 48%; }
-.skill-field { position: absolute; inset: 2.2rem 0.55rem 0.55rem; z-index: 3; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); grid-template-rows: repeat(10, minmax(0, 1fr)); gap: 0.22rem; transform-origin: center; animation: collection-transfer 14s var(--ease-out) infinite; }
+.skill-field { position: absolute; inset: 2.2rem 0.55rem 0.55rem; z-index: 3; display: grid; grid-template-rows: repeat(10, minmax(0, 1fr)); gap: 0.22rem; }
+.skill-row { min-height: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.22rem; }
 .skill-field span { min-width: 0; padding: 0.18rem 0.22rem; border: 1px solid oklch(0.65 0.08 79 / 0.72); background: var(--paper); color: var(--ink); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: clamp(0.39rem, 0.48vw, 0.55rem); font-weight: 700; line-height: 1.05; overflow-wrap: anywhere; text-align: center; }
-.skill-paths { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; overflow: visible; opacity: 0.14; pointer-events: none; animation: paths-cycle 14s var(--ease-out) infinite; }
-.skill-paths path { fill: none; stroke: var(--thread); stroke-width: 1.15; vector-effect: non-scaling-stroke; }
-.throat { position: absolute; left: 67%; top: 46%; z-index: 5; width: 2.15rem; height: 5rem; display: flex; justify-content: space-between; transform: translate(-50%, -50%); }
-.throat i { display: block; width: 0.35rem; border: 1px solid oklch(0.52 0.04 290); background: var(--ink); box-shadow: 0 0 0 2px oklch(0.1 0.01 290); }
-.package { position: absolute; right: 0.25rem; top: 2%; z-index: 6; width: 29%; height: 61%; padding: 1.25rem 1rem 1rem; display: flex; flex-direction: column; background: var(--paper); color: var(--ink); box-shadow: 1rem 1.25rem 3rem oklch(0.06 0.02 288 / 0.7); transform: rotate(1deg); transform-origin: bottom center; animation: package-settles 14s var(--ease-out) infinite; }
-.convergence[data-ready="true"] .package { animation-play-state: running; }
-.package::before { content: ""; position: absolute; inset: 0; opacity: 0.32; background: repeating-linear-gradient(76deg, transparent 0 11px, oklch(0.71 0.04 78) 12px, transparent 13px 22px); mix-blend-mode: multiply; pointer-events: none; }
-.package::after { content: ""; position: absolute; left: -1.35rem; top: 43%; width: 2.7rem; height: 2.7rem; border: 2px solid var(--water-light); border-radius: 50%; opacity: 0; transform: scale(0.15); animation: package-absorbs 14s var(--ease-out) infinite; pointer-events: none; }
+.transfer-funnel { position: absolute; left: 63.8%; top: 39%; z-index: 5; width: 9%; height: 7rem; background: var(--thread); clip-path: polygon(0 0, 100% 39%, 100% 61%, 0 100%); opacity: 0.28; transform-origin: right center; }
+.transfer-funnel::before { content: ""; position: absolute; inset: 2px; z-index: 0; background: oklch(0.19 0.035 288); clip-path: inherit; }
+.transfer-funnel span { position: absolute; inset: 0; z-index: 1; display: grid; place-items: center; color: var(--thread-hot); font-family: var(--mono); font-size: 0.5rem; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; }
+.package { position: absolute; right: 0.25rem; top: 2%; z-index: 6; isolation: isolate; width: 29%; height: 61%; padding: 1.25rem 1rem 1rem; display: flex; flex-direction: column; background: var(--paper); color: var(--ink); box-shadow: 1rem 1.25rem 3rem oklch(0.06 0.02 288 / 0.7); transform: rotate(1deg); transform-origin: bottom center; will-change: transform; }
+.package::before { content: ""; position: absolute; inset: 0; z-index: 0; opacity: 0.14; background: repeating-linear-gradient(76deg, transparent 0 11px, oklch(0.46 0.035 78) 12px, transparent 13px 22px); pointer-events: none; }
+.package > * { z-index: 1; }
+.package-inlet { position: absolute; left: -0.6rem; top: 43%; z-index: 2; width: 0.75rem; height: 2.8rem; border: 2px solid var(--thread); background: var(--ink); }
 .package-kicker, .package-file { position: relative; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
-.package-kicker-waiting { animation: waiting-label-cycle 14s var(--ease-out) infinite; }
-.package-kicker-filled { position: absolute; top: 1.25rem; left: 1rem; opacity: 0; animation: filled-label-cycle 14s var(--ease-out) infinite; }
+.package-kicker-filled { position: absolute; top: 1.25rem; left: 1rem; opacity: 0; visibility: hidden; }
 .package strong { position: relative; margin-top: 0.75rem; font-family: var(--display); font-size: clamp(1.65rem, 2.7vw, 2.65rem); line-height: 0.85; text-transform: uppercase; transform-origin: left center; }
 .package-file { margin-top: 0.8rem; font-family: var(--mono); }
-.package-contents { position: relative; width: 100%; margin-top: 0.75rem; flex: 1; display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(7, 1fr); gap: 0.14rem; opacity: 0; transform: scale(0.7); animation: contents-fill 14s var(--ease-out) infinite; }
-.package-contents i { display: block; min-width: 0; background: var(--ink); opacity: 0.68; }
-.package-count { position: relative; margin-top: 0.3rem; font-family: var(--mono); font-size: 0.58rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0; animation: contents-fill 14s var(--ease-out) infinite; }
+.package-contents { position: relative; width: 100%; margin-top: 0.75rem; flex: 1; display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(7, 1fr); gap: 0.14rem; }
+.package-contents i { display: block; min-width: 0; border: 1px solid oklch(0.28 0.02 288 / 0.45); background: var(--ink); opacity: 0.1; transform: scale(0.65); }
+.package-count { position: relative; margin-top: 0.3rem; font-family: var(--mono); font-size: 0.58rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
 .seal { position: relative; margin: auto 0 0 auto; padding: 0.5rem; border: 2px solid var(--thread); color: oklch(0.49 0.19 31); font-family: var(--display); font-size: 0.75rem; font-weight: 900; letter-spacing: 0.04em; line-height: 1.05; text-align: center; text-transform: uppercase; transform: rotate(-5deg); }
-.one-entry { position: absolute; right: 0.55rem; bottom: 0.45rem; z-index: 7; color: var(--thread-hot); font-family: var(--mono); font-size: 0.62rem; font-weight: 800; letter-spacing: 0.08em; opacity: 0; text-transform: uppercase; animation: one-entry-cycle 14s var(--ease-out) infinite; }
+.one-entry { position: absolute; right: 0.55rem; bottom: 0.45rem; z-index: 7; color: var(--thread-hot); font-family: var(--mono); font-size: 0.62rem; font-weight: 800; letter-spacing: 0.08em; opacity: 0; visibility: hidden; text-transform: uppercase; }
 .principles { grid-column: 1 / -1; grid-row: 2; align-self: end; margin: 2rem 0 0; padding: 2rem 0 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; list-style: none; }
 .principles li { display: grid; grid-template-columns: auto 1fr; gap: 0 0.8rem; }
 .principles span { grid-row: span 2; color: var(--thread-hot); font-family: var(--mono); font-size: 0.75rem; }
@@ -139,19 +137,6 @@ pre { max-width: 100%; margin: 0; padding: 1.1rem; overflow: auto; border: 1px s
 footer { padding-block: 3rem; border-top: 1px solid var(--line); flex-wrap: wrap; }
 footer p { color: var(--muted); font-size: 0.85rem; }
 
-@keyframes scene-reset { 0%, 89% { opacity: 0; } 94%, 97% { opacity: 1; } 100% { opacity: 0; } }
-@keyframes context-drains { 0%, 22% { transform: scaleY(0.93); } 62%, 91% { transform: scaleY(0.055); } 96%, 100% { transform: scaleY(0.93); } }
-@keyframes water-surface { to { transform: translate3d(6%, 2px, 0) scaleY(0.7); } }
-@keyframes basin-label-cycle { 0%, 48% { opacity: 1; } 62%, 100% { opacity: 0; } }
-@keyframes collection-transfer { 0%, 18% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } 56% { opacity: 0.92; transform: translate3d(var(--field-tx, 0), var(--field-ty, 0), 0) scale(0.08); } 62%, 94% { opacity: 0; transform: translate3d(var(--field-tx, 0), var(--field-ty, 0), 0) scale(0.04); } 97% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.8); } 100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } }
-@keyframes paths-cycle { 0%, 18% { opacity: 0.14; } 48% { opacity: 0.92; } 64%, 100% { opacity: 0; } }
-@keyframes package-settles { 0%, 55% { transform: translate3d(0, 0, 0) rotate(1deg) scale(1); } 69%, 91% { transform: translate3d(0, 34%, 0) rotate(0deg) scale(1.06); } 96%, 100% { transform: translate3d(0, 0, 0) rotate(1deg) scale(1); } }
-@keyframes package-absorbs { 0%, 46% { opacity: 0; transform: scale(0.15); } 58% { opacity: 0.78; transform: scale(1); } 70%, 100% { opacity: 0; transform: scale(1.7); } }
-@keyframes contents-fill { 0%, 51% { opacity: 0; transform: scale(0.7); } 66%, 92% { opacity: 1; transform: scale(1); } 97%, 100% { opacity: 0; transform: scale(0.7); } }
-@keyframes waiting-label-cycle { 0%, 51% { opacity: 1; } 62%, 100% { opacity: 0; } }
-@keyframes filled-label-cycle { 0%, 54% { opacity: 0; } 66%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
-@keyframes one-entry-cycle { 0%, 58% { opacity: 0; transform: translateY(0.5rem); } 70%, 91% { opacity: 1; transform: translateY(0); } 97%, 100% { opacity: 0; transform: translateY(0.5rem); } }
-
 @media (max-width: 1120px) {
   .hero { display: block; min-height: auto; }
   .hero-copy { max-width: 44rem; }
@@ -172,9 +157,11 @@ footer p { color: var(--muted); font-size: 0.85rem; }
   .convergence { min-height: 43rem; display: block; }
   .context-basin { inset: 0 0 48% 0; }
   .skill-field { gap: 0.16rem; }
+  .skill-row { gap: 0.16rem; }
   .skill-field span { padding: 0.12rem; font-size: 0.42rem; }
-  .throat { left: 50%; top: 51%; transform: translate(-50%, -50%) rotate(90deg); }
+  .transfer-funnel { left: 44%; top: 46.5%; width: 12%; height: 9%; clip-path: polygon(0 0, 100% 0, 62% 100%, 38% 100%); transform-origin: center bottom; }
   .package { top: 54%; right: 22%; width: 56%; height: 31%; }
+  .package-inlet { left: calc(50% - 1.4rem); top: -0.55rem; width: 2.8rem; height: 0.7rem; }
   .one-entry { right: 50%; transform: translateX(50%); }
   .principles { grid-template-columns: 1fr; gap: 1.2rem; }
   .section-heading { grid-template-columns: 1fr; }.section-heading .eyebrow { grid-column: 1; }.example-button { margin-top: 1rem; }
@@ -186,17 +173,10 @@ footer p { color: var(--muted); font-size: 0.85rem; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
-  .convergence::after { opacity: 0; }
-  .flood { transform: scaleY(0.05); }
-  .skill-field, .skill-paths, .basin-label { opacity: 0; }
-  .package { transform: translate3d(0, 34%, 0) scale(1.06); }
-  .package::after { opacity: 0; transform: scale(0); }
-  .package-contents, .package-count, .one-entry, .package-kicker-filled { opacity: 1; transform: none; }
-  .package-kicker-waiting { opacity: 0; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 
 @media (forced-colors: active) {
   .package, .primary-link { border: 2px solid ButtonText; }
-  .threads path { stroke: CanvasText; filter: none; }
+  .transfer-funnel { background: ButtonText; }
 }

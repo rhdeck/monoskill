@@ -7,6 +7,7 @@ import {
   validateSource
 } from "./generator.js";
 import { collectAnalytics } from "./analytics.js";
+import { gsap } from "gsap";
 
 if (["127.0.0.1", "localhost"].includes(window.location.hostname)) {
   import("./agentation.js").catch(() => {});
@@ -22,49 +23,170 @@ const commandOutput = document.querySelector("#command-output");
 const promptOutput = document.querySelector("#prompt-output");
 const status = document.querySelector("#copy-status");
 const scene = document.querySelector(".convergence");
-const skillField = scene.querySelector(".skill-field");
-const pathLayer = scene.querySelector(".skill-paths");
-const throat = scene.querySelector(".throat");
+const skillRows = [...scene.querySelectorAll(".skill-row")];
+const flood = scene.querySelector(".flood");
+const basinLabel = scene.querySelector(".basin-label");
+const funnel = scene.querySelector(".transfer-funnel");
 const monoPackage = scene.querySelector(".package");
+const packageInlet = scene.querySelector(".package-inlet");
 const packageContents = scene.querySelector(".package-contents");
+const packageCount = scene.querySelector(".package-count");
+const waitingKicker = scene.querySelector(".package-kicker-waiting");
+const filledKicker = scene.querySelector(".package-kicker-filled");
+const oneEntry = scene.querySelector(".one-entry");
 let nameWasEdited = false;
 let completionWasTracked = false;
 
 for (let index = 0; index < 47; index += 1) packageContents.append(document.createElement("i"));
+const packageCells = [...packageContents.children];
 
-let layoutFrame;
-function layoutSkillTransfer() {
-  window.cancelAnimationFrame(layoutFrame);
-  layoutFrame = window.requestAnimationFrame(() => {
-    const sceneRect = scene.getBoundingClientRect();
-    const throatRect = throat.getBoundingClientRect();
-    const packageRect = monoPackage.getBoundingClientRect();
-    const fieldRect = skillField.getBoundingClientRect();
-    const throatX = throatRect.left + throatRect.width / 2 - sceneRect.left;
-    const throatY = throatRect.top + throatRect.height / 2 - sceneRect.top;
-    const targetX = packageRect.left + packageRect.width * 0.34 - sceneRect.left;
-    const targetY = packageRect.top + packageRect.height * 0.48 - sceneRect.top;
-    const fieldX = fieldRect.left + fieldRect.width / 2 - sceneRect.left;
-    const fieldY = fieldRect.top + fieldRect.height / 2 - sceneRect.top;
-    skillField.style.setProperty("--field-tx", `${targetX - fieldX}px`);
-    skillField.style.setProperty("--field-ty", `${targetY - fieldY}px`);
-    pathLayer.replaceChildren();
-    pathLayer.setAttribute("viewBox", `0 0 ${sceneRect.width} ${sceneRect.height}`);
-
-    for (const skill of skillField.children) {
-      const rect = skill.getBoundingClientRect();
-      const startX = rect.left + rect.width / 2 - sceneRect.left;
-      const startY = rect.top + rect.height / 2 - sceneRect.top;
-      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      const bendX = startX + (throatX - startX) * 0.62;
-      path.setAttribute("d", `M ${startX} ${startY} C ${bendX} ${startY}, ${throatX - 32} ${throatY}, ${throatX} ${throatY} C ${throatX + 18} ${throatY}, ${targetX - 18} ${targetY}, ${targetX} ${targetY}`);
-      pathLayer.append(path);
-    }
-  });
+function setPackedCount(count) {
+  packageCount.textContent = count === 47 ? "47 skills inside" : `${count} / 47 packed`;
 }
 
-new ResizeObserver(layoutSkillTransfer).observe(scene);
-layoutSkillTransfer();
+function transferGeometry() {
+  const inletRect = packageInlet.getBoundingClientRect();
+  const targetX = inletRect.left + inletRect.width / 2;
+  const targetY = inletRect.top + inletRect.height / 2;
+  return skillRows.map((row) => [...row.children].map((skill) => {
+    const rect = skill.getBoundingClientRect();
+    return {
+      x: targetX - (rect.left + rect.width / 2),
+      y: targetY - (rect.top + rect.height / 2)
+    };
+  }));
+}
+
+function buildHeroTimeline({ isDesktop }) {
+  const geometry = transferGeometry();
+  const timeline = gsap.timeline({
+    repeat: -1,
+    repeatDelay: 1.1,
+    defaults: { ease: "power3.inOut" }
+  });
+  const initial = [...skillRows.flatMap((row) => [...row.children]), ...packageCells];
+
+  gsap.set(scene, { autoAlpha: 1 });
+  gsap.set(skillRows.flatMap((row) => [...row.children]), { x: 0, y: 0, scale: 1, autoAlpha: 1, transformOrigin: "center" });
+  gsap.set(flood, { scaleY: 0.93, transformOrigin: "bottom" });
+  gsap.set(funnel, { autoAlpha: 0.28, scaleX: 0.82, transformOrigin: "right center" });
+  gsap.set(packageCells, { autoAlpha: 0.1, scale: 0.65, transformOrigin: "center" });
+  gsap.set([filledKicker, oneEntry], { autoAlpha: 0, y: 8 });
+  gsap.set([waitingKicker, basinLabel], { autoAlpha: 1, y: 0 });
+  gsap.set(monoPackage, { x: 0, y: 0, scale: 1, rotation: 1 });
+  setPackedCount(0);
+  scene.dataset.animationStep = "flooded";
+
+  timeline.addLabel("flooded", 0)
+    .call(() => { scene.dataset.animationStep = "flooded"; setPackedCount(0); }, null, "flooded")
+    .to({}, { duration: 1.8 });
+
+  let packed = 0;
+  skillRows.forEach((row, rowIndex) => {
+    const skills = [...row.children];
+    const start = packed;
+    packed += skills.length;
+    const packedAtRow = packed;
+    const label = `transfer-${String(rowIndex + 1).padStart(2, "0")}`;
+    const waterLevel = 0.93 - (packedAtRow / 47) * 0.875;
+
+    timeline.addLabel(label)
+      .call(() => { scene.dataset.animationStep = label; }, null, label)
+      .to(funnel, { autoAlpha: 1, scaleX: 1, duration: 0.18, ease: "power2.out" }, label)
+      .to(skills, {
+        x: (index) => geometry[rowIndex][index].x,
+        duration: 0.92,
+        stagger: { each: 0.05, from: "end" },
+        ease: "power2.in"
+      }, label)
+      .to(skills, {
+        y: (index) => geometry[rowIndex][index].y,
+        scale: 0.08,
+        rotation: (index) => (index - 2) * -1.4,
+        autoAlpha: 0,
+        duration: 0.92,
+        stagger: { each: 0.05, from: "end" },
+        ease: "power4.in"
+      }, label)
+      .to(flood, { scaleY: waterLevel, duration: 1.02, ease: "power2.inOut" }, label)
+      .to(packageCells.slice(start, packedAtRow), {
+        autoAlpha: 0.78,
+        scale: 1,
+        duration: 0.24,
+        stagger: 0.025,
+        ease: "back.out(1.5)"
+      }, `${label}+=0.76`)
+      .call(() => { setPackedCount(packedAtRow); }, null, `${label}+=0.9`)
+      .to(funnel, { autoAlpha: 0.55, scaleX: 0.9, duration: 0.16, ease: "power2.out" }, ">-0.08");
+  });
+
+  timeline.addLabel("packed")
+    .call(() => { scene.dataset.animationStep = "packed"; setPackedCount(47); }, null, "packed")
+    .to(funnel, { autoAlpha: 0, scaleX: 0.7, duration: 0.3 }, "packed")
+    .to(waitingKicker, { autoAlpha: 0, y: -8, duration: 0.25 }, "packed")
+    .to(filledKicker, { autoAlpha: 1, y: 0, duration: 0.3 }, "packed+=0.12")
+    .to(basinLabel, { autoAlpha: 0, duration: 0.25 }, "packed")
+    .to({}, { duration: 0.45 })
+    .addLabel("settled")
+    .call(() => { scene.dataset.animationStep = "settled"; }, null, "settled")
+    .to(monoPackage, {
+      y: isDesktop ? 150 : 54,
+      scale: isDesktop ? 1.06 : 1.02,
+      rotation: 0,
+      duration: 0.8,
+      ease: "back.out(1.25)"
+    }, "settled")
+    .to(oneEntry, { autoAlpha: 1, y: 0, duration: 0.4 }, "settled+=0.36")
+    .to({}, { duration: 2.6 })
+    .addLabel("reset")
+    .call(() => { scene.dataset.animationStep = "reset"; }, null, "reset")
+    .to(scene, { autoAlpha: 0, duration: 0.3, ease: "power2.in" }, "reset")
+    .set(initial, { clearProps: "transform,opacity,visibility" })
+    .set([flood, funnel, monoPackage, waitingKicker, filledKicker, oneEntry, basinLabel], { clearProps: "transform,opacity,visibility" })
+    .call(() => { setPackedCount(0); scene.dataset.animationStep = "flooded"; })
+    .to(scene, { autoAlpha: 1, duration: 0.42, ease: "power2.out" });
+
+  const observer = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting && !document.hidden) timeline.resume();
+    else timeline.pause();
+  }, { threshold: 0.08 });
+  const onVisibility = () => { document.hidden ? timeline.pause() : timeline.resume(); };
+  observer.observe(scene);
+  document.addEventListener("visibilitychange", onVisibility);
+
+  window.__monoskillAnimation = {
+    labels: Object.keys(timeline.labels),
+    play: () => timeline.play(),
+    seek: (label, offset = 0) => { timeline.pause().seek(timeline.labels[label] + offset, false); }
+  };
+
+  return () => {
+    observer.disconnect();
+    document.removeEventListener("visibilitychange", onVisibility);
+    timeline.kill();
+    delete window.__monoskillAnimation;
+  };
+}
+
+const motion = gsap.matchMedia();
+motion.add({
+  isDesktop: "(min-width: 621px)",
+  isMobile: "(max-width: 620px)",
+  reduceMotion: "(prefers-reduced-motion: reduce)"
+}, (context) => {
+  if (!context.conditions.reduceMotion) return buildHeroTimeline(context.conditions);
+
+  gsap.set(skillRows, { autoAlpha: 0 });
+  gsap.set(flood, { scaleY: 0.055, transformOrigin: "bottom" });
+  gsap.set(funnel, { autoAlpha: 0 });
+  gsap.set(packageCells, { autoAlpha: 0.78, scale: 1 });
+  gsap.set([waitingKicker, basinLabel], { autoAlpha: 0 });
+  gsap.set([filledKicker, oneEntry], { autoAlpha: 1, y: 0 });
+  gsap.set(monoPackage, { y: context.conditions.isDesktop ? 150 : 54, scale: context.conditions.isDesktop ? 1.06 : 1.02, rotation: 0 });
+  setPackedCount(47);
+  scene.dataset.animationStep = "settled";
+  return () => gsap.set(scene.querySelectorAll("*"), { clearProps: "transform,opacity,visibility" });
+});
 
 function track(event, detail = {}) {
   const safeDetail = { event, ...detail };

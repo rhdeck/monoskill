@@ -60,8 +60,8 @@ test("Agentation is available locally without entering the production bundle", a
 
 test("local refreshes cannot mix stale markup, styles, and scripts", async () => {
   const [html, server] = await Promise.all([read("./index.html"), read("./server.js")]);
-  assert.match(html, /styles\.css\?v=2/);
-  assert.match(html, /app\.js\?v=2/);
+  assert.match(html, /styles\.css\?v=3/);
+  assert.match(html, /app\.js\?v=3/);
   assert.match(server, /"cache-control": "no-store"/);
   assert.doesNotMatch(server, /max-age=3600/);
 });
@@ -80,7 +80,9 @@ test("the page leads with measured context savings and usable documentation", as
   assert.match(html, /flood your context\./);
   assert.match(html, /class="flood"/);
   assert.match(html, /class="skill-field"/);
-  assert.match(html, /class="skill-paths"/);
+  assert.equal((html.match(/class="skill-row"/g) || []).length, 10);
+  assert.match(html, /class="transfer-funnel"/);
+  assert.doesNotMatch(html, /class="skill-paths"/);
   assert.match(html, /visible from the start/);
   assert.match(html, /47 skills · one collection/);
   assert.equal((html.match(/<span>[a-z][a-z-]*<\/span>/g) || []).length, 47);

@@ -69,7 +69,11 @@ test("the page leads with measured context savings and usable documentation", as
   assert.match(html, /Too many skills/);
   assert.match(html, /flood your context\./);
   assert.match(html, /class="flood"/);
-  assert.match(html, /class="siphon"/);
+  assert.match(html, /class="skill-field"/);
+  assert.match(html, /class="skill-paths"/);
+  assert.match(html, /visible from the start/);
+  assert.match(html, /47 skills · one collection/);
+  assert.equal((html.match(/<span>[a-z][a-z-]*<\/span>/g) || []).length, 47);
   assert.match(html, /47 skills become one/);
   assert.match(html, /99% less discovery context/);
   assert.match(html, /331 characters instead of 32,817/);

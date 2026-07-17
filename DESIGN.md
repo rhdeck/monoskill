@@ -44,7 +44,9 @@ The page is a sequence of three physical states: discovery metadata raises a vis
 
 ## Motion
 
-Skill fragments bob as translucent water rises around them. The water then drops while a short siphon pulse runs through the throat and settles into the Monoskill package. Input completion tightens the field and briefly seals the package. Copy actions use a restrained color and label transition. Use transform and opacity only, with exponential easing. Reduced motion shows the fully drained end state and retains every label and relationship.
+The opening state shows all 47 real Corey Haines skills inside an already-flooded discovery context, with an empty Monoskill visible as their destination. Each skill box follows its own measured path through the compression throat. As the boxes enter, the water falls, the Monoskill reveals a 47-item internal grid, and the filled package settles to the bottom. Input completion tightens the field and briefly seals the package. Copy actions use a restrained color and label transition. Use transform and opacity only, with exponential easing. Reduced motion shows the fully drained end state and retains the full collection count.
+
+The four-frame art-direction reference is `docs/storyboards/context-flood-47-skills.png`.
 
 ## Responsive Behavior
 

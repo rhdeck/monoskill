@@ -5,6 +5,9 @@ const canonicalProduction = process.env.WEBSITE_BASE_URL && new URL(process.env.
 test("generates safe commands without leaking pasted values to analytics", async ({ page, context, isMobile }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/");
+  await expect(page.locator(".skill-field span")).toHaveCount(47);
+  await expect(page.locator(".skill-paths path")).toHaveCount(47);
+  await expect(page.locator(".package-contents i")).toHaveCount(47);
   await page.evaluate(() => {
     window.__events = [];
     window.addEventListener("monoskill:analytics", (event) => window.__events.push(event.detail));
@@ -68,6 +71,6 @@ test("honors reduced motion and exposes a keyboard path", async ({ page }) => {
   await expect(page.locator(".skip-link")).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page.locator("#source")).toBeInViewport();
-  const duration = await page.locator(".fragments span").first().evaluate((element) => parseFloat(getComputedStyle(element).animationDuration));
+  const duration = await page.locator(".skill-field span").first().evaluate((element) => parseFloat(getComputedStyle(element).animationDuration));
   expect(duration).toBeLessThan(0.001);
 });

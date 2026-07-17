@@ -22,8 +22,51 @@ const commandOutput = document.querySelector("#command-output");
 const promptOutput = document.querySelector("#prompt-output");
 const status = document.querySelector("#copy-status");
 const scene = document.querySelector(".convergence");
+const skillField = scene.querySelector(".skill-field");
+const pathLayer = scene.querySelector(".skill-paths");
+const throat = scene.querySelector(".throat");
+const monoPackage = scene.querySelector(".package");
+const packageContents = scene.querySelector(".package-contents");
 let nameWasEdited = false;
 let completionWasTracked = false;
+
+for (let index = 0; index < 47; index += 1) packageContents.append(document.createElement("i"));
+
+let layoutFrame;
+function layoutSkillTransfer() {
+  window.cancelAnimationFrame(layoutFrame);
+  layoutFrame = window.requestAnimationFrame(() => {
+    const sceneRect = scene.getBoundingClientRect();
+    const throatRect = throat.getBoundingClientRect();
+    const packageRect = monoPackage.getBoundingClientRect();
+    const throatX = throatRect.left + throatRect.width / 2 - sceneRect.left;
+    const throatY = throatRect.top + throatRect.height / 2 - sceneRect.top;
+    const targetX = packageRect.left + packageRect.width * 0.34 - sceneRect.left;
+    const targetY = packageRect.top + packageRect.height * 0.48 - sceneRect.top;
+    pathLayer.replaceChildren();
+    pathLayer.setAttribute("viewBox", `0 0 ${sceneRect.width} ${sceneRect.height}`);
+
+    for (const [index, skill] of [...skillField.children].entries()) {
+      const rect = skill.getBoundingClientRect();
+      const startX = rect.left + rect.width / 2 - sceneRect.left;
+      const startY = rect.top + rect.height / 2 - sceneRect.top;
+      const delay = `${index * 0.014}s`;
+      skill.style.setProperty("--tx", `${targetX - startX}px`);
+      skill.style.setProperty("--ty", `${targetY - startY}px`);
+      skill.style.setProperty("--delay", delay);
+
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      const bendX = startX + (throatX - startX) * 0.62;
+      path.setAttribute("d", `M ${startX} ${startY} C ${bendX} ${startY}, ${throatX - 32} ${throatY}, ${throatX} ${throatY} C ${throatX + 18} ${throatY}, ${targetX - 18} ${targetY}, ${targetX} ${targetY}`);
+      path.style.setProperty("--delay", delay);
+      pathLayer.append(path);
+      path.style.setProperty("--path", `${path.getTotalLength()}`);
+    }
+  });
+}
+
+new ResizeObserver(layoutSkillTransfer).observe(scene);
+layoutSkillTransfer();
 
 function track(event, detail = {}) {
   const safeDetail = { event, ...detail };

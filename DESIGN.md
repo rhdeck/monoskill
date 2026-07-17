@@ -2,7 +2,7 @@
 
 ## Theme
 
-A developer in a dim workspace is watching dozens of skill descriptions crowd an agent's discovery context. The scene calls for a dark, low-glare surface where named skills compress through luminous strands into one warm, discoverable package.
+A developer in a dim workspace is watching skill descriptions accumulate like rising water in an agent's context. The scene calls for a dark, low-glare chamber where the flood drains through a mechanical throat into one warm Monoskill package.
 
 ## Brand Voice
 
@@ -31,7 +31,7 @@ Use the system's condensed display face when available (`Avenir Next Condensed`,
 
 ## Layout
 
-The page is a sequence of three physical states: crowded discovery metadata, a compression throat, then one provider-level entry point and generator. The wide layout uses an asymmetric 12-column composition; mobile turns convergence into a vertical flow instead of shrinking the desktop scene. A measured Corey Haines example makes the compression concrete.
+The page is a sequence of three physical states: discovery metadata raises a visible context flood, a siphon clears it through a compression throat, then one provider-level Monoskill remains. The wide layout uses an asymmetric 12-column composition; mobile turns the same drain into a vertical flow. A measured Corey Haines example makes the compression concrete.
 
 ## Components
 
@@ -44,7 +44,7 @@ The page is a sequence of three physical states: crowded discovery metadata, a c
 
 ## Motion
 
-Skill fragments drift by a few pixels while thread strokes draw toward the package. Input completion tightens the field and briefly seals the package. Copy actions use a restrained color and label transition. Use transform and opacity only, with exponential easing. Reduced motion shows the complete converged state and retains every label and relationship.
+Skill fragments bob as translucent water rises around them. The water then drops while a short siphon pulse runs through the throat and settles into the Monoskill package. Input completion tightens the field and briefly seals the package. Copy actions use a restrained color and label transition. Use transform and opacity only, with exponential easing. Reduced motion shows the fully drained end state and retains every label and relationship.
 
 ## Responsive Behavior
 

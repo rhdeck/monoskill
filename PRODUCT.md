@@ -22,7 +22,7 @@ Avoid generic dark developer-tool templates, terminal cosplay, glass-card grids,
 
 ## Design Principles
 
-1. Name the context-crowding problem before explaining the compiler.
+1. Name the problem plainly: too many skills flood your context.
 2. Make the paste-to-copy path dominant and self-explanatory.
 3. Prove context savings with measured discovery metadata from a real provider collection.
 4. Show that all bundled skills remain available on demand.

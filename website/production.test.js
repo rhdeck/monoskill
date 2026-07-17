@@ -66,8 +66,10 @@ test("State Change is credited as the giver", async () => {
 
 test("the page leads with measured context savings and usable documentation", async () => {
   const html = await read("./index.html");
-  assert.match(html, /Keep the skills\./);
-  assert.match(html, /Lose the context flood\./);
+  assert.match(html, /Too many skills/);
+  assert.match(html, /flood your context\./);
+  assert.match(html, /class="flood"/);
+  assert.match(html, /class="siphon"/);
   assert.match(html, /47 skills become one/);
   assert.match(html, /99% less discovery context/);
   assert.match(html, /331 characters instead of 32,817/);

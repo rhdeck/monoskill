@@ -9,6 +9,8 @@
   --line: oklch(0.34 0.035 287);
   --success: oklch(0.77 0.14 151);
   --focus: oklch(0.86 0.13 79);
+  --water: oklch(0.55 0.14 245);
+  --water-light: oklch(0.72 0.12 230);
   --display: "Avenir Next Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
@@ -61,21 +63,31 @@ footer p a { color: var(--paper); font-weight: 700; }
 .primary-link { display: inline-flex; min-height: 3.25rem; align-items: center; gap: 1rem; padding: 0.7rem 1.15rem; background: var(--thread); color: var(--ink); font-weight: 800; text-decoration: none; transition: transform 220ms var(--ease-out), background 220ms var(--ease-out); }
 .primary-link:hover { transform: translateY(-2px); background: var(--thread-hot); }
 
-.convergence { position: relative; grid-column: 6 / -1; grid-row: 1; min-height: 31rem; align-self: start; margin-top: 0.5rem; }
+.convergence { position: relative; grid-column: 6 / -1; grid-row: 1; min-height: 31rem; align-self: start; margin-top: 0.5rem; overflow: hidden; }
+.flood { position: absolute; left: 0; bottom: 0; z-index: 1; width: 67%; height: 92%; overflow: hidden; background: linear-gradient(180deg, oklch(0.65 0.13 235 / 0.5), oklch(0.39 0.13 253 / 0.82)); transform: scaleY(0.12); transform-origin: bottom; animation: context-flood 9s var(--ease-out) infinite; }
+.flood::before, .flood::after { content: ""; position: absolute; left: -8%; top: -0.55rem; width: 116%; height: 1.1rem; border-radius: 50%; background: var(--water-light); opacity: 0.72; animation: water-surface 2.6s ease-in-out infinite alternate; }
+.flood::after { left: -13%; top: -0.15rem; opacity: 0.36; animation-direction: alternate-reverse; }
+.flood i { position: absolute; width: 18rem; height: 18rem; border: 1px solid oklch(0.82 0.08 225 / 0.28); border-radius: 50%; opacity: 0; animation: water-ring 9s ease-out infinite; }
+.flood i:first-child { left: -7rem; top: 18%; }.flood i:nth-child(2) { right: -8rem; top: 48%; animation-delay: 0.8s; }
+.flood span { position: absolute; right: 0.7rem; top: 0.65rem; color: oklch(0.92 0.02 225 / 0.8); font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; }
 .fragments { position: absolute; inset: 0 auto 0 0; width: 32%; display: flex; flex-direction: column; justify-content: space-around; z-index: 2; }
-.fragments span { width: fit-content; max-width: 100%; padding: 0.45rem 0.65rem; border: 1px solid var(--line); background: var(--ink-raised); color: var(--muted); font-family: var(--mono); font-size: clamp(0.6rem, 0.8vw, 0.75rem); animation: fragment-drift 5s calc(var(--i) * -0.6s) ease-in-out infinite alternate; }
+.fragments span { width: fit-content; max-width: 100%; padding: 0.45rem 0.65rem; border: 1px solid var(--line); background: var(--ink-raised); color: var(--muted); font-family: var(--mono); font-size: clamp(0.6rem, 0.8vw, 0.75rem); animation: fragment-float 9s calc(var(--i) * -0.08s) var(--ease-out) infinite; }
 .fragments span:nth-child(1) { --i: 0; }.fragments span:nth-child(2) { --i: 1; }.fragments span:nth-child(3) { --i: 2; }.fragments span:nth-child(4) { --i: 3; }.fragments span:nth-child(5) { --i: 4; }.fragments span:nth-child(6) { --i: 5; }
 .threads { position: absolute; inset: 0 11% 0 7%; width: 77%; height: 100%; overflow: visible; }
 .threads path { fill: none; stroke: var(--thread); stroke-width: 1.8; vector-effect: non-scaling-stroke; stroke-dasharray: 800; stroke-dashoffset: 800; animation: draw-thread 2.2s calc(0.15s * var(--i, 1)) var(--ease-out) forwards; filter: drop-shadow(0 0 5px oklch(0.69 0.205 31 / 0.5)); }
 .threads path:nth-child(2) { --i: 2; }.threads path:nth-child(3) { --i: 3; }.threads path:nth-child(4) { --i: 4; }.threads path:nth-child(5) { --i: 5; }.threads path:nth-child(6) { --i: 6; }
 .threads .spine { stroke-width: 4; --i: 5; }
+.siphon { position: absolute; left: 31%; top: calc(43% - 1rem); z-index: 3; width: 35%; height: 2rem; overflow: hidden; opacity: 0; transform: scaleX(0); transform-origin: right; animation: siphon-pull 9s var(--ease-out) infinite; }
+.siphon::before { content: ""; position: absolute; inset: 0.55rem 0; background: linear-gradient(90deg, transparent, var(--water-light)); clip-path: polygon(0 0, 100% 38%, 100% 62%, 0 100%); }
+.siphon i { position: absolute; right: 0; top: 0.55rem; width: 0.9rem; height: 0.9rem; border-radius: 50%; background: var(--water-light); box-shadow: 0 0 1.2rem var(--water-light); animation: siphon-drop 9s var(--ease-out) infinite; }
 .throat { position: absolute; left: 66%; top: 43%; z-index: 3; width: 2.3rem; height: 4.7rem; display: flex; justify-content: space-between; transform: translate(-50%, -50%); }
 .throat i { display: block; width: 0.35rem; border: 1px solid oklch(0.52 0.04 290); background: var(--ink); box-shadow: 0 0 0 2px oklch(0.1 0.01 290); }
 .package { position: absolute; right: 0; top: 17%; z-index: 4; width: clamp(10.5rem, 18vw, 15rem); aspect-ratio: 0.8; padding: 1.5rem; display: flex; flex-direction: column; background: var(--paper); color: var(--ink); box-shadow: 1rem 1.25rem 3rem oklch(0.06 0.02 288 / 0.7); transform: rotate(1.5deg); transition: transform 600ms var(--ease-out); }
 .convergence[data-ready="true"] .package { transform: rotate(0deg) translateX(-0.5rem); }
 .package::before { content: ""; position: absolute; inset: 0; opacity: 0.32; background: repeating-linear-gradient(76deg, transparent 0 11px, oklch(0.71 0.04 78) 12px, transparent 13px 22px); mix-blend-mode: multiply; pointer-events: none; }
+.package::after { content: ""; position: absolute; left: -1.35rem; top: 43%; width: 2.7rem; height: 2.7rem; border: 2px solid var(--water-light); border-radius: 50%; opacity: 0; transform: scale(0.15); animation: package-absorbs 9s var(--ease-out) infinite; pointer-events: none; }
 .package-kicker, .package-file { position: relative; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
-.package strong { position: relative; margin-top: 1.25rem; font-family: var(--display); font-size: clamp(2rem, 3vw, 3.1rem); line-height: 0.85; text-transform: uppercase; }
+.package strong { position: relative; margin-top: 1.25rem; font-family: var(--display); font-size: clamp(2rem, 3vw, 3.1rem); line-height: 0.85; text-transform: uppercase; transform-origin: left center; animation: monoskill-settles 9s var(--ease-out) infinite; }
 .package-file { margin-top: 0.8rem; font-family: var(--mono); }
 .seal { position: relative; margin: auto 0 0 auto; padding: 0.5rem; border: 2px solid var(--thread); color: oklch(0.49 0.19 31); font-family: var(--display); font-size: 0.75rem; font-weight: 900; letter-spacing: 0.04em; line-height: 1.05; text-align: center; text-transform: uppercase; transform: rotate(-5deg); }
 .principles { grid-column: 1 / -1; grid-row: 2; align-self: end; margin: 2rem 0 0; padding: 2rem 0 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; list-style: none; }
@@ -126,7 +138,14 @@ footer { padding-block: 3rem; border-top: 1px solid var(--line); flex-wrap: wrap
 footer p { color: var(--muted); font-size: 0.85rem; }
 
 @keyframes draw-thread { to { stroke-dashoffset: 0; } }
-@keyframes fragment-drift { to { transform: translate3d(5px, -3px, 0); } }
+@keyframes context-flood { 0%, 8% { transform: scaleY(0.12); } 42%, 58% { transform: scaleY(0.84); } 82%, 100% { transform: scaleY(0.05); } }
+@keyframes water-surface { to { transform: translate3d(6%, 2px, 0) scaleY(0.7); } }
+@keyframes water-ring { 0%, 12% { opacity: 0; transform: scale(0.2); } 35% { opacity: 0.55; } 58%, 100% { opacity: 0; transform: scale(1.1); } }
+@keyframes fragment-float { 0%, 12%, 100% { transform: translate3d(0, 0, 0); } 42% { transform: translate3d(4px, -7px, 0) rotate(-0.5deg); } 58% { transform: translate3d(-2px, -4px, 0) rotate(0.5deg); } 82% { transform: translate3d(5px, 0, 0); } }
+@keyframes siphon-pull { 0%, 48% { opacity: 0; transform: scaleX(0); } 57%, 73% { opacity: 0.9; transform: scaleX(1); } 84%, 100% { opacity: 0; transform: scaleX(0.08); } }
+@keyframes siphon-drop { 0%, 54% { transform: translateX(-13rem) scale(0.5); } 74%, 100% { transform: translateX(0) scale(1); } }
+@keyframes package-absorbs { 0%, 61% { opacity: 0; transform: scale(0.15); } 71% { opacity: 0.75; transform: scale(1); } 85%, 100% { opacity: 0; transform: scale(1.65); } }
+@keyframes monoskill-settles { 0%, 67% { transform: scale(1); } 76% { transform: scale(1.055); } 88%, 100% { transform: scale(1); } }
 
 @media (max-width: 900px) {
   .site-header nav a:not(:last-child) { display: none; }
@@ -143,9 +162,11 @@ footer p { color: var(--muted); font-size: 0.85rem; }
   h1 { font-size: clamp(3.8rem, 19vw, 6rem); }
   .hero { padding-top: 3.5rem; }
   .convergence { min-height: 38rem; display: flex; flex-direction: column; justify-content: space-between; }
+  .flood { width: 100%; height: 19rem; bottom: auto; top: 0; }
   .fragments { position: relative; width: 100%; height: 12rem; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.65rem; }
   .fragments span { align-self: center; }
   .threads { inset: 8rem 5% 8rem; width: 90%; height: 21rem; transform: rotate(90deg) scale(0.7, 1.2); }
+  .siphon { left: 40%; top: 44%; width: 20%; transform: rotate(90deg) scaleX(0); }
   .throat { left: 50%; top: 52%; transform: translate(-50%, -50%) rotate(90deg); }
   .package { position: relative; top: auto; right: auto; width: 11rem; margin: 11rem auto 0; }
   .principles { grid-template-columns: 1fr; gap: 1.2rem; }
@@ -160,6 +181,10 @@ footer p { color: var(--muted); font-size: 0.85rem; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
   .threads path { stroke-dashoffset: 0; }
+  .flood { transform: scaleY(0.05); }
+  .siphon { opacity: 0; transform: scaleX(0); }
+  .package::after { opacity: 0; transform: scale(0); }
+  .package strong { transform: none; }
 }
 
 @media (forced-colors: active) {

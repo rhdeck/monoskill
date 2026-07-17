@@ -10,10 +10,12 @@ const publicFiles = [
   "favicon.svg",
   "generator.js",
   "index.html",
+  "og-image-context.png",
   "og-image.png",
   "robots.txt",
   "site.webmanifest",
   "sitemap.xml",
+  "state-change-logo.png",
   "styles.css"
 ];
 

@@ -2,7 +2,7 @@
 
 ## Theme
 
-A developer in a dim workspace is comparing dozens of scattered skill folders, then needs one trustworthy artifact to hand to an agent. The scene calls for a dark, low-glare surface with luminous source strands converging into a warm, solid package.
+A developer in a dim workspace is watching dozens of skill descriptions crowd an agent's discovery context. The scene calls for a dark, low-glare surface where named skills compress through luminous strands into one warm, discoverable package.
 
 ## Brand Voice
 
@@ -31,13 +31,15 @@ Use the system's condensed display face when available (`Avenir Next Condensed`,
 
 ## Layout
 
-The page is a sequence of three physical states: scattered sources, a compression throat, then a single portable package and generator. The wide layout uses an asymmetric 12-column composition; mobile turns convergence into a vertical flow instead of shrinking the desktop scene.
+The page is a sequence of three physical states: crowded discovery metadata, a compression throat, then one provider-level entry point and generator. The wide layout uses an asymmetric 12-column composition; mobile turns convergence into a vertical flow instead of shrinking the desktop scene. A measured Corey Haines example makes the compression concrete.
 
 ## Components
 
 - A code-native convergence field made from semantic skill fragments, SVG paths, and one package silhouette.
+- A visible, qualified comparison of individual discovery metadata against the compiled entry point.
 - One dominant labeled source input with inferred-name editing immediately downstream.
 - Two copy surfaces for the live CLI command and AI-ready prompt, visually subordinate to the input but available without scrolling on a common laptop viewport.
+- A short `npx` how-to below the generator; provenance is linked as technical documentation rather than presented as a marketing section.
 - Inline validation and status text announced with `aria-live`, never toast-only.
 
 ## Motion

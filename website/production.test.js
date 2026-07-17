@@ -17,8 +17,8 @@ test("all discovery metadata uses the production origin", async () => {
 
   assert.match(html, new RegExp(`<link rel="canonical" href="${origin}/">`));
   assert.match(html, new RegExp(`<meta property="og:url" content="${origin}/">`));
-  assert.match(html, new RegExp(`<meta property="og:image" content="${origin}/og-image.png">`));
-  assert.match(html, new RegExp(`<meta name="twitter:image" content="${origin}/og-image.png">`));
+  assert.match(html, new RegExp(`<meta property="og:image" content="${origin}/og-image-context.png">`));
+  assert.match(html, new RegExp(`<meta name="twitter:image" content="${origin}/og-image-context.png">`));
   assert.equal(robots.includes(`${origin}/sitemap.xml`), true);
   assert.equal(sitemap.includes(`<loc>${origin}/</loc>`), true);
   assert.equal(manifest.id, `${origin}/`);
@@ -57,8 +57,23 @@ test("Agentation is available locally without entering the production bundle", a
 });
 
 test("State Change is credited as the giver", async () => {
+  const [html, build] = await Promise.all([read("./index.html"), read("./build.js")]);
+  assert.match(html, /<a class="gift-banner" href="https:\/\/statechange\.ai\/">/);
+  assert.match(html, /<img src="\.\/state-change-logo\.png" alt="">/);
+  assert.match(html, /A free gift from <strong>State Change<\/strong>/);
+  assert.match(build, /"state-change-logo\.png"/);
+});
+
+test("the page leads with measured context savings and usable documentation", async () => {
   const html = await read("./index.html");
-  assert.match(html, /A free gift from <a href="https:\/\/statechange\.ai\/">State Change<\/a>\./);
+  assert.match(html, /Keep the skills\./);
+  assert.match(html, /Lose the context flood\./);
+  assert.match(html, /47 skills become one/);
+  assert.match(html, /99% less discovery context/);
+  assert.match(html, /331 characters instead of 32,817/);
+  assert.match(html, /npx --yes monoskill@0\.3\.2 add coreyhaines31\/marketingskills --name corey-marketing/);
+  assert.match(html, /id="how-it-works"/);
+  assert.doesNotMatch(html, /href="#provenance"/);
 });
 
 test("GitHub main is the fail-closed Netlify production path", async () => {

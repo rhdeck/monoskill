@@ -8,6 +8,7 @@ test("generates safe commands without leaking pasted values to analytics", async
   await expect(page.locator(".skill-field span")).toHaveCount(47);
   await expect(page.locator(".skill-paths path")).toHaveCount(47);
   await expect(page.locator(".package-contents i")).toHaveCount(47);
+  expect(await page.evaluate(() => document.body.scrollWidth - document.documentElement.clientWidth)).toBe(0);
   await page.evaluate(() => {
     window.__events = [];
     window.addEventListener("monoskill:analytics", (event) => window.__events.push(event.detail));
@@ -73,4 +74,13 @@ test("honors reduced motion and exposes a keyboard path", async ({ page }) => {
   await expect(page.locator("#source")).toBeInViewport();
   const duration = await page.locator(".skill-field span").first().evaluate((element) => parseFloat(getComputedStyle(element).animationDuration));
   expect(duration).toBeLessThan(0.001);
+});
+
+test("stacks the hero at the in-app browser width", async ({ page }) => {
+  await page.setViewportSize({ width: 1003, height: 1200 });
+  await page.goto("/");
+  await expect(page.locator(".skill-field span")).toHaveCount(47);
+  await expect(page.locator(".skill-paths path")).toHaveCount(47);
+  expect(await page.locator(".hero").evaluate((element) => getComputedStyle(element).display)).toBe("block");
+  expect(await page.evaluate(() => document.body.scrollWidth - document.documentElement.clientWidth)).toBe(0);
 });

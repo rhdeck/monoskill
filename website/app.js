@@ -39,28 +39,26 @@ function layoutSkillTransfer() {
     const sceneRect = scene.getBoundingClientRect();
     const throatRect = throat.getBoundingClientRect();
     const packageRect = monoPackage.getBoundingClientRect();
+    const fieldRect = skillField.getBoundingClientRect();
     const throatX = throatRect.left + throatRect.width / 2 - sceneRect.left;
     const throatY = throatRect.top + throatRect.height / 2 - sceneRect.top;
     const targetX = packageRect.left + packageRect.width * 0.34 - sceneRect.left;
     const targetY = packageRect.top + packageRect.height * 0.48 - sceneRect.top;
+    const fieldX = fieldRect.left + fieldRect.width / 2 - sceneRect.left;
+    const fieldY = fieldRect.top + fieldRect.height / 2 - sceneRect.top;
+    skillField.style.setProperty("--field-tx", `${targetX - fieldX}px`);
+    skillField.style.setProperty("--field-ty", `${targetY - fieldY}px`);
     pathLayer.replaceChildren();
     pathLayer.setAttribute("viewBox", `0 0 ${sceneRect.width} ${sceneRect.height}`);
 
-    for (const [index, skill] of [...skillField.children].entries()) {
+    for (const skill of skillField.children) {
       const rect = skill.getBoundingClientRect();
       const startX = rect.left + rect.width / 2 - sceneRect.left;
       const startY = rect.top + rect.height / 2 - sceneRect.top;
-      const delay = `${index * 0.014}s`;
-      skill.style.setProperty("--tx", `${targetX - startX}px`);
-      skill.style.setProperty("--ty", `${targetY - startY}px`);
-      skill.style.setProperty("--delay", delay);
-
       const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
       const bendX = startX + (throatX - startX) * 0.62;
       path.setAttribute("d", `M ${startX} ${startY} C ${bendX} ${startY}, ${throatX - 32} ${throatY}, ${throatX} ${throatY} C ${throatX + 18} ${throatY}, ${targetX - 18} ${targetY}, ${targetX} ${targetY}`);
-      path.style.setProperty("--delay", delay);
       pathLayer.append(path);
-      path.style.setProperty("--path", `${path.getTotalLength()}`);
     }
   });
 }

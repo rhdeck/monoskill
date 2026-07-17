@@ -72,10 +72,10 @@ footer p a { color: var(--paper); font-weight: 700; }
 .flood::after { left: -13%; top: -0.15rem; opacity: 0.36; animation-direction: alternate-reverse; }
 .flood i { position: absolute; width: 18rem; height: 18rem; border: 1px solid oklch(0.82 0.08 225 / 0.25); border-radius: 50%; opacity: 0.3; }
 .flood i:first-child { left: -7rem; top: 18%; }.flood i:nth-child(2) { right: -8rem; top: 48%; }
-.skill-field { position: absolute; inset: 2.2rem 0.55rem 0.55rem; z-index: 3; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); grid-template-rows: repeat(10, minmax(0, 1fr)); gap: 0.22rem; }
-.skill-field span { min-width: 0; padding: 0.18rem 0.22rem; border: 1px solid oklch(0.65 0.08 79 / 0.72); background: var(--paper); color: var(--ink); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: clamp(0.39rem, 0.48vw, 0.55rem); font-weight: 700; line-height: 1.05; overflow-wrap: anywhere; text-align: center; transform-origin: center; animation: skill-transfer 14s var(--delay, 0s) var(--ease-out) infinite; }
-.skill-paths { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
-.skill-paths path { fill: none; stroke: var(--thread); stroke-width: 1.15; stroke-dasharray: var(--path, 1000); stroke-dashoffset: var(--path, 1000); vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 3px oklch(0.69 0.205 31 / 0.4)); animation: route-transfer 14s var(--delay, 0s) var(--ease-out) infinite; }
+.skill-field { position: absolute; inset: 2.2rem 0.55rem 0.55rem; z-index: 3; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); grid-template-rows: repeat(10, minmax(0, 1fr)); gap: 0.22rem; transform-origin: center; animation: collection-transfer 14s var(--ease-out) infinite; }
+.skill-field span { min-width: 0; padding: 0.18rem 0.22rem; border: 1px solid oklch(0.65 0.08 79 / 0.72); background: var(--paper); color: var(--ink); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: clamp(0.39rem, 0.48vw, 0.55rem); font-weight: 700; line-height: 1.05; overflow-wrap: anywhere; text-align: center; }
+.skill-paths { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; overflow: visible; opacity: 0.14; pointer-events: none; animation: paths-cycle 14s var(--ease-out) infinite; }
+.skill-paths path { fill: none; stroke: var(--thread); stroke-width: 1.15; vector-effect: non-scaling-stroke; }
 .throat { position: absolute; left: 67%; top: 46%; z-index: 5; width: 2.15rem; height: 5rem; display: flex; justify-content: space-between; transform: translate(-50%, -50%); }
 .throat i { display: block; width: 0.35rem; border: 1px solid oklch(0.52 0.04 290); background: var(--ink); box-shadow: 0 0 0 2px oklch(0.1 0.01 290); }
 .package { position: absolute; right: 0.25rem; top: 2%; z-index: 6; width: 29%; height: 61%; padding: 1.25rem 1rem 1rem; display: flex; flex-direction: column; background: var(--paper); color: var(--ink); box-shadow: 1rem 1.25rem 3rem oklch(0.06 0.02 288 / 0.7); transform: rotate(1deg); transform-origin: bottom center; animation: package-settles 14s var(--ease-out) infinite; }
@@ -143,8 +143,8 @@ footer p { color: var(--muted); font-size: 0.85rem; }
 @keyframes context-drains { 0%, 22% { transform: scaleY(0.93); } 62%, 91% { transform: scaleY(0.055); } 96%, 100% { transform: scaleY(0.93); } }
 @keyframes water-surface { to { transform: translate3d(6%, 2px, 0) scaleY(0.7); } }
 @keyframes basin-label-cycle { 0%, 48% { opacity: 1; } 62%, 100% { opacity: 0; } }
-@keyframes skill-transfer { 0%, 18% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } 56% { opacity: 0.92; transform: translate3d(var(--tx, 0), var(--ty, 0), 0) scale(0.18); } 62%, 94% { opacity: 0; transform: translate3d(var(--tx, 0), var(--ty, 0), 0) scale(0.05); } 97% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.8); } 100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } }
-@keyframes route-transfer { 0%, 18% { opacity: 0.16; stroke-dashoffset: var(--path, 1000); } 52% { opacity: 0.92; stroke-dashoffset: 0; } 64%, 100% { opacity: 0; stroke-dashoffset: 0; } }
+@keyframes collection-transfer { 0%, 18% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } 56% { opacity: 0.92; transform: translate3d(var(--field-tx, 0), var(--field-ty, 0), 0) scale(0.08); } 62%, 94% { opacity: 0; transform: translate3d(var(--field-tx, 0), var(--field-ty, 0), 0) scale(0.04); } 97% { opacity: 0; transform: translate3d(0, 0, 0) scale(0.8); } 100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } }
+@keyframes paths-cycle { 0%, 18% { opacity: 0.14; } 48% { opacity: 0.92; } 64%, 100% { opacity: 0; } }
 @keyframes package-settles { 0%, 55% { transform: translate3d(0, 0, 0) rotate(1deg) scale(1); } 69%, 91% { transform: translate3d(0, 34%, 0) rotate(0deg) scale(1.06); } 96%, 100% { transform: translate3d(0, 0, 0) rotate(1deg) scale(1); } }
 @keyframes package-absorbs { 0%, 46% { opacity: 0; transform: scale(0.15); } 58% { opacity: 0.78; transform: scale(1); } 70%, 100% { opacity: 0; transform: scale(1.7); } }
 @keyframes contents-fill { 0%, 51% { opacity: 0; transform: scale(0.7); } 66%, 92% { opacity: 1; transform: scale(1); } 97%, 100% { opacity: 0; transform: scale(0.7); } }
@@ -152,14 +152,17 @@ footer p { color: var(--muted); font-size: 0.85rem; }
 @keyframes filled-label-cycle { 0%, 54% { opacity: 0; } 66%, 92% { opacity: 1; } 97%, 100% { opacity: 0; } }
 @keyframes one-entry-cycle { 0%, 58% { opacity: 0; transform: translateY(0.5rem); } 70%, 91% { opacity: 1; transform: translateY(0); } 97%, 100% { opacity: 0; transform: translateY(0.5rem); } }
 
-@media (max-width: 900px) {
-  .site-header nav a:not(:last-child) { display: none; }
+@media (max-width: 1120px) {
   .hero { display: block; min-height: auto; }
   .hero-copy { max-width: 44rem; }
-  .convergence { min-height: 30rem; margin-top: 3rem; }
+  .convergence { min-height: 34rem; margin-top: 4rem; }
   .principles { margin-top: 1rem; }
   #generator-form { grid-template-columns: 1fr; }
   .how-it-works { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 900px) {
+  .site-header nav a:not(:last-child) { display: none; }
 }
 
 @media (max-width: 620px) {
@@ -186,7 +189,7 @@ footer p { color: var(--muted); font-size: 0.85rem; }
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
   .convergence::after { opacity: 0; }
   .flood { transform: scaleY(0.05); }
-  .skill-field span, .skill-paths path, .basin-label { opacity: 0; }
+  .skill-field, .skill-paths, .basin-label { opacity: 0; }
   .package { transform: translate3d(0, 34%, 0) scale(1.06); }
   .package::after { opacity: 0; transform: scale(0); }
   .package-contents, .package-count, .one-entry, .package-kicker-filled { opacity: 1; transform: none; }

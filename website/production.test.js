@@ -35,6 +35,8 @@ test("Netlify contract builds the verified static site with restrictive headers"
   assert.match(config, new RegExp(`to = "${origin}/:splat"`));
   assert.match(config, /connect-src 'self' https:\/\/plausible\.io/);
   assert.match(config, /frame-ancestors 'none'/);
+  assert.match(config, /for = "\/\*\.css"[\s\S]*Cache-Control = "public, max-age=0, must-revalidate"/);
+  assert.match(config, /for = "\/\*\.js"[\s\S]*Cache-Control = "public, max-age=0, must-revalidate"/);
 });
 
 test("Agentation is available locally without entering the production bundle", async () => {
@@ -54,6 +56,14 @@ test("Agentation is available locally without entering the production bundle", a
   assert.match(dev, /agentation-entry\.jsx/);
   assert.match(entry, /<Agentation \/>/);
   assert.doesNotMatch(html, /agentation\.js/);
+});
+
+test("local refreshes cannot mix stale markup, styles, and scripts", async () => {
+  const [html, server] = await Promise.all([read("./index.html"), read("./server.js")]);
+  assert.match(html, /styles\.css\?v=2/);
+  assert.match(html, /app\.js\?v=2/);
+  assert.match(server, /"cache-control": "no-store"/);
+  assert.doesNotMatch(server, /max-age=3600/);
 });
 
 test("State Change is credited as the giver", async () => {

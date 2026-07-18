@@ -79,6 +79,7 @@ test("the page leads with measured context savings and usable documentation", as
   const html = await read("./index.html");
   assert.match(html, /Too many skills/);
   assert.match(html, /flood your context\./);
+  assert.doesNotMatch(html, /Many skills\. Little(?: discovery)? context\./);
   assert.match(html, /class="flood"/);
   assert.match(html, /class="skill-field"/);
   assert.equal((html.match(/class="skill-row"/g) || []).length, 10);

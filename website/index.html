@@ -51,10 +51,10 @@
         <a class="primary-link" href="#generator">Group a skill collection <span aria-hidden="true">↓</span></a>
       </div>
 
-      <div class="convergence" data-ready="false" aria-label="Skill descriptions raise a context flood, then drain into one Monoskill">
+      <div class="convergence pressure-hero" data-ready="false" aria-label="Forty-seven skills flood discovery, then drain into one small Monoskill package while the context falls from 32,817 to 331 characters">
+        <div class="context-metric"><span>Discovery context</span><b data-context-count>32,817</b><i>characters</i></div>
         <div class="context-basin" aria-hidden="true">
-          <span class="basin-label">Discovery context · 47 entries</span>
-          <div class="flood"><i></i><i></i></div>
+          <div class="flood"></div>
           <div class="skill-field">
             <div class="skill-row"><span>ab-testing</span><span>ad-creative</span><span>ads</span><span>ai-seo</span><span>analytics</span></div>
             <div class="skill-row"><span>aso</span><span>churn-prevention</span><span>co-marketing</span><span>cold-email</span><span>community-marketing</span></div>
@@ -67,21 +67,22 @@
             <div class="skill-row"><span>schema</span><span>seo-audit</span><span>signup</span><span>site-architecture</span><span>sms</span></div>
             <div class="skill-row"><span>social</span><span>video</span></div>
           </div>
+          <span class="basin-label">47 separate entries</span>
         </div>
-        <div class="transfer-funnel" aria-hidden="true">
-          <span>Pack</span>
-        </div>
-        <div class="package">
-          <span class="package-inlet" aria-hidden="true"></span>
-          <span class="package-kicker package-kicker-waiting">Empty destination · visible from the start</span>
-          <span class="package-kicker package-kicker-filled">47 skills · one collection</span>
-          <strong>Monoskill</strong>
-          <span class="package-file">SKILL.md</span>
+        <div class="pressure-pipe" aria-hidden="true"><span class="pipe-fill"></span></div>
+        <div class="pressure-package">
+          <strong>MONO</strong><span>SKILL</span>
           <span class="package-contents" aria-hidden="true"></span>
           <span class="package-count">0 / 47 packed</span>
-          <span class="seal">99% less<br>discovery context</span>
         </div>
-        <span class="one-entry" aria-hidden="true">1 discovery entry</span>
+        <div class="pressure-result"><b>99%</b><span>lighter in context</span><i>47 skills still available</i></div>
+        <div class="hero-scene-wash" aria-hidden="true"></div>
+        <div class="hero-narration" aria-hidden="true">
+          <span data-hero-beat>01 · Before</span>
+          <b data-hero-title>Forty-seven skills flood discovery.</b>
+          <small data-hero-detail>Every useful capability advertises itself separately.</small>
+          <div class="hero-progress" aria-hidden="true"><i></i><i></i><i></i></div>
+        </div>
       </div>
 
       <ul class="principles" aria-label="Monoskill properties">
@@ -93,9 +94,15 @@
 
     <section class="generator-section" id="generator" aria-labelledby="generator-title">
       <div class="section-heading">
-        <p class="eyebrow">Try it with a real collection</p>
-        <h2 id="generator-title">Corey’s 47 skills. One command.</h2>
-        <button class="example-button" id="example-button" type="button">Try Corey Haines’s marketing skills</button>
+        <p class="eyebrow">Try a real collection</p>
+        <h2 id="generator-title">Turn many skills into one.</h2>
+        <div class="example-picker">
+          <p id="collection-summary" aria-live="polite" aria-atomic="true">Choose an example or paste any public GitHub repository.</p>
+          <div class="example-buttons" aria-label="Example skill collections">
+            <button class="example-button" type="button" data-example-source="mattpocock/skills" data-example-label="Matt Pocock">Try Matt Pocock</button>
+            <button class="example-button" type="button" data-example-source="coreyhaines31/marketingskills" data-example-label="Corey Haines">Try Corey Haines</button>
+          </div>
+        </div>
       </div>
 
       <form id="generator-form" data-ready="false" novalidate>
@@ -105,7 +112,7 @@
           <p class="field-message" id="source-message" aria-live="polite" aria-atomic="true">GitHub shorthand, Git URL, or a local path.</p>
 
           <label for="name"><span>02</span> Mono-skill name</label>
-          <input id="name" name="name" autocomplete="off" spellcheck="false" placeholder="marketing-skills" aria-describedby="name-message">
+          <input id="name" name="name" autocomplete="off" spellcheck="false" placeholder="owner-collection" aria-describedby="name-message">
           <p class="field-message" id="name-message" aria-live="polite" aria-atomic="true">This becomes the folder and skill trigger name.</p>
 
           <fieldset class="scope-picker">
@@ -130,7 +137,7 @@
             <header><h3><span>05</span> AI-ready prompt</h3><button type="button" data-copy="prompt-output" data-label="AI prompt" data-event="copy_ai_prompt" disabled>Copy prompt</button></header>
             <pre id="prompt-output" tabindex="0">Your AI-ready installation prompt will appear here.</pre>
           </article>
-          <p class="dependency-note">The prompt installs the shipped <code>$monoskill</code> skill, previews every target with the pinned 0.3.2 CLI, then deploys one canonical copy with Codex and Claude Code links.</p>
+          <p class="dependency-note">The prompt installs the shipped <code>$monoskill</code> skill, previews every target with the pinned 0.4.0 CLI, then deploys one canonical copy with Codex and Claude Code links.</p>
         </div>
       </form>
       <p class="sr-only" id="copy-status" role="status" aria-live="polite"></p>
@@ -144,8 +151,8 @@
       </div>
       <ol>
         <li><span>1 · Point at a collection</span><code>coreyhaines31/marketingskills</code></li>
-        <li><span>2 · Name the entry point</span><code>--name corey-marketing</code></li>
-        <li class="command-row"><span>3 · Run it</span><code>npx --yes monoskill@0.3.2 add coreyhaines31/marketingskills --name corey-marketing</code></li>
+        <li><span>2 · Get a useful default name</span><code>coreyhaines31-marketing</code></li>
+        <li class="command-row"><span>3 · Run it</span><code>npx --yes monoskill@0.4.0 add coreyhaines31/marketingskills</code></li>
         <li><span>Need the receipts?</span><a href="https://github.com/statechange/monoskill/blob/main/docs/ARCHITECTURE.md">Sources, commits, and hashes travel with the package.</a></li>
       </ol>
     </section>

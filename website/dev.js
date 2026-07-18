@@ -10,6 +10,8 @@ await mkdir(output, { recursive: true });
 await build({
   entryPoints: {
     app: join(root, "app.js"),
+    animatics: join(root, "animatics.js"),
+    directions: join(root, "directions.js"),
     agentation: join(root, "agentation-entry.jsx")
   },
   outdir: output,

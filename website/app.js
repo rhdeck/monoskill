@@ -7,6 +7,8 @@ import {
   validateSource
 } from "./generator.js";
 import { collectAnalytics } from "./analytics.js";
+import { inspectGitHubSkills } from "./github-repository.js";
+import { githubRepository } from "../src/naming.js";
 import { gsap } from "gsap";
 
 if (["127.0.0.1", "localhost"].includes(window.location.hostname)) {
@@ -22,20 +24,28 @@ const scopeInputs = document.querySelectorAll('input[name="scope"]');
 const commandOutput = document.querySelector("#command-output");
 const promptOutput = document.querySelector("#prompt-output");
 const status = document.querySelector("#copy-status");
+const generatorTitle = document.querySelector("#generator-title");
+const collectionSummary = document.querySelector("#collection-summary");
 const scene = document.querySelector(".convergence");
 const skillRows = [...scene.querySelectorAll(".skill-row")];
+const skillItems = skillRows.flatMap((row) => [...row.children]);
 const flood = scene.querySelector(".flood");
 const basinLabel = scene.querySelector(".basin-label");
-const funnel = scene.querySelector(".transfer-funnel");
-const monoPackage = scene.querySelector(".package");
-const packageInlet = scene.querySelector(".package-inlet");
+const pipeFill = scene.querySelector(".pipe-fill");
+const monoPackage = scene.querySelector(".pressure-package");
 const packageContents = scene.querySelector(".package-contents");
 const packageCount = scene.querySelector(".package-count");
-const waitingKicker = scene.querySelector(".package-kicker-waiting");
-const filledKicker = scene.querySelector(".package-kicker-filled");
-const oneEntry = scene.querySelector(".one-entry");
+const pressureResult = scene.querySelector(".pressure-result");
+const contextCount = scene.querySelector("[data-context-count]");
+const heroBeat = scene.querySelector("[data-hero-beat]");
+const heroTitle = scene.querySelector("[data-hero-title]");
+const heroDetail = scene.querySelector("[data-hero-detail]");
+const heroProgress = [...scene.querySelectorAll(".hero-progress i")];
+const sceneWash = scene.querySelector(".hero-scene-wash");
 let nameWasEdited = false;
 let completionWasTracked = false;
+let inspectionController;
+let inspectionTimer;
 
 for (let index = 0; index < 47; index += 1) packageContents.append(document.createElement("i"));
 const packageCells = [...packageContents.children];
@@ -45,106 +55,107 @@ function setPackedCount(count) {
 }
 
 function transferGeometry() {
-  const inletRect = packageInlet.getBoundingClientRect();
+  const inletRect = monoPackage.getBoundingClientRect();
   const targetX = inletRect.left + inletRect.width / 2;
   const targetY = inletRect.top + inletRect.height / 2;
-  return skillRows.map((row) => [...row.children].map((skill) => {
+  return skillItems.map((skill) => {
     const rect = skill.getBoundingClientRect();
     return {
       x: targetX - (rect.left + rect.width / 2),
       y: targetY - (rect.top + rect.height / 2)
     };
-  }));
+  });
 }
 
-function buildHeroTimeline({ isDesktop }) {
+const heroCopy = {
+  before: ["01 · Before", "Forty-seven skills flood discovery.", "Every useful capability advertises itself separately."],
+  during: ["02 · During", "Package the collection without loss.", "Every skill crosses one visible throat into the same small package."],
+  after: ["03 · After", "The pressure is gone. The abilities remain.", "One 331-character entry still routes to all 47 skills."]
+};
+
+function setHeroCopy(key) {
+  const [beat, title, detail] = heroCopy[key];
+  heroBeat.textContent = beat;
+  heroTitle.textContent = title;
+  heroDetail.textContent = detail;
+  heroProgress.forEach((bar, index) => bar.classList.toggle("active", index <= ["before", "during", "after"].indexOf(key)));
+  basinLabel.textContent = key === "before" ? "47 separate entries" : key === "during" ? "Packaging 47 / 47" : "Discovery context cleared";
+  scene.dataset.animationStep = key;
+}
+
+function setContextCount(progress) {
+  contextCount.textContent = Math.round(32817 + (331 - 32817) * progress).toLocaleString("en-US");
+}
+
+function exposeHeroTimeline(timeline) {
+  window.__monoskillAnimation = {
+    labels: Object.keys(timeline.labels),
+    play: () => timeline.play(),
+    seek: (label, offset = 0) => {
+      timeline.pause().seek(timeline.labels[label] + offset, false);
+      if (heroCopy[label]) setHeroCopy(label);
+      if (label === "before") setContextCount(0);
+      if (label === "after") setContextCount(1);
+    }
+  };
+}
+
+function buildHeroTimeline() {
   const geometry = transferGeometry();
+  const counter = { progress: 0 };
   const timeline = gsap.timeline({
     repeat: -1,
-    repeatDelay: 1.1,
-    defaults: { ease: "power3.inOut" }
+    repeatDelay: 0.5,
+    defaults: { ease: "power2.inOut" }
   });
-  const initial = [...skillRows.flatMap((row) => [...row.children]), ...packageCells];
 
   gsap.set(scene, { autoAlpha: 1 });
-  gsap.set(skillRows.flatMap((row) => [...row.children]), { x: 0, y: 0, scale: 1, autoAlpha: 1, transformOrigin: "center" });
-  gsap.set(flood, { scaleY: 0.93, transformOrigin: "bottom" });
-  gsap.set(funnel, { autoAlpha: 0.28, scaleX: 0.82, transformOrigin: "right center" });
-  gsap.set(packageCells, { autoAlpha: 0.1, scale: 0.65, transformOrigin: "center" });
-  gsap.set([filledKicker, oneEntry], { autoAlpha: 0, y: 8 });
-  gsap.set([waitingKicker, basinLabel], { autoAlpha: 1, y: 0 });
-  gsap.set(monoPackage, { x: 0, y: 0, scale: 1, rotation: 1 });
+  gsap.set(skillItems, { x: 0, y: 0, scale: 1, rotation: 0, autoAlpha: 1, transformOrigin: "center" });
+  gsap.set(flood, { scaleY: 1, transformOrigin: "bottom" });
+  gsap.set(pipeFill, { scaleX: 0, autoAlpha: 0, transformOrigin: "left" });
+  gsap.set(packageCells, { autoAlpha: 0, scale: 0.45, transformOrigin: "center" });
+  gsap.set(pressureResult, { autoAlpha: 0, y: 18 });
+  gsap.set(sceneWash, { autoAlpha: 0 });
+  gsap.set(monoPackage, { x: 0, y: 0, scale: 1, rotation: 0 });
   setPackedCount(0);
-  scene.dataset.animationStep = "flooded";
+  setContextCount(0);
+  setHeroCopy("before");
 
-  timeline.addLabel("flooded", 0)
-    .call(() => { scene.dataset.animationStep = "flooded"; setPackedCount(0); }, null, "flooded")
-    .to({}, { duration: 1.8 });
-
-  let packed = 0;
-  skillRows.forEach((row, rowIndex) => {
-    const skills = [...row.children];
-    const start = packed;
-    packed += skills.length;
-    const packedAtRow = packed;
-    const label = `transfer-${String(rowIndex + 1).padStart(2, "0")}`;
-    const waterLevel = 0.93 - (packedAtRow / 47) * 0.875;
-
-    timeline.addLabel(label)
-      .call(() => { scene.dataset.animationStep = label; }, null, label)
-      .to(funnel, { autoAlpha: 1, scaleX: 1, duration: 0.18, ease: "power2.out" }, label)
-      .to(skills, {
-        x: (index) => geometry[rowIndex][index].x,
-        duration: 0.92,
-        stagger: { each: 0.05, from: "end" },
-        ease: "power2.in"
-      }, label)
-      .to(skills, {
-        y: (index) => geometry[rowIndex][index].y,
-        scale: 0.08,
-        rotation: (index) => (index - 2) * -1.4,
-        autoAlpha: 0,
-        duration: 0.92,
-        stagger: { each: 0.05, from: "end" },
-        ease: "power4.in"
-      }, label)
-      .to(flood, { scaleY: waterLevel, duration: 1.02, ease: "power2.inOut" }, label)
-      .to(packageCells.slice(start, packedAtRow), {
-        autoAlpha: 0.78,
-        scale: 1,
-        duration: 0.24,
-        stagger: 0.025,
-        ease: "back.out(1.5)"
-      }, `${label}+=0.76`)
-      .call(() => { setPackedCount(packedAtRow); }, null, `${label}+=0.9`)
-      .to(funnel, { autoAlpha: 0.55, scaleX: 0.9, duration: 0.16, ease: "power2.out" }, ">-0.08");
-  });
-
-  timeline.addLabel("packed")
-    .call(() => { scene.dataset.animationStep = "packed"; setPackedCount(47); }, null, "packed")
-    .to(funnel, { autoAlpha: 0, scaleX: 0.7, duration: 0.3 }, "packed")
-    .to(waitingKicker, { autoAlpha: 0, y: -8, duration: 0.25 }, "packed")
-    .to(filledKicker, { autoAlpha: 1, y: 0, duration: 0.3 }, "packed+=0.12")
-    .to(basinLabel, { autoAlpha: 0, duration: 0.25 }, "packed")
-    .to({}, { duration: 0.45 })
-    .addLabel("settled")
-    .call(() => { scene.dataset.animationStep = "settled"; }, null, "settled")
-    .to(monoPackage, {
-      y: isDesktop ? 150 : 54,
-      scale: isDesktop ? 1.06 : 1.02,
-      rotation: 0,
-      duration: 0.8,
-      ease: "back.out(1.25)"
-    }, "settled")
-    .to(oneEntry, { autoAlpha: 1, y: 0, duration: 0.4 }, "settled+=0.36")
-    .to({}, { duration: 2.6 })
+  timeline.addLabel("before", 0)
+    .call(() => { setHeroCopy("before"); setPackedCount(0); setContextCount(0); }, null, "before")
+    .to({}, { duration: 1.8 })
+    .addLabel("during")
+    .call(() => setHeroCopy("during"), null, "during")
+    .to(pipeFill, { scaleX: 1, autoAlpha: 1, duration: 0.5 }, "during")
+    .to(flood, { scaleY: 0.13, duration: 3 }, "during+=0.15")
+    .to(skillItems, {
+      x: (index) => geometry[index].x,
+      y: (index) => geometry[index].y,
+      scale: 0.1,
+      rotation: (index) => (index % 3 - 1) * 5,
+      autoAlpha: 0,
+      duration: 1.25,
+      stagger: { amount: 2.25, from: "end" },
+      ease: "power2.in"
+    }, "during+=0.25")
+    .to(packageCells, { autoAlpha: 0.82, scale: 1, duration: 0.25, stagger: { amount: 2.25, from: "start" }, ease: "power2.out" }, "during+=0.5")
+    .to(counter, { progress: 1, duration: 2.6, onUpdate: () => setContextCount(counter.progress) }, "during+=0.2")
+    .call(() => setPackedCount(47), null, "during+=2.7")
+    .to(pipeFill, { autoAlpha: 0.3, duration: 0.4 }, "during+=2.8")
+    .addLabel("after")
+    .call(() => { setHeroCopy("after"); setContextCount(1); }, null, "after")
+    .to(pressureResult, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" }, "after")
+    .to({}, { duration: 2.4 })
     .addLabel("reset")
-    .call(() => { scene.dataset.animationStep = "reset"; }, null, "reset")
-    .to(scene, { autoAlpha: 0, duration: 0.3, ease: "power2.in" }, "reset")
-    .set(initial, { clearProps: "transform,opacity,visibility" })
-    .set([flood, funnel, monoPackage, waitingKicker, filledKicker, oneEntry, basinLabel], { clearProps: "transform,opacity,visibility" })
-    .call(() => { setPackedCount(0); scene.dataset.animationStep = "flooded"; })
-    .to(scene, { autoAlpha: 1, duration: 0.42, ease: "power2.out" });
+    .to(sceneWash, { autoAlpha: 1, duration: 0.35 })
+    .set(skillItems, { x: 0, y: 0, scale: 1, rotation: 0, autoAlpha: 1 })
+    .set(packageCells, { autoAlpha: 0, scale: 0.45 })
+    .set(flood, { scaleY: 1 })
+    .set(pipeFill, { scaleX: 0, autoAlpha: 0 })
+    .set(pressureResult, { autoAlpha: 0, y: 18 })
+    .set(counter, { progress: 0 })
+    .call(() => { setPackedCount(0); setContextCount(0); setHeroCopy("before"); })
+    .to(sceneWash, { autoAlpha: 0, duration: 0.35 });
 
   const observer = new IntersectionObserver(([entry]) => {
     if (entry.isIntersecting && !document.hidden) timeline.resume();
@@ -154,11 +165,7 @@ function buildHeroTimeline({ isDesktop }) {
   observer.observe(scene);
   document.addEventListener("visibilitychange", onVisibility);
 
-  window.__monoskillAnimation = {
-    labels: Object.keys(timeline.labels),
-    play: () => timeline.play(),
-    seek: (label, offset = 0) => { timeline.pause().seek(timeline.labels[label] + offset, false); }
-  };
+  exposeHeroTimeline(timeline);
 
   return () => {
     observer.disconnect();
@@ -174,17 +181,18 @@ motion.add({
   isMobile: "(max-width: 620px)",
   reduceMotion: "(prefers-reduced-motion: reduce)"
 }, (context) => {
-  if (!context.conditions.reduceMotion) return buildHeroTimeline(context.conditions);
+  if (!context.conditions.reduceMotion) return buildHeroTimeline();
 
-  gsap.set(skillRows, { autoAlpha: 0 });
-  gsap.set(flood, { scaleY: 0.055, transformOrigin: "bottom" });
-  gsap.set(funnel, { autoAlpha: 0 });
-  gsap.set(packageCells, { autoAlpha: 0.78, scale: 1 });
-  gsap.set([waitingKicker, basinLabel], { autoAlpha: 0 });
-  gsap.set([filledKicker, oneEntry], { autoAlpha: 1, y: 0 });
-  gsap.set(monoPackage, { y: context.conditions.isDesktop ? 150 : 54, scale: context.conditions.isDesktop ? 1.06 : 1.02, rotation: 0 });
+  const staticTimeline = gsap.timeline({ paused: true }).addLabel("before", 0).addLabel("during", 0.1).addLabel("after", 0.2).addLabel("reset", 0.3);
+  gsap.set(skillItems, { autoAlpha: 0 });
+  gsap.set(flood, { scaleY: 0.13, transformOrigin: "bottom" });
+  gsap.set(pipeFill, { autoAlpha: 0 });
+  gsap.set(packageCells, { autoAlpha: 0.82, scale: 1 });
+  gsap.set(pressureResult, { autoAlpha: 1, y: 0 });
   setPackedCount(47);
-  scene.dataset.animationStep = "settled";
+  setContextCount(1);
+  setHeroCopy("after");
+  exposeHeroTimeline(staticTimeline);
   return () => gsap.set(scene.querySelectorAll("*"), { clearProps: "transform,opacity,visibility" });
 });
 
@@ -203,6 +211,35 @@ function trackSourceCompletion() {
 
 function selectedScope() {
   return document.querySelector('input[name="scope"]:checked').value;
+}
+
+function scheduleRepositoryInspection({ immediate = false, label } = {}) {
+  window.clearTimeout(inspectionTimer);
+  inspectionController?.abort();
+  const repository = githubRepository(sourceInput.value);
+  if (!repository) {
+    generatorTitle.textContent = "Turn many skills into one.";
+    collectionSummary.textContent = "Choose an example or paste any public GitHub repository.";
+    return;
+  }
+
+  const run = async () => {
+    inspectionController = new AbortController();
+    const sourceAtStart = sourceInput.value;
+    collectionSummary.textContent = `Checking ${repository.owner}/${repository.repo} on GitHub…`;
+    try {
+      const result = await inspectGitHubSkills(sourceAtStart, { signal: inspectionController.signal });
+      if (sourceInput.value !== sourceAtStart) return;
+      const provider = label || result.fullName.split("/")[0];
+      generatorTitle.textContent = `${provider}’s ${result.skillCount} skills. One Monoskill.`;
+      collectionSummary.textContent = `Found ${result.skillCount} skills on GitHub. The generated name is ${nameInput.value}.`;
+    } catch (error) {
+      if (error.name === "AbortError" || sourceInput.value !== sourceAtStart) return;
+      generatorTitle.textContent = "Turn many skills into one.";
+      collectionSummary.textContent = error.message;
+    }
+  };
+  inspectionTimer = window.setTimeout(run, immediate ? 0 : 450);
 }
 
 function render({ inferName = true } = {}) {
@@ -236,6 +273,7 @@ function render({ inferName = true } = {}) {
 sourceInput.addEventListener("input", () => {
   completionWasTracked = false;
   render();
+  scheduleRepositoryInspection();
 });
 sourceInput.addEventListener("blur", trackSourceCompletion);
 nameInput.addEventListener("input", () => {
@@ -250,14 +288,15 @@ nameInput.addEventListener("blur", () => {
 for (const input of scopeInputs) input.addEventListener("change", () => render({ inferName: false }));
 form.addEventListener("submit", (event) => event.preventDefault());
 
-document.querySelector("#example-button").addEventListener("click", () => {
-  sourceInput.value = "coreyhaines31/marketingskills";
-  nameInput.value = "corey-marketing";
-  nameWasEdited = true;
-  render();
-  nameWasEdited = false;
-  sourceInput.focus();
-});
+for (const button of document.querySelectorAll("[data-example-source]")) {
+  button.addEventListener("click", () => {
+    sourceInput.value = button.dataset.exampleSource;
+    nameWasEdited = false;
+    render();
+    scheduleRepositoryInspection({ immediate: true, label: button.dataset.exampleLabel });
+    sourceInput.focus();
+  });
+}
 
 for (const button of document.querySelectorAll("[data-copy]")) {
   const originalLabel = button.textContent;

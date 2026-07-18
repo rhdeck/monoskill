@@ -45,7 +45,7 @@ Somebody finds a repository and says, “Hey, that looks like a pretty good set 
 **SCREEN — TYPE THIS**
 
 ```bash
-npx --yes monoskill@0.3.2 add coreyhaines31/marketingskills \
+npx --yes monoskill@0.4.0 add coreyhaines31/marketingskills \
   --name corey-marketing
 ```
 

@@ -1,3 +1,5 @@
+import { inferSkillName, normalizeSkillName } from "../src/naming.js";
+
 const CONTROL_CHARACTERS = /[\u0000-\u001f\u007f]/;
 const GITHUB_SHORTHAND = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 const SCP_GIT_URL = /^[A-Za-z0-9._-]+@[A-Za-z0-9.-]+:[^\s]+$/;
@@ -5,7 +7,7 @@ const LOCAL_PATH = /^(?:\.{0,2}\/|~\/|\/)/;
 const BARE_LOCAL_PATH = /^[A-Za-z0-9_][A-Za-z0-9._' ()@+-]*(?:\/[A-Za-z0-9._' ()@+-]+)*$/;
 const SKILL_NAME = /^[a-z0-9-]{1,63}$/;
 const SUPPORTED_PROTOCOLS = new Set(["https:", "http:", "ssh:", "git:", "file:"]);
-const CLI_BOOTSTRAP = "npx --yes monoskill@0.3.2";
+const CLI_BOOTSTRAP = "npx --yes monoskill@0.4.0";
 const SKILL_BOOTSTRAP = "npx skills add statechange/monoskill --skill monoskill";
 const SCOPES = new Set(["project", "global"]);
 
@@ -41,22 +43,7 @@ export function validateSource(raw) {
   };
 }
 
-export function inferSkillName(source) {
-  const trimmed = String(source ?? "").trim().replace(/[?#].*$/, "").replace(/\/+$/, "");
-  const scpPath = trimmed.includes(":") && !trimmed.includes("://") ? trimmed.split(":").at(-1) : trimmed;
-  const segment = scpPath.split(/[\\/]/).filter(Boolean).at(-1)?.replace(/\.git$/i, "") || "mono-skill";
-  return normalizeSkillName(segment) || "mono-skill";
-}
-
-export function normalizeSkillName(value) {
-  return String(value ?? "")
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9-]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 63)
-    .replace(/-+$/g, "");
-}
+export { inferSkillName, normalizeSkillName };
 
 export function validateSkillName(value) {
   return SKILL_NAME.test(String(value ?? ""));

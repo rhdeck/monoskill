@@ -33,7 +33,7 @@ test("Netlify contract builds the verified static site with restrictive headers"
   assert.match(config, /command = "npm test && npm run check && npm run website:build"/);
   assert.match(config, /publish = "website\/dist"/);
   assert.match(config, new RegExp(`to = "${origin}/:splat"`));
-  assert.match(config, /connect-src 'self' https:\/\/plausible\.io/);
+  assert.match(config, /connect-src 'self' https:\/\/api\.github\.com https:\/\/plausible\.io/);
   assert.match(config, /frame-ancestors 'none'/);
   assert.match(config, /for = "\/\*\.css"[\s\S]*Cache-Control = "public, max-age=0, must-revalidate"/);
   assert.match(config, /for = "\/\*\.js"[\s\S]*Cache-Control = "public, max-age=0, must-revalidate"/);
@@ -59,11 +59,12 @@ test("Agentation is available locally without entering the production bundle", a
 });
 
 test("local refreshes cannot mix stale markup, styles, and scripts", async () => {
-  const [html, server] = await Promise.all([read("./index.html"), read("./server.js")]);
+  const [html, server, playwright] = await Promise.all([read("./index.html"), read("./server.js"), read("./playwright.config.js")]);
   assert.match(html, /styles\.css\?v=3/);
   assert.match(html, /app\.js\?v=3/);
   assert.match(server, /"cache-control": "no-store"/);
   assert.doesNotMatch(server, /max-age=3600/);
+  assert.match(playwright, /command: "node dev\.js"/);
 });
 
 test("State Change is credited as the giver", async () => {
@@ -81,15 +82,16 @@ test("the page leads with measured context savings and usable documentation", as
   assert.match(html, /class="flood"/);
   assert.match(html, /class="skill-field"/);
   assert.equal((html.match(/class="skill-row"/g) || []).length, 10);
-  assert.match(html, /class="transfer-funnel"/);
+  assert.match(html, /class="pressure-pipe"/);
   assert.doesNotMatch(html, /class="skill-paths"/);
-  assert.match(html, /visible from the start/);
-  assert.match(html, /47 skills · one collection/);
+  assert.match(html, /class="pressure-package"/);
+  assert.match(html, /47 skills still available/);
   assert.equal((html.match(/<span>[a-z][a-z-]*<\/span>/g) || []).length, 47);
   assert.match(html, /47 skills become one/);
   assert.match(html, /99% less discovery context/);
   assert.match(html, /331 characters instead of 32,817/);
-  assert.match(html, /npx --yes monoskill@0\.3\.2 add coreyhaines31\/marketingskills --name corey-marketing/);
+  assert.match(html, /npx --yes monoskill@0\.4\.0 add coreyhaines31\/marketingskills/);
+  assert.match(html, /coreyhaines31-marketing/);
   assert.match(html, /id="how-it-works"/);
   assert.doesNotMatch(html, /href="#provenance"/);
 });

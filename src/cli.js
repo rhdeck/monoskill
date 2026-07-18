@@ -2,13 +2,14 @@ import { resolve } from "node:path";
 import { packageSkill } from "./archive.js";
 import { build, buildArchive, check, update } from "./compiler.js";
 import { add } from "./deploy.js";
+import { inferSkillName } from "./naming.js";
 
 const HELP = `monoskill — compile many agent skills into one router skill
 
 Usage:
-  monoskill add <source> --name <name> [--agent <agent>] [--global --yes]
-  monoskill build <source> --name <name> [--output <dir>] [--ref <git-ref>]
-  monoskill build <source> --name <name> --archive [--output <file.skill>] [--force]
+  monoskill add <source> [--name <name>] [--agent <agent>] [--global --yes]
+  monoskill build <source> [--name <name>] [--output <dir>] [--ref <git-ref>]
+  monoskill build <source> [--name <name>] --archive [--output <file.skill>] [--force]
   monoskill package <skill-dir> [--output <file.skill>] [--force]
   monoskill check <skill-dir> [--json]
   monoskill update <skill-dir>
@@ -16,7 +17,7 @@ Usage:
 Source may be a local directory, Git URL, or GitHub owner/repo shorthand.
 
 Options:
-  -n, --name <name>          Generated skill name (add/build)
+  -n, --name <name>          Generated skill name (inferred from GitHub source by default)
   -o, --output <path>       Output directory, or .skill file with --archive/package
       --ref <git-ref>       Branch, tag, or commit to compile
       --skills-dir <path>   Skill root inside source (auto-detected by default)
@@ -38,12 +39,14 @@ export async function run(argv) {
     return;
   }
   if (command === "--version" || command === "-v") {
-    console.log("0.3.2");
+    console.log("0.4.0");
     return;
   }
 
   const options = parseOptions(rest);
   if (!positional) throw new Error(`${command} requires a path or source`);
+
+  if ((command === "add" || command === "build") && !options.name) options.name = inferSkillName(positional);
 
   if (command === "add") {
     const result = await add(positional, options);
@@ -58,7 +61,6 @@ export async function run(argv) {
   }
 
   if (command === "build") {
-    if (!options.name) throw new Error("build requires --name <name>");
     if (options.archive) {
       const output = resolve(options.output ?? `${options.name}.skill`);
       const result = await buildArchive(positional, { ...options, output });

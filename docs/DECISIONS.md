@@ -2,6 +2,10 @@
 
 This log records settled, load-bearing product and implementation choices. Newest entries go first.
 
+## 2026-07-18 — Infer GitHub collection names and show live skill counts
+
+Version 0.4.0 makes `--name` optional for `add` and `build`. A GitHub source derives one stable name from owner and repository, removes a generic trailing `skills`, and preserves an explicit `--name` override. The website uses that same naming module, inspects the public repository tree using the compiler's `SKILL.md` discovery boundary, and reports the live count before generating a version-pinned command. The CLI package and website ship from the same commit so the demonstrated behavior cannot lead the published executable.
+
 ## 2026-07-16 — Move canonical ownership to State Change
 
 The public repository's canonical home is `statechange/monoskill`; `rhdeck/monoskill` remains only as GitHub's transfer redirect and must not be recreated. Version 0.3.2 prepares the ownership-cutover release: package metadata, provenance checks, bundled skill discovery, website links, and exact CLI examples resolve through the organization-owned repository. The personal-owner trusted-publisher binding recorded below is superseded only when npm accepts the new binding and the 0.3.2 OIDC provenance receipt succeeds. The npm package name remains the unscoped `monoskill`, and `monoskill.com` is the production origin.

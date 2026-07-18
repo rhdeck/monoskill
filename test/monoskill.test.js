@@ -48,6 +48,21 @@ test("build, detect drift, and update a local git skill collection", async () =>
   }
 });
 
+test("CLI infers a generated name when --name is omitted", async () => {
+  const temp = await mkdtemp(join(tmpdir(), "monoskill-inferred-name-test-"));
+  const source = join(temp, "vendor-skills");
+  const output = join(temp, "compiled");
+  try {
+    await createSkill(source, "seo", "Audit search performance.");
+    await commitFixture(source);
+    await exec(process.execPath, [join(process.cwd(), "bin", "monoskill.js"), "build", source, "--output", output]);
+    const manifest = JSON.parse(await readFile(join(output, "provenance.json"), "utf8"));
+    assert.equal(manifest.skill.name, "vendor-skills");
+  } finally {
+    await rm(temp, { recursive: true, force: true });
+  }
+});
+
 test("package produces a deterministic, lossless .skill archive and protects existing artifacts", async () => {
   const temp = await mkdtemp(join(tmpdir(), "monoskill-package-test-"));
   const source = join(temp, "vendor");
@@ -263,10 +278,12 @@ test("CLI integrates GitHub shorthand and full clone URL sources", { skip: proce
   const temp = await mkdtemp(join(tmpdir(), "monoskill-network-sources-test-"));
   const cli = join(process.cwd(), "bin", "monoskill.js");
   try {
-    const shorthand = await exec(process.execPath, [cli, "add", "coreyhaines31/marketingskills", "--name", "shorthand", "--dry-run", "--json"], { cwd: temp });
-    const fullUrl = await exec(process.execPath, [cli, "add", "https://github.com/coreyhaines31/marketingskills.git", "--name", "full-url", "--dry-run", "--json"], { cwd: temp });
+    const shorthand = await exec(process.execPath, [cli, "add", "coreyhaines31/marketingskills", "--dry-run", "--json"], { cwd: temp });
+    const fullUrl = await exec(process.execPath, [cli, "add", "https://github.com/coreyhaines31/marketingskills.git", "--dry-run", "--json"], { cwd: temp });
     assert.equal(JSON.parse(shorthand.stdout).skillCount, 47);
+    assert.match(JSON.parse(shorthand.stdout).canonical, /coreyhaines31-marketing$/);
     assert.equal(JSON.parse(fullUrl.stdout).skillCount, 47);
+    assert.match(JSON.parse(fullUrl.stdout).canonical, /coreyhaines31-marketing$/);
     assert.equal(await pathExists(join(temp, ".agents")), false);
   } finally {
     await rm(temp, { recursive: true, force: true });

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Monoskill · Visual direction studies</title>
+  <meta name="color-scheme" content="dark">
+  <link rel="stylesheet" href="./directions.css">
+  <script type="module" src="./directions.js"></script>
+</head>
+<body>
+  <header class="review-bar">
+    <a href="/">← Monoskill</a>
+    <p><strong>Visual direction review</strong><span>Three live hero treatments</span></p>
+    <nav aria-label="Visual directions">
+      <a href="?view=all">All three</a>
+      <a href="?view=pressure">01 Pressure</a>
+      <a href="?view=press">02 Press</a>
+      <a href="?view=gravity">03 Gravity</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="direction pressure" id="pressure" data-direction="pressure" aria-labelledby="pressure-title">
+      <div class="direction-copy">
+        <span class="direction-number">Direction 01</span>
+        <h1 id="pressure-title">The context<br><em>pressure vessel</em></h1>
+        <p>Forty-seven skills raise the pressure. Monoskill is the release valve that is visible before the flood begins.</p>
+        <div class="direction-notes">
+          <span>Abundant</span><span>Industrial</span><span>Clarifying</span>
+        </div>
+      </div>
+      <div class="pressure-stage" aria-label="A packed context chamber drains through a single Monoskill valve">
+        <div class="pressure-meter"><span>Context load</span><b>32,817</b><i>characters</i></div>
+        <div class="pressure-chamber">
+          <div class="pressure-water"></div>
+          <div class="pressure-skills" data-skill-field></div>
+          <span class="water-mark">Discovery context</span>
+        </div>
+        <div class="pressure-valve">
+          <span>47 in</span>
+          <strong>MONO<br>SKILL</strong>
+          <i>1 out</i>
+        </div>
+        <div class="pressure-result"><b>331</b><span>characters</span></div>
+        <p class="stage-caption">A single deliberate release. Everything else holds still.</p>
+      </div>
+      <ol class="beat-strip" aria-label="Motion beats">
+        <li><span>01</span><b>Pressure builds</b><small>The field is dense but ordered.</small></li>
+        <li><span>02</span><b>The valve opens</b><small>Skills travel through one physical throat.</small></li>
+        <li><span>03</span><b>The chamber clears</b><small>Monoskill remains. The load falls away.</small></li>
+      </ol>
+    </section>
+
+    <section class="direction press" id="press" data-direction="press" aria-labelledby="press-title">
+      <div class="press-headline">
+        <span class="direction-number">Direction 02 · Editorial compression</span>
+        <h1 id="press-title">Too many skills<br>crowd the page.</h1>
+      </div>
+      <div class="press-stage" aria-label="A crowded editorial field is compressed into one Monoskill volume">
+        <div class="press-field" data-skill-field></div>
+        <div class="press-registration" aria-hidden="true"><span></span><span></span><span></span></div>
+        <article class="press-volume">
+          <span class="volume-top">Corey Haines · 47 skills</span>
+          <strong>MONO<br>SKILL</strong>
+          <p>Every capability.<br>One discovery entry.</p>
+          <i>99% less context</i>
+        </article>
+        <div class="press-rule"><span>32,817 characters</span><b>→</b><span>331</span></div>
+      </div>
+      <div class="press-footer">
+        <p>The page is the context window. The skill names are not particles: they are readable editorial matter that physically binds into one volume.</p>
+        <div class="direction-notes"><span>Graphic</span><span>Tactile</span><span>Authoritative</span></div>
+      </div>
+    </section>
+
+    <section class="direction gravity" id="gravity" data-direction="gravity" aria-labelledby="gravity-title">
+      <div class="gravity-copy">
+        <span class="direction-number">Direction 03</span>
+        <p class="gravity-kicker">One provider. One center of gravity.</p>
+        <h1 id="gravity-title">Keep every skill.<br><em>Lose the weight.</em></h1>
+        <p>Monoskill becomes the stable center from the first frame. The collection bends toward it; the context ring visibly contracts.</p>
+        <div class="direction-notes"><span>Magnetic</span><span>Precise</span><span>Expansive</span></div>
+      </div>
+      <div class="gravity-stage" aria-label="Many skills orbit a central Monoskill core inside a contracting context ring">
+        <div class="context-orbit orbit-outer"><span>32,817 discovery characters</span></div>
+        <div class="context-orbit orbit-mid"></div>
+        <div class="gravity-skills" data-orbit-field></div>
+        <div class="gravity-core">
+          <span>47 skills</span>
+          <strong>MONOSKILL</strong>
+          <i>331 chars</i>
+        </div>
+        <span class="gravity-result">99% lighter</span>
+      </div>
+      <p class="stage-caption">Only the collection moves. The core, claim, and horizon remain fixed.</p>
+    </section>
+  </main>
+</body>
+</html>

@@ -6,27 +6,28 @@ brand
 
 ## Users
 
-Developers and agent-tool builders who maintain repositories of reusable skills and want one compact, portable trigger surface without losing the original skills, their assets, or their provenance. They arrive ready to paste a source and leave with an immediately usable command or agent prompt.
+People who want a whole collection of skills from one trusted provider without flooding an agent's discovery context with every skill name and description. They arrive with a provider's repository and leave with one compact, immediately usable entry point.
 
 ## Product Purpose
 
-Monoskill compiles many independently authored agent skills into one concise router skill. The public site must make that transformation legible in seconds, then turn a GitHub shorthand, repository URL, Git URL, or local path into a validated command and AI-ready prompt without requiring a documentation detour.
+Monoskill groups a provider's skill collection behind one concise router skill. The public site must lead with the context cost it removes, prove that benefit with a measured real collection, then turn a GitHub shorthand, repository URL, Git URL, or local path into a validated `npx` command and AI-ready prompt without requiring a documentation detour.
 
 ## Brand Personality
 
-Mechanical, convergent, assured. Monoskill should feel like a precise packaging instrument: many live strands enter, one portable object leaves, and the provenance trail stays attached.
+Mechanical, convergent, assured. Monoskill should feel like a precise compression instrument: many skill descriptions crowd one side, one discoverable entry point leaves the other, and every underlying skill remains available on demand.
 
 ## Anti-references
 
-Avoid generic dark developer-tool templates, terminal cosplay, glass-card grids, decorative particle fields, neon cyberpunk, gradient text, and abstract motion that does not explain compilation. Avoid implying that compilation destroys or flattens the source skills.
+Avoid generic dark developer-tool templates, terminal cosplay, glass-card grids, decorative particle fields, neon cyberpunk, gradient text, and abstract motion that does not explain compression. Do not promote provenance into a user benefit; keep it as supporting technical documentation.
 
 ## Design Principles
 
-1. Show the transformation before explaining it.
+1. Name the problem plainly: too many skills flood your context.
 2. Make the paste-to-copy path dominant and self-explanatory.
-3. Treat provenance as part of the package, not legal fine print.
-4. Let motion communicate convergence, never delay the task.
-5. Expose the real CLI contract and name dependencies honestly.
+3. Prove context savings with measured discovery metadata from a real provider collection.
+4. Show that all bundled skills remain available on demand.
+5. Let motion communicate convergence, never delay the task.
+6. Expose the real `npx` contract and name dependencies honestly.
 
 ## Accessibility & Inclusion
 

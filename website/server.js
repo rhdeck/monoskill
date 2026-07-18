@@ -15,10 +15,11 @@ createServer(async (request, response) => {
     return;
   }
   try {
-    const body = await readFile(join(root, relative));
+    const file = ["agentation.js", "animatics.js", "app.js", "directions.js"].includes(relative) ? join(root, ".dev", relative) : join(root, relative);
+    const body = await readFile(file);
     response.writeHead(200, {
       "content-type": `${types[extname(relative)] || "application/octet-stream"}; charset=utf-8`,
-      "cache-control": relative === "index.html" ? "no-cache" : "public, max-age=3600",
+      "cache-control": "no-store",
       "x-content-type-options": "nosniff",
       "referrer-policy": "strict-origin-when-cross-origin"
     });

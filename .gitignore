@@ -4,6 +4,7 @@ node_modules/
 coverage/
 website/artifacts/
 website/dist/
+website/.dev/
 artifacts/
 .playwright-cli/
 test-results/

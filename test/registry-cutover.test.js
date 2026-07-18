@@ -29,7 +29,7 @@ test("consumer CLI surfaces use the exact public registry release", async () => 
   }
   for (const relative of ["README.md", "website/generator.js", "skills/monoskill/references/cli.md"]) {
     const contents = await readFile(path.join(root, relative), "utf8");
-    assert.match(contents, /npx --yes monoskill@0\.3\.2/, relative);
+    assert.match(contents, /npx --yes monoskill@0\.4\.0/, relative);
   }
 });
 
@@ -52,11 +52,11 @@ test("the actual npm tarball README self-references only the ownership-cutover v
       encoding: "utf8",
     }));
     const readme = execFileSync("tar", ["-xOf", path.join(temporary, pack.filename), "package/README.md"], { encoding: "utf8" });
-    assert.match(readme, /npx --yes monoskill@0\.3\.2 add /);
+    assert.match(readme, /npx --yes monoskill@0\.4\.0 add /);
     assert.doesNotMatch(readme, /github:(?:rhdeck|statechange)\/monoskill|npx github:|monoskill@0\.3\.[01]/);
     const cliExamples = readme.split("\n").filter((line) => line.startsWith("npx ") && !line.startsWith("npx skills add "));
     assert.ok(cliExamples.length >= 8, "packed README retains the complete CLI example surface");
-    assert.ok(cliExamples.every((line) => line.startsWith("npx --yes monoskill@0.3.2 ")));
+    assert.ok(cliExamples.every((line) => line.startsWith("npx --yes monoskill@0.4.0 ")));
   } finally {
     await rm(temporary, { recursive: true, force: true });
   }

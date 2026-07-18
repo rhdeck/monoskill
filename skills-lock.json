@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "skills": {
+    "data-visualization": {
+      "source": "dylantarre/animation-principles",
+      "sourceType": "github",
+      "skillPath": "skills/01-by-domain/data-visualization/SKILL.md",
+      "computedHash": "025f32d2828f7c9f7eea64d44a5f581cf38049a60f3bdb9d3cc5cd0a773f57ae"
+    },
+    "explainer-visuals": {
+      "source": "petekp/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/explainer-visuals/SKILL.md",
+      "computedHash": "9ae93c939aba6d6ba23ccebff61ff780c06e78f6bb79499566b7c66d522cb7f6"
+    },
+    "gsap-core": {
+      "source": "greensock/gsap-skills",
+      "sourceType": "github",
+      "skillPath": "skills/gsap-core/SKILL.md",
+      "computedHash": "c4a01101d9e1aafbf4b49f75d74f9349790d8741981ba0237c990093863035a6"
+    },
+    "gsap-performance": {
+      "source": "greensock/gsap-skills",
+      "sourceType": "github",
+      "skillPath": "skills/gsap-performance/SKILL.md",
+      "computedHash": "863842ac2d7aee53fd4f0025c960173d7ad3e658a5715b89b2211fa280213c1f"
+    },
+    "gsap-timeline": {
+      "source": "greensock/gsap-skills",
+      "sourceType": "github",
+      "skillPath": "skills/gsap-timeline/SKILL.md",
+      "computedHash": "54981c2feec5a9c0d57988aeb32315af32bdeadd261550d5e9db7a7b1f08b487"
+    },
+    "motion-art-direction": {
+      "source": "iart-ai/motion-design-skills",
+      "sourceType": "github",
+      "skillPath": "skills/motion-art-direction/SKILL.md",
+      "computedHash": "bcba09b729fd3d99b3b1a388c3aaac655a3771b26dc3e8d077a110dfdd9e1631"
+    }
+  }
+}

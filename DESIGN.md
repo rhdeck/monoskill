@@ -2,7 +2,7 @@
 
 ## Theme
 
-A developer in a dim workspace is comparing dozens of scattered skill folders, then needs one trustworthy artifact to hand to an agent. The scene calls for a dark, low-glare surface with luminous source strands converging into a warm, solid package.
+A developer in a dim workspace is watching skill descriptions accumulate like rising water in an agent's context. The scene calls for a dark, low-glare chamber where the flood drains through a mechanical throat into one warm Monoskill package.
 
 ## Brand Voice
 
@@ -31,18 +31,22 @@ Use the system's condensed display face when available (`Avenir Next Condensed`,
 
 ## Layout
 
-The page is a sequence of three physical states: scattered sources, a compression throat, then a single portable package and generator. The wide layout uses an asymmetric 12-column composition; mobile turns convergence into a vertical flow instead of shrinking the desktop scene.
+The page is a sequence of three physical states: discovery metadata raises a visible context flood, a siphon clears it through a compression throat, then one provider-level Monoskill remains. The wide layout uses an asymmetric 12-column composition; mobile turns the same drain into a vertical flow. A measured Corey Haines example makes the compression concrete.
 
 ## Components
 
-- A code-native convergence field made from semantic skill fragments, SVG paths, and one package silhouette.
+- A code-native convergence field made from ten legible rows of semantic skill fragments, one physical compression funnel, and one package silhouette.
+- A visible, qualified comparison of individual discovery metadata against the compiled entry point.
 - One dominant labeled source input with inferred-name editing immediately downstream.
 - Two copy surfaces for the live CLI command and AI-ready prompt, visually subordinate to the input but available without scrolling on a common laptop viewport.
+- A short `npx` how-to below the generator; provenance is linked as technical documentation rather than presented as a marketing section.
 - Inline validation and status text announced with `aria-live`, never toast-only.
 
 ## Motion
 
-Skill fragments drift by a few pixels while thread strokes draw toward the package. Input completion tightens the field and briefly seals the package. Copy actions use a restrained color and label transition. Use transform and opacity only, with exponential easing. Reduced motion shows the complete converged state and retains every label and relationship.
+The opening state shows all 47 real Corey Haines skills inside an already-flooded discovery context, with an empty Monoskill visible as their destination. One GSAP master timeline carries the complete story through named poses: `flooded`, ten numbered transfers, `packed`, `settled`, and `reset`. During each transfer, one still-legible row moves through the same visible funnel while that exact timeline label lowers the water and fills the matching package cells. No separate route-line, water, or package animation may run independently. The completed package settles only after all 47 cells are filled. Use transform and opacity, batch geometry reads before timeline writes, pause the sequence when it is off-screen, and expose labels for deterministic visual testing. Reduced motion skips the timeline and shows the fully drained end state with the full collection count.
+
+The four-frame art-direction reference is `docs/storyboards/context-flood-47-skills.png`.
 
 ## Responsive Behavior
 

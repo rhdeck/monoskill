@@ -3,29 +3,33 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Monoskill · Many skills, one way in</title>
-  <meta name="description" content="Compile a repository of agent skills into one compact, provenance-aware router skill.">
+  <title>Monoskill · Many skills, little context</title>
+  <meta name="description" content="Group a provider's whole skill collection behind one compact, discoverable entry point.">
   <meta name="theme-color" content="#17151d">
   <meta name="color-scheme" content="dark">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Monoskill">
   <meta property="og:url" content="https://monoskill.com/">
-  <meta property="og:title" content="Monoskill · Many skills, one way in">
-  <meta property="og:description" content="One package. One trigger surface. Provenance intact.">
-  <meta property="og:image" content="https://monoskill.com/og-image.png">
+  <meta property="og:title" content="Monoskill · Many skills, little context">
+  <meta property="og:description" content="Too many skills flood your context. Monoskill clears it.">
+  <meta property="og:image" content="https://monoskill.com/og-image-context.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Many skill fragments converging into one Monoskill package.">
+  <meta property="og:image:alt" content="Many skill descriptions converging into one compact Monoskill entry point.">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://monoskill.com/og-image.png">
+  <meta name="twitter:image" content="https://monoskill.com/og-image-context.png">
   <link rel="canonical" href="https://monoskill.com/">
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="manifest" href="./site.webmanifest">
-  <link rel="stylesheet" href="./styles.css?v=1">
-  <script type="module" src="./app.js?v=1"></script>
+  <link rel="stylesheet" href="./styles.css?v=3">
+  <script type="module" src="./app.js?v=3"></script>
 </head>
 <body>
   <a class="skip-link" href="#generator">Skip to generator</a>
+  <a class="gift-banner" href="https://statechange.ai/">
+    <img src="./state-change-logo.png" alt="">
+    <span>A free gift from <strong>State Change</strong></span>
+  </a>
   <header class="site-header">
     <a class="brand" href="#top" aria-label="Monoskill home">
       <svg aria-hidden="true" viewBox="0 0 32 32"><path d="M16 2 28 9v14l-12 7L4 23V9l12-7Zm0 4.2L8 10.8v9.8l8 4.7 8-4.7v-9.8l-8-4.6Zm-1.5 3.3h3v5h5v3h-5v5h-3v-5h-5v-3h5v-5Z"/></svg>
@@ -33,53 +37,72 @@
     </a>
     <nav aria-label="Primary">
       <a href="#generator">Generator</a>
-      <a href="#provenance">Provenance</a>
-      <a href="https://github.com/statechange/monoskill">GitHub</a>
+      <a href="#how-it-works">How it works</a>
+      <a class="github-link" href="https://github.com/statechange/monoskill"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 .7a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2.24c-3.23.7-3.91-1.37-3.91-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.77 2.72 1.26 3.38.96.1-.75.4-1.26.74-1.55-2.58-.29-5.29-1.29-5.29-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.16 1.18a10.9 10.9 0 0 1 5.76 0c2.2-1.49 3.16-1.18 3.16-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.72 5.39-5.31 5.68.42.36.79 1.07.79 2.16v3.21c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .7Z"/></svg><span>GitHub</span></a>
     </nav>
   </header>
 
   <main id="top">
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <p class="eyebrow">A compiler for agent skills</p>
-        <h1 id="hero-title">Many skills.<br><strong>One way in.</strong></h1>
-        <p class="lede">Compile a whole skill repository into one compact router. Keep every source tree and its provenance attached.</p>
-        <a class="primary-link" href="#generator">Build the mono-skill <span aria-hidden="true">↓</span></a>
+        <p class="eyebrow">Many skills. Little context.</p>
+        <h1 id="hero-title">Too many skills<br><strong>flood your context.</strong></h1>
+        <p class="lede">Install a provider’s skills one by one and every name and description adds to the flood. Monoskill clears the water by grouping the whole collection behind one compact entry point.</p>
+        <a class="primary-link" href="#generator">Group a skill collection <span aria-hidden="true">↓</span></a>
       </div>
 
-      <div class="convergence" data-ready="false" aria-label="Multiple skill fragments converging into one portable mono-skill">
-        <div class="fragments" aria-hidden="true">
-          <span>copywriting</span><span>seo-audit</span>
-          <span>content-strategy</span><span>launch-strategy</span>
-          <span>cold-email</span><span>pricing-strategy</span>
+      <div class="convergence pressure-hero" data-ready="false" aria-label="Forty-seven skills flood discovery, then drain into one small Monoskill package while the context falls from 32,817 to 331 characters">
+        <div class="context-metric"><span>Discovery context</span><b data-context-count>32,817</b><i>characters</i></div>
+        <div class="context-basin" aria-hidden="true">
+          <div class="flood"></div>
+          <div class="skill-field">
+            <div class="skill-row"><span>ab-testing</span><span>ad-creative</span><span>ads</span><span>ai-seo</span><span>analytics</span></div>
+            <div class="skill-row"><span>aso</span><span>churn-prevention</span><span>co-marketing</span><span>cold-email</span><span>community-marketing</span></div>
+            <div class="skill-row"><span>competitor-profiling</span><span>competitors</span><span>content-strategy</span><span>copy-editing</span><span>copywriting</span></div>
+            <div class="skill-row"><span>cro</span><span>customer-research</span><span>directory-submissions</span><span>emails</span><span>free-tools</span></div>
+            <div class="skill-row"><span>image</span><span>launch</span><span>lead-magnets</span><span>marketing-council</span><span>marketing-ideas</span></div>
+            <div class="skill-row"><span>marketing-loops</span><span>marketing-plan</span><span>marketing-psychology</span><span>offers</span><span>onboarding</span></div>
+            <div class="skill-row"><span>paywalls</span><span>popups</span><span>pricing</span><span>product-marketing</span><span>programmatic-seo</span></div>
+            <div class="skill-row"><span>prospecting</span><span>public-relations</span><span>referrals</span><span>revops</span><span>sales-enablement</span></div>
+            <div class="skill-row"><span>schema</span><span>seo-audit</span><span>signup</span><span>site-architecture</span><span>sms</span></div>
+            <div class="skill-row"><span>social</span><span>video</span></div>
+          </div>
+          <span class="basin-label">47 separate entries</span>
         </div>
-        <svg class="threads" viewBox="0 0 700 420" preserveAspectRatio="none" aria-hidden="true">
-          <path d="M15 34 C280 34 300 210 505 210"/><path d="M15 98 C280 98 300 210 505 210"/>
-          <path d="M15 164 C280 164 300 210 505 210"/><path d="M15 256 C280 256 300 210 505 210"/>
-          <path d="M15 322 C280 322 300 210 505 210"/><path d="M15 386 C280 386 300 210 505 210"/>
-          <path class="spine" d="M505 210 H680"/>
-        </svg>
-        <div class="throat" aria-hidden="true"><i></i><i></i><i></i></div>
-        <div class="package">
-          <span class="package-kicker">Compiled mono-skill</span>
-          <strong>one trigger</strong>
-          <span class="package-file">SKILL.md</span>
-          <span class="seal">Provenance<br>intact</span>
+        <div class="pressure-pipe" aria-hidden="true"><span class="pipe-fill"></span></div>
+        <div class="pressure-package">
+          <strong>MONO</strong><span>SKILL</span>
+          <span class="package-contents" aria-hidden="true"></span>
+          <span class="package-count">0 / 47 packed</span>
+        </div>
+        <div class="pressure-result"><b>99%</b><span>lighter in context</span><i>47 skills still available</i></div>
+        <div class="hero-scene-wash" aria-hidden="true"></div>
+        <div class="hero-narration" aria-hidden="true">
+          <span data-hero-beat>01 · Before</span>
+          <b data-hero-title>Forty-seven skills flood discovery.</b>
+          <small data-hero-detail>Every useful capability advertises itself separately.</small>
+          <div class="hero-progress" aria-hidden="true"><i></i><i></i><i></i></div>
         </div>
       </div>
 
       <ul class="principles" aria-label="Monoskill properties">
-        <li><span>01</span><strong>Compact root</strong><small>Load only the routes you need.</small></li>
-        <li><span>02</span><strong>Complete sources</strong><small>Scripts, assets, and references stay together.</small></li>
-        <li><span>03</span><strong>Deterministic trail</strong><small>Commit and content hashes ship with it.</small></li>
+        <li><span>01</span><strong>47 skills become one</strong><small>One provider. One entry point for the agent to discover.</small></li>
+        <li><span>02</span><strong>99% less discovery context</strong><small>331 characters instead of 32,817 in the measured Corey Haines example.</small></li>
+        <li><span>03</span><strong>The flood clears</strong><small>Every bundled skill stays available without crowding the starting context.</small></li>
       </ul>
     </section>
 
     <section class="generator-section" id="generator" aria-labelledby="generator-title">
       <div class="section-heading">
-        <p class="eyebrow">Source to command</p>
-        <h2 id="generator-title">Paste once. Leave ready.</h2>
-        <button class="example-button" id="example-button" type="button">Try Corey Haines’s marketing skills</button>
+        <p class="eyebrow">Try a real collection</p>
+        <h2 id="generator-title">Turn many skills into one.</h2>
+        <div class="example-picker">
+          <p id="collection-summary" aria-live="polite" aria-atomic="true">Choose an example or paste any public GitHub repository.</p>
+          <div class="example-buttons" aria-label="Example skill collections">
+            <button class="example-button" type="button" data-example-source="mattpocock/skills" data-example-label="Matt Pocock">Try Matt Pocock</button>
+            <button class="example-button" type="button" data-example-source="coreyhaines31/marketingskills" data-example-label="Corey Haines">Try Corey Haines</button>
+          </div>
+        </div>
       </div>
 
       <form id="generator-form" data-ready="false" novalidate>
@@ -89,7 +112,7 @@
           <p class="field-message" id="source-message" aria-live="polite" aria-atomic="true">GitHub shorthand, Git URL, or a local path.</p>
 
           <label for="name"><span>02</span> Mono-skill name</label>
-          <input id="name" name="name" autocomplete="off" spellcheck="false" placeholder="marketing-skills" aria-describedby="name-message">
+          <input id="name" name="name" autocomplete="off" spellcheck="false" placeholder="owner-collection" aria-describedby="name-message">
           <p class="field-message" id="name-message" aria-live="polite" aria-atomic="true">This becomes the folder and skill trigger name.</p>
 
           <fieldset class="scope-picker">
@@ -114,29 +137,30 @@
             <header><h3><span>05</span> AI-ready prompt</h3><button type="button" data-copy="prompt-output" data-label="AI prompt" data-event="copy_ai_prompt" disabled>Copy prompt</button></header>
             <pre id="prompt-output" tabindex="0">Your AI-ready installation prompt will appear here.</pre>
           </article>
-          <p class="dependency-note">The prompt installs the shipped <code>$monoskill</code> skill, previews every target with the pinned 0.3.2 CLI, then deploys one canonical copy with Codex and Claude Code links.</p>
+          <p class="dependency-note">The prompt installs the shipped <code>$monoskill</code> skill, previews every target with the pinned 0.4.0 CLI, then deploys one canonical copy with Codex and Claude Code links.</p>
         </div>
       </form>
       <p class="sr-only" id="copy-status" role="status" aria-live="polite"></p>
     </section>
 
-    <section class="provenance" id="provenance" aria-labelledby="provenance-title">
+    <section class="how-it-works" id="how-it-works" aria-labelledby="how-it-works-title">
       <div>
-        <p class="eyebrow">Nothing flattened. Nothing lost.</p>
-        <h2 id="provenance-title">The package keeps its receipts.</h2>
+        <p class="eyebrow">No install required</p>
+        <h2 id="how-it-works-title">Give it a skill repo. Get one skill back.</h2>
+        <p class="section-copy">Use <code>npx</code> against a GitHub repository or local path. Monoskill finds the skills, packages the collection, and installs one entry point into your project.</p>
       </div>
       <ol>
-        <li><span>Source</span><code>owner/repository</code></li>
-        <li><span>Resolved commit</span><code>4f8d2c9…</code></li>
-        <li><span>Skill hashes</span><code>sha256 × every tree</code></li>
-        <li><span>Portable output</span><code>references/ + provenance.json</code></li>
+        <li><span>1 · Point at a collection</span><code>coreyhaines31/marketingskills</code></li>
+        <li><span>2 · Get a useful default name</span><code>coreyhaines31-marketing</code></li>
+        <li class="command-row"><span>3 · Run it</span><code>npx --yes monoskill@0.4.0 add coreyhaines31/marketingskills</code></li>
+        <li><span>Need the receipts?</span><a href="https://github.com/statechange/monoskill/blob/main/docs/ARCHITECTURE.md">Sources, commits, and hashes travel with the package.</a></li>
       </ol>
     </section>
   </main>
 
   <footer>
     <a class="brand" href="#top"><span>Monoskill</span></a>
-    <p>One package. One trigger surface. Provenance intact.</p>
+    <p>Many skills. Little discovery context.<br>A free gift from <a href="https://statechange.ai/">State Change</a>.</p>
     <nav aria-label="Project links">
       <a href="https://www.npmjs.com/package/monoskill">npm</a>
       <a href="https://github.com/statechange/monoskill">GitHub</a>

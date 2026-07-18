@@ -17,8 +17,8 @@ test("all discovery metadata uses the production origin", async () => {
 
   assert.match(html, new RegExp(`<link rel="canonical" href="${origin}/">`));
   assert.match(html, new RegExp(`<meta property="og:url" content="${origin}/">`));
-  assert.match(html, new RegExp(`<meta property="og:image" content="${origin}/og-image.png">`));
-  assert.match(html, new RegExp(`<meta name="twitter:image" content="${origin}/og-image.png">`));
+  assert.match(html, new RegExp(`<meta property="og:image" content="${origin}/og-image-context.png">`));
+  assert.match(html, new RegExp(`<meta name="twitter:image" content="${origin}/og-image-context.png">`));
   assert.equal(robots.includes(`${origin}/sitemap.xml`), true);
   assert.equal(sitemap.includes(`<loc>${origin}/</loc>`), true);
   assert.equal(manifest.id, `${origin}/`);
@@ -33,8 +33,67 @@ test("Netlify contract builds the verified static site with restrictive headers"
   assert.match(config, /command = "npm test && npm run check && npm run website:build"/);
   assert.match(config, /publish = "website\/dist"/);
   assert.match(config, new RegExp(`to = "${origin}/:splat"`));
-  assert.match(config, /connect-src 'self' https:\/\/plausible\.io/);
+  assert.match(config, /connect-src 'self' https:\/\/api\.github\.com https:\/\/plausible\.io/);
   assert.match(config, /frame-ancestors 'none'/);
+  assert.match(config, /for = "\/\*\.css"[\s\S]*Cache-Control = "public, max-age=0, must-revalidate"/);
+  assert.match(config, /for = "\/\*\.js"[\s\S]*Cache-Control = "public, max-age=0, must-revalidate"/);
+});
+
+test("Agentation is available locally without entering the production bundle", async () => {
+  const [app, html, dev, entry, packageText] = await Promise.all([
+    read("./app.js"),
+    read("./index.html"),
+    read("./dev.js"),
+    read("./agentation-entry.jsx"),
+    read("../package.json")
+  ]);
+  const packageJson = JSON.parse(packageText);
+
+  assert.equal(packageJson.scripts["website:dev"], "node website/dev.js");
+  assert.equal(packageJson.devDependencies.agentation, "^3.0.2");
+  assert.match(app, /\["127\.0\.0\.1", "localhost"\]/);
+  assert.match(app, /import\("\.\/agentation\.js"\)/);
+  assert.match(dev, /agentation-entry\.jsx/);
+  assert.match(entry, /<Agentation \/>/);
+  assert.doesNotMatch(html, /agentation\.js/);
+});
+
+test("local refreshes cannot mix stale markup, styles, and scripts", async () => {
+  const [html, server, playwright] = await Promise.all([read("./index.html"), read("./server.js"), read("./playwright.config.js")]);
+  assert.match(html, /styles\.css\?v=3/);
+  assert.match(html, /app\.js\?v=3/);
+  assert.match(server, /"cache-control": "no-store"/);
+  assert.doesNotMatch(server, /max-age=3600/);
+  assert.match(playwright, /command: "node dev\.js"/);
+});
+
+test("State Change is credited as the giver", async () => {
+  const [html, build] = await Promise.all([read("./index.html"), read("./build.js")]);
+  assert.match(html, /<a class="gift-banner" href="https:\/\/statechange\.ai\/">/);
+  assert.match(html, /<img src="\.\/state-change-logo\.png" alt="">/);
+  assert.match(html, /A free gift from <strong>State Change<\/strong>/);
+  assert.match(build, /"state-change-logo\.png"/);
+});
+
+test("the page leads with measured context savings and usable documentation", async () => {
+  const html = await read("./index.html");
+  assert.match(html, /Too many skills/);
+  assert.match(html, /flood your context\./);
+  assert.match(html, /class="flood"/);
+  assert.match(html, /class="skill-field"/);
+  assert.equal((html.match(/class="skill-row"/g) || []).length, 10);
+  assert.match(html, /class="pressure-pipe"/);
+  assert.doesNotMatch(html, /class="skill-paths"/);
+  assert.match(html, /class="pressure-package"/);
+  assert.match(html, /47 skills still available/);
+  assert.equal((html.match(/<span>[a-z][a-z-]*<\/span>/g) || []).length, 47);
+  assert.match(html, /47 skills become one/);
+  assert.match(html, /99% less discovery context/);
+  assert.match(html, /331 characters instead of 32,817/);
+  assert.match(html, /npx --yes monoskill@0\.4\.0 add coreyhaines31\/marketingskills/);
+  assert.match(html, /coreyhaines31-marketing/);
+  assert.match(html, /id="how-it-works"/);
+  assert.doesNotMatch(html, /href="#provenance"/);
 });
 
 test("GitHub main is the fail-closed Netlify production path", async () => {

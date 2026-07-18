@@ -16,7 +16,7 @@ export default defineConfig({
     { name: "mobile-chromium", use: { ...devices["iPhone 13"], browserName: "chromium" } }
   ],
   webServer: process.env.WEBSITE_BASE_URL ? undefined : {
-    command: "node server.js",
+    command: "node dev.js",
     cwd: import.meta.dirname,
     url: "http://127.0.0.1:4173",
     reuseExistingServer: true
